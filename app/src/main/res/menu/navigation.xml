@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_tests"
+        android:icon="@drawable/ic_menu_tests"
+        android:title="@string/tests" />
+
+    <item
+        android:id="@+id/navigation_courses"
+        android:icon="@drawable/ic_menu_courses"
+        android:title="@string/courses" />
+
+    <item
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/ic_menu_profile"
+        android:title="@string/profile" />
+
+    <item
+        android:id="@+id/navigation_leaderboard"
+        android:icon="@drawable/ic_menu_leaderboard"
+        android:title="@string/leaderboard" />
+
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@drawable/ic_menu_settings"
+        android:title="@string/settings" />
+
+</menu>
