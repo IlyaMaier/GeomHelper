@@ -1,11 +1,15 @@
 package com.example.geomhelper;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -16,13 +20,17 @@ import com.example.geomhelper.Fragments.FragmentLeaderboard;
 import com.example.geomhelper.Fragments.FragmentProfile;
 import com.example.geomhelper.Fragments.FragmentSettings;
 import com.example.geomhelper.Fragments.FragmentTests;
+import com.example.geomhelper.Fragments.FragmentThemes;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static int back = 0;
+    SharedPreferences mSettings;
     private static final int NUM_PAGES = 5;
     BottomNavigationView bottomNavigationView;
     ViewPager viewPager;
     PagerAdapter pagerAdapter;
+    SharedPreferences.Editor editor;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -55,6 +63,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (!Courses.currentCourses.contains(Courses.basics))
+            Courses.currentCourses.add(0, Courses.basics);
+        if (!Courses.currentCourses.contains(Courses.second))
+            Courses.currentCourses.add(1, Courses.second);
+
+        mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+        if (mSettings.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
+            Person.name = mSettings.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");
+            Person.currentLevel = mSettings.getString(Person.APP_PREFERENCES_LEVEL, "Произошла ошибка");
+            Person.experience = mSettings.getInt(Person.APP_PREFERENCES_EXPERIENCE, -1);
+            Person.currentLevelExperience = mSettings.getInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, -1);
+            Person.leaderBoardPlace = mSettings.getLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, -1);
+            for (int i = 0; i < mSettings.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
+                if (!Person.courses.contains(Courses.currentCourses.get(i))) {
+                    String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
+                    if (mSettings.getString(course, "").equals(Courses.currentCourses.get(i).getCourseName()))
+                        Person.courses.add(i, Courses.currentCourses.get(i));
+                }
+            }
+        } else {
+            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivityForResult(i, 1);
+        }
+
         viewPager = findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
@@ -66,7 +98,8 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.getMenu().findItem(R.id.navigation_profile).setChecked(true);
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
 
             @Override
             public void onPageSelected(int position) {
@@ -94,18 +127,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            public void onPageScrollStateChanged(int state) { }
+            public void onPageScrollStateChanged(int state) {
+            }
         });
     }
 
     @Override
     public void onBackPressed() {
-        if (viewPager.getCurrentItem() == 2) {
-            super.onBackPressed();
-        } else if (viewPager.getCurrentItem() >= 3) {
-            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
-        } else {
-            viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+        if (back == 0) {
+            if (viewPager.getCurrentItem() == 2) {
+                super.onBackPressed();
+            } else if (viewPager.getCurrentItem() >= 3) {
+                viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
+            } else {
+                viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+            }
+        } else if (back == 1) {
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            FragmentCourses fragmentCourses = new FragmentCourses();
+            fragmentTransaction.replace(R.id.fragment, fragmentCourses);
+            fragmentTransaction.commit();
+            back = 0;
+        } else if (back == 2) {
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            FragmentThemes fragmentThemes = new FragmentThemes();
+            fragmentTransaction.replace(R.id.fragment, fragmentThemes);
+            fragmentTransaction.commit();
+            back = 1;
         }
     }
 
@@ -137,4 +185,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (bottomNavigationView.getSelectedItemId() == R.id.navigation_courses ||
+                bottomNavigationView.getSelectedItemId() == R.id.navigation_profile ||
+                bottomNavigationView.getSelectedItemId() == R.id.navigation_tests)
+            editor = mSettings.edit();
+        editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
+        editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
+        editor.putString(Person.APP_PREFERENCES_LEVEL, Person.currentLevel);
+        editor.putInt(Person.APP_PREFERENCES_EXPERIENCE, Person.experience);
+        editor.putInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, Person.currentLevelExperience);
+        editor.putLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, Person.leaderBoardPlace);
+        editor.putInt(Person.APP_PREFERENCES_COURSES_SIZE, Person.courses.size());
+        for (int i = 0; i < Person.courses.size(); i++) {
+            String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
+            editor.putString(course, Person.courses.get(i).getCourseName());
+        }
+        editor.apply();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) onRestart();
+    }
 }

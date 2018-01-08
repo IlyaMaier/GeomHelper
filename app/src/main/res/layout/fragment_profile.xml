@@ -20,7 +20,7 @@
             android:src="@drawable/back_login" />
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/textName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -29,18 +29,20 @@
             android:textSize="30sp" />
 
         <TextView
+            android:id="@+id/textLevelName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Ученик"
+            android:text=""
             android:textColor="#000000"
             android:textSize="20sp" />
 
         <TextView
+            android:id="@+id/textExperince"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="47/356"
+            android:text=""
             android:textColor="#000000"
             android:textSize="15sp" />
     </LinearLayout>

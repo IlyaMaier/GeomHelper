@@ -16,7 +16,9 @@ public class FragmentLeaderboard extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_leaderboard, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_leaderboard, container, false);
+
+        return rootView;
     }
 
 }

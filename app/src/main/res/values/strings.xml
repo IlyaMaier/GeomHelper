@@ -1,15 +1,28 @@
 <resources>
     <string name="app_name">GeomHelper</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
-    <string name="settings">Settings</string>
-    <string name="leaderboard">Leaderboard</string>
-    <string name="profile">Profile</string>
-    <string name="courses">Courses</string>
-    <string name="tests">Tests</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="settings">Настройки</string>
+    <string name="leaderboard">Таблица лидеров</string>
+    <string name="profile">Профиль</string>
+    <string name="courses">Курсы</string>
+    <string name="tests">Тесты</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="ProfileImage">Profile Image</string>
+    <string name="title_activity_login">Добро пожаловать</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password (optional)</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="SignIn">Войти</string>
+    <string name="SignUp">Зарегистрироваться</string>
+    <string name="Password">Пароль</string>
+    <string name="Name">Имя</string>
 </resources>

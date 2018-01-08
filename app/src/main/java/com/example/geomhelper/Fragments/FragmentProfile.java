@@ -13,16 +13,23 @@ import com.example.geomhelper.R;
 
 public class FragmentProfile extends Fragment {
 
-    TextView textView;
+    TextView textName, textLevelName, textExperience;
+    static TextView personName;
 
-    public FragmentProfile(  ) {}
+    public FragmentProfile() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
-        textView = rootView.findViewById(R.id.textView);
-        textView.setText(Person.name);
+        textName = rootView.findViewById(R.id.textName);
+        textName.setText(Person.name);
+        textLevelName = rootView.findViewById(R.id.textLevelName);
+        textLevelName.setText(Person.currentLevel);
+        textExperience = rootView.findViewById(R.id.textExperince);
+        textExperience.setText((Person.experience + "/" + Person.currentLevelExperience));
         return rootView;
     }
+
 }
