@@ -10,50 +10,53 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.example.geomhelper.Resources.Resources;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.example.geomhelper.Resources.Resources;
 
-public class FragmentThemes extends Fragment {
-
-    public FragmentThemes() {
-    }
+public class FragmentTestThemes extends Fragment {
 
     Resources resources = new Resources();
     Button[] button;
     LinearLayout linearLayout;
 
+    public FragmentTestThemes() { }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_themes, container, false);
+        View rootView =  inflater.inflate(R.layout.fragment_test_themes, container, false);
 
-        linearLayout = view.findViewById(R.id.linearLayoutFragmentThemes);
-        button = new Button[Person.currentCourse.getNumberOfThemes()];
+        linearLayout = rootView.findViewById(R.id.linearLayoutFragmentTestThemes);
+        button = new Button[Person.currentTestCourse.getNumberOfThemes()];
 
         for (int i = 0; i < button.length; i++) {
             button[i] = new Button(getContext());
             button[i].setHeight(250);
             button[i].setBackgroundColor(resources.colors[i]);
-            button[i].setText(Person.currentCourse.getTheme(i));
+            button[i].setText(Person.currentTestCourse.getTheme(i));
             button[i].setTextSize(16);
             button[i].setId(i);
             linearLayout.addView(button[i]);
             button[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    MainActivity.back = 2;
-                    Person.backCourses = 2;
-                    Person.currentTheme = v.getId();
-                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                    FragmentCourseText fragmentCourseText = new FragmentCourseText();
-                    fragmentTransaction.replace(R.id.fragment, fragmentCourseText);
-                    fragmentTransaction.commit();
+//                    MainActivity.back = 4;
+//                    Person.backTests = 4;
+                    Person.currentTestTheme = v.getId();
+//                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+//                    FragmentCourseText fragmentCourseText = new FragmentCourseText();
+//                    fragmentTransaction.replace(R.id.fragment, fragmentCourseText);
+//                    fragmentTransaction.commit();
                 }
             });
         }
-        return view;
+
+        return rootView;
+
     }
+
+
 
 }

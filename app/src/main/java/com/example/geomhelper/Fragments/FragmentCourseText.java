@@ -40,6 +40,7 @@ public class FragmentCourseText extends Fragment {
                     fragmentTransaction.replace(R.id.fragment, fragmentThemes);
                     fragmentTransaction.commit();
                     MainActivity.back = 1;
+                    Person.backCourses = 1;
                 } else {
                     floatingActionButton.setImageResource(R.drawable.ic_next);
                     Person.currentTheme--;
@@ -60,6 +61,7 @@ public class FragmentCourseText extends Fragment {
                     fragmentTransaction.replace(R.id.fragment, fragmentThemes);
                     fragmentTransaction.commit();
                     MainActivity.back = 1;
+                    Person.backCourses = 1;
                 } else {
                     Person.currentTheme++;
                     textView.setText(Person.currentCourse.getThemesText(Person.currentTheme));

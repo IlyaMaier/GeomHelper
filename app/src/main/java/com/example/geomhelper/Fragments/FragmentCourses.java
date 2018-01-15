@@ -61,6 +61,7 @@ public class FragmentCourses extends Fragment {
                     @Override
                     public void onClick(View v) {
                         MainActivity.back = 1;
+                        Person.backCourses = 1;
                         floatingActionButton.hide();
                         for (int j = 0; j < Person.courses.size(); j++) {
                             button[j].setEnabled(false);

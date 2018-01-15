@@ -19,6 +19,7 @@ import com.example.geomhelper.Fragments.FragmentCourses;
 import com.example.geomhelper.Fragments.FragmentLeaderboard;
 import com.example.geomhelper.Fragments.FragmentProfile;
 import com.example.geomhelper.Fragments.FragmentSettings;
+import com.example.geomhelper.Fragments.FragmentTestThemes;
 import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Fragments.FragmentThemes;
 import com.example.geomhelper.Resources.BottomNavigationViewHelper;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     ViewPager viewPager;
     PagerAdapter pagerAdapter;
     SharedPreferences.Editor editor;
+    boolean backCourses = false,backTests = false;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -68,6 +70,10 @@ public class MainActivity extends AppCompatActivity {
             Courses.currentCourses.add(0, Courses.basics);
         if (!Courses.currentCourses.contains(Courses.second))
             Courses.currentCourses.add(1, Courses.second);
+        if (!Courses.currentCourses.contains(Courses.third))
+            Courses.currentCourses.add(2, Courses.third);
+        if (!Courses.currentCourses.contains(Courses.fourth))
+            Courses.currentCourses.add(3, Courses.fourth);
 
         mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
         if (mSettings.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
@@ -77,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             Person.currentLevelExperience = mSettings.getInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, -1);
             Person.leaderBoardPlace = mSettings.getLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, -1);
             for (int i = 0; i < mSettings.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
-                if (Person.courses.size() != mSettings.getInt(Person.APP_PREFERENCES_COURSES_SIZE,0)) {
+                if (Person.courses.size() != mSettings.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0)) {
                     String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
                     for (int j = 0; j < Courses.currentCourses.size(); j++) {
                         if (mSettings.getString(course, "").equals(Courses.currentCourses.get(j).getCourseName()))
@@ -110,10 +116,16 @@ public class MainActivity extends AppCompatActivity {
                     case 0:
                         setTitle(getString(R.string.tests));
                         bottomNavigationView.setSelectedItemId(R.id.navigation_tests);
+                        backTests = true;
+                        backCourses = false;
+                        back = Person.backTests;
                         break;
                     case 1:
                         setTitle(getString(R.string.courses));
                         bottomNavigationView.setSelectedItemId(R.id.navigation_courses);
+                        backCourses = true;
+                        backTests = false;
+                        back = Person.backCourses;
                         break;
                     case 2:
                         setTitle(getString(R.string.profile));
@@ -145,14 +157,22 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
             }
-        } else if (back == 1) {
+        } else if (back == 1&&backCourses) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new FragmentCourses()).commit();
             getSupportFragmentManager().beginTransaction().remove(new FragmentCourses()).commit();
             back = 0;
-        } else if (back == 2) {
+        } else if (back == 2&&backCourses) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new FragmentThemes()).commit();
             getSupportFragmentManager().beginTransaction().remove(new FragmentThemes()).commit();
             back = 1;
+        } else if (back == 3&&backTests) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.frameTests, new FragmentTests()).commit();
+            getSupportFragmentManager().beginTransaction().remove(new FragmentTestThemes()).commit();
+            back = 0;
+        } else if (back == 4&&backTests) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.frameTests, new FragmentTestThemes()).commit();
+//            getSupportFragmentManager().beginTransaction().remove(new FragmentThemes()).commit();
+            back = 3;
         }
     }
 
@@ -182,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
         public int getCount() {
             return NUM_PAGES;
         }
+
     }
 
     @Override

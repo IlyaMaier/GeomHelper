@@ -19,9 +19,13 @@ public class Person {
     public static String currentLevel = "Ученик";
     public static int experience = 0;
     public static int currentLevelExperience = 100;
-    public static long leaderBoardPlace;
+    public static long leaderBoardPlace = 0;
     public static ArrayList<Course> courses = new ArrayList<>();
     public static Course currentCourse = null;
     public static int currentTheme = 0;
+    public static Course currentTestCourse = null;
+    public static int currentTestTheme = 0;
+    public static short backTests = 0;
+    public static short backCourses= 0;
 
 }
