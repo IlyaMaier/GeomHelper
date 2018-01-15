@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class Person {
 
-    // это будет именем файла настроек
     public static final String APP_PREFERENCES = "mySettings";
     public static final String APP_PREFERENCES_COURSES_SIZE = "size";
     public static final String APP_PREFERENCES_NAME = "name";

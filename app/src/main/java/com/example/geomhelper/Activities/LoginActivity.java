@@ -1,4 +1,4 @@
-package com.example.geomhelper;
+package com.example.geomhelper.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.geomhelper.Person;
+import com.example.geomhelper.R;
 
 public class LoginActivity extends AppCompatActivity {
 

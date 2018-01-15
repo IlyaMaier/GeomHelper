@@ -25,4 +25,12 @@
     <string name="SignUp">Зарегистрироваться</string>
     <string name="Password">Пароль</string>
     <string name="Name">Имя</string>
+    <string name="Error">Случилась непридведенная ошибка</string>
+    <string name="_7"><![CDATA[< < - - - - - - 7 класс - - - - - - > >]]></string>
+    <string name="_8"><![CDATA[< < - - - - - - 8 класс - - - - - - > >]]></string>
+    <string name="_9"><![CDATA[< < - - - - - - 9 класс - - - - - - > >]]></string>
+    <string name="test_1">Начальные геометрические сведения</string>
+    <string name="test_2">Треугольники</string>
+    <string name="test_3">Параллельные прямые</string>
+    <string name="test_4">Соотношения между сторонами и углами ▲</string>
 </resources>

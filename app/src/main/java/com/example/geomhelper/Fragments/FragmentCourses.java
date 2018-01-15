@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.example.geomhelper.Courses;
-import com.example.geomhelper.Main2Activity;
+import com.example.geomhelper.Activities.Main2Activity;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
@@ -64,6 +64,7 @@ public class FragmentCourses extends Fragment {
                         floatingActionButton.hide();
                         for (int j = 0; j < Person.courses.size(); j++) {
                             button[j].setEnabled(false);
+                            button[j].setVisibility(View.INVISIBLE);
                         }
                         Person.currentCourse = Person.courses.get(v.getId());
                         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();

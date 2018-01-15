@@ -41,6 +41,7 @@ public class FragmentCourseText extends Fragment {
                     fragmentTransaction.commit();
                     MainActivity.back = 1;
                 } else {
+                    floatingActionButton.setImageResource(R.drawable.ic_next);
                     Person.currentTheme--;
                     textView.setText(Person.currentCourse.getThemesText(Person.currentTheme));
                 }

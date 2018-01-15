@@ -1,4 +1,4 @@
-package com.example.geomhelper;
+package com.example.geomhelper.Resources;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

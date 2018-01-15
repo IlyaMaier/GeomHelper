@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.example.geomhelper.Resources.Colors;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
@@ -19,6 +20,7 @@ public class FragmentThemes extends Fragment {
     public FragmentThemes() {
     }
 
+    Colors colors = new Colors();
     Button[] button;
     LinearLayout linearLayout;
 
@@ -32,10 +34,10 @@ public class FragmentThemes extends Fragment {
 
         for (int i = 0; i < button.length; i++) {
             button[i] = new Button(getContext());
-            button[i].setBackgroundResource(R.drawable.background_button_themes);
+            button[i].setHeight(250);
+            button[i].setBackgroundColor(colors.colors[i]);
             button[i].setText(Person.currentCourse.getTheme(i));
             button[i].setTextSize(16);
-            button[i].setTextColor(getResources().getColor(R.color.white));
             button[i].setId(i);
             linearLayout.addView(button[i]);
             button[i].setOnClickListener(new View.OnClickListener() {

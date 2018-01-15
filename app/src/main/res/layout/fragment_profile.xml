@@ -11,7 +11,7 @@
         android:layout_margin="16dp"
         android:orientation="vertical">
 
-        <com.example.geomhelper.CircleImageView
+        <com.example.geomhelper.Resources.CircleImageView
             android:id="@+id/imageProfile"
             android:layout_width="96dp"
             android:layout_height="96dp"

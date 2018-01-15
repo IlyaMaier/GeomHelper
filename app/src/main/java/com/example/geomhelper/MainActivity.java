@@ -9,24 +9,25 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.example.geomhelper.Activities.LoginActivity;
 import com.example.geomhelper.Fragments.FragmentCourses;
 import com.example.geomhelper.Fragments.FragmentLeaderboard;
 import com.example.geomhelper.Fragments.FragmentProfile;
 import com.example.geomhelper.Fragments.FragmentSettings;
 import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Fragments.FragmentThemes;
+import com.example.geomhelper.Resources.BottomNavigationViewHelper;
 
 public class MainActivity extends AppCompatActivity {
 
     public static int back = 0;
     SharedPreferences mSettings;
-    private static final int NUM_PAGES = 5;
+    final int NUM_PAGES = 5;
     BottomNavigationView bottomNavigationView;
     ViewPager viewPager;
     PagerAdapter pagerAdapter;
@@ -76,10 +77,12 @@ public class MainActivity extends AppCompatActivity {
             Person.currentLevelExperience = mSettings.getInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, -1);
             Person.leaderBoardPlace = mSettings.getLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, -1);
             for (int i = 0; i < mSettings.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
-                if (!Person.courses.contains(Courses.currentCourses.get(i))) {
+                if (Person.courses.size() != mSettings.getInt(Person.APP_PREFERENCES_COURSES_SIZE,0)) {
                     String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
-                    if (mSettings.getString(course, "").equals(Courses.currentCourses.get(i).getCourseName()))
-                        Person.courses.add(i, Courses.currentCourses.get(i));
+                    for (int j = 0; j < Courses.currentCourses.size(); j++) {
+                        if (mSettings.getString(course, "").equals(Courses.currentCourses.get(j).getCourseName()))
+                            Person.courses.add(i, Courses.currentCourses.get(j));
+                    }
                 }
             }
         } else {
@@ -143,22 +146,18 @@ public class MainActivity extends AppCompatActivity {
                 viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
             }
         } else if (back == 1) {
-            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            FragmentCourses fragmentCourses = new FragmentCourses();
-            fragmentTransaction.replace(R.id.fragment, fragmentCourses);
-            fragmentTransaction.commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new FragmentCourses()).commit();
+            getSupportFragmentManager().beginTransaction().remove(new FragmentCourses()).commit();
             back = 0;
         } else if (back == 2) {
-            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            FragmentThemes fragmentThemes = new FragmentThemes();
-            fragmentTransaction.replace(R.id.fragment, fragmentThemes);
-            fragmentTransaction.commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new FragmentThemes()).commit();
+            getSupportFragmentManager().beginTransaction().remove(new FragmentThemes()).commit();
             back = 1;
         }
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
-        public ScreenSlidePagerAdapter(FragmentManager fm) {
+        ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
@@ -211,4 +210,5 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) onRestart();
     }
+
 }

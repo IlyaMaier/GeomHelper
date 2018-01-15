@@ -1,4 +1,4 @@
-package com.example.geomhelper;
+package com.example.geomhelper.Resources;
 
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.internal.BottomNavigationMenuView;
