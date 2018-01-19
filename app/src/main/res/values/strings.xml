@@ -33,4 +33,6 @@
     <string name="test_2">Треугольники</string>
     <string name="test_3">Параллельные прямые</string>
     <string name="test_4">Соотношения между сторонами и углами ▲</string>
+    <string name="email">Email</string>
+    <string name="name_or_nickname">Имя или ник</string>
 </resources>

@@ -23,6 +23,16 @@ import com.example.geomhelper.Fragments.FragmentTestThemes;
 import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Fragments.FragmentThemes;
 import com.example.geomhelper.Resources.BottomNavigationViewHelper;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     ViewPager viewPager;
     PagerAdapter pagerAdapter;
     SharedPreferences.Editor editor;
-    boolean backCourses = false,backTests = false;
+    boolean backCourses = false, backTests = false;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -96,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(i, 1);
         }
 
+        sendDataToFirebase();
+
         viewPager = findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
@@ -157,19 +169,19 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
             }
-        } else if (back == 1&&backCourses) {
+        } else if (back == 1 && backCourses) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new FragmentCourses()).commit();
             getSupportFragmentManager().beginTransaction().remove(new FragmentCourses()).commit();
             back = 0;
-        } else if (back == 2&&backCourses) {
+        } else if (back == 2 && backCourses) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new FragmentThemes()).commit();
             getSupportFragmentManager().beginTransaction().remove(new FragmentThemes()).commit();
             back = 1;
-        } else if (back == 3&&backTests) {
+        } else if (back == 3 && backTests) {
             getSupportFragmentManager().beginTransaction().replace(R.id.frameTests, new FragmentTests()).commit();
             getSupportFragmentManager().beginTransaction().remove(new FragmentTestThemes()).commit();
             back = 0;
-        } else if (back == 4&&backTests) {
+        } else if (back == 4 && backTests) {
             getSupportFragmentManager().beginTransaction().replace(R.id.frameTests, new FragmentTestThemes()).commit();
 //            getSupportFragmentManager().beginTransaction().remove(new FragmentThemes()).commit();
             back = 3;
@@ -230,6 +242,41 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) onRestart();
+    }
+
+    public static void getDataFromFirebase() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        DatabaseReference myRef;
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        myRef = FirebaseDatabase.getInstance().getReference();
+        if (user != null) {
+            myRef.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    GenericTypeIndicator<String> t = new GenericTypeIndicator<>();
+                    Person.name = dataSnapshot.child("name").getValue(t);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    public static void sendDataToFirebase() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        DatabaseReference myRef;
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        myRef = FirebaseDatabase.getInstance().getReference();
+        if (user != null) {
+            myRef.child(user.getUid()).child("name").setValue(Person.name);
+        }
+
     }
 
 }
