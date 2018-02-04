@@ -26,7 +26,8 @@
         <activity android:name=".Activities.Main2Activity" />
         <activity
             android:name=".Activities.LoginActivity"
-            android:label="@string/title_activity_login"></activity>
+            android:label="@string/title_activity_login" />
+        <activity android:name=".Activities.SplashScreen"></activity>
     </application>
 
 </manifest>

@@ -1,8 +1,8 @@
 package com.example.geomhelper.Activities;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -11,6 +11,8 @@ import android.widget.Toast;
 import com.example.geomhelper.Courses;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class Main2Activity extends AppCompatActivity {
 
@@ -47,6 +49,7 @@ public class Main2Activity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Person.courses.add(Courses.currentCourses.get(v.getId()));
+                    sendDataToFirebase(v.getId() + "");
                     Intent intent = new Intent();
                     setResult(RESULT_OK, intent);
                     finish();
@@ -54,4 +57,11 @@ public class Main2Activity extends AppCompatActivity {
             });
         }
     }
+
+    void sendDataToFirebase(String name) {
+        FirebaseDatabase.getInstance().getReference().
+                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                child("courses").child(name).setValue("added");
+    }
+
 }

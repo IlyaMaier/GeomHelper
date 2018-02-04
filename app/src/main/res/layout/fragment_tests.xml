@@ -6,6 +6,7 @@
     tools:context="com.example.geomhelper.Fragments.FragmentTests">
 
     <ScrollView
+        android:id="@+id/scroll_tests"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

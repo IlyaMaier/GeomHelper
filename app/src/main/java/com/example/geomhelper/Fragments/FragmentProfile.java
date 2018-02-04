@@ -13,9 +13,8 @@ import com.example.geomhelper.R;
 
 public class FragmentProfile extends Fragment {
 
-    TextView textName, textLevelName, textExperience;
-    static TextView personName;
-
+    TextView textLevelName, textExperience;
+    static TextView textName;
     public FragmentProfile() {
     }
 
@@ -30,6 +29,16 @@ public class FragmentProfile extends Fragment {
         textExperience = rootView.findViewById(R.id.textExperince);
         textExperience.setText((Person.experience + "/" + Person.currentLevelExperience));
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        textName.setText(Person.name);
+    }
+
+    public static void restart(){
+        textName.setText(Person.name);
     }
 
 }

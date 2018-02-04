@@ -23,16 +23,6 @@ import com.example.geomhelper.Fragments.FragmentTestThemes;
 import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Fragments.FragmentThemes;
 import com.example.geomhelper.Resources.BottomNavigationViewHelper;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -88,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
         if (mSettings.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
             Person.name = mSettings.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");
+            Person.uId = mSettings.getString(Person.APP_PREFERENCES_UID, "-1");
             Person.currentLevel = mSettings.getString(Person.APP_PREFERENCES_LEVEL, "Произошла ошибка");
             Person.experience = mSettings.getInt(Person.APP_PREFERENCES_EXPERIENCE, -1);
             Person.currentLevelExperience = mSettings.getInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, -1);
@@ -103,10 +94,8 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivityForResult(i, 1);
+            startActivity(i);
         }
-
-        sendDataToFirebase();
 
         viewPager = findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
@@ -220,12 +209,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (bottomNavigationView.getSelectedItemId() == R.id.navigation_courses ||
-                bottomNavigationView.getSelectedItemId() == R.id.navigation_profile ||
-                bottomNavigationView.getSelectedItemId() == R.id.navigation_tests)
-            editor = mSettings.edit();
-        editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
+        editor = mSettings.edit();
         editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
+        editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
         editor.putString(Person.APP_PREFERENCES_LEVEL, Person.currentLevel);
         editor.putInt(Person.APP_PREFERENCES_EXPERIENCE, Person.experience);
         editor.putInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, Person.currentLevelExperience);
@@ -241,42 +227,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) onRestart();
-    }
-
-    public static void getDataFromFirebase() {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        DatabaseReference myRef;
-        FirebaseUser user = mAuth.getCurrentUser();
-
-        myRef = FirebaseDatabase.getInstance().getReference();
-        if (user != null) {
-            myRef.child(user.getUid()).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    GenericTypeIndicator<String> t = new GenericTypeIndicator<>();
-                    Person.name = dataSnapshot.child("name").getValue(t);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-    }
-
-    public static void sendDataToFirebase() {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        DatabaseReference myRef;
-        FirebaseUser user = mAuth.getCurrentUser();
-
-        myRef = FirebaseDatabase.getInstance().getReference();
-        if (user != null) {
-            myRef.child(user.getUid()).child("name").setValue(Person.name);
-        }
-
+        onRestart();
+        FragmentProfile.restart();
     }
 
 }

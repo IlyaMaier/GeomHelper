@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import com.example.geomhelper.Courses;
 import com.example.geomhelper.MainActivity;
@@ -29,6 +30,8 @@ public class FragmentTests extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tests, container, false);
 
+        ScrollView scrollView = rootView.findViewById(R.id.scroll_tests);
+        scrollView.fullScroll(ScrollView.FOCUS_DOWN);
         button = new Button[Courses.currentCourses.size()];
         linearLayout = rootView.findViewById(R.id.linearLayoutFragmentTests);
         resources = new Resources();

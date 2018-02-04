@@ -11,8 +11,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.example.geomhelper.Courses;
 import com.example.geomhelper.Activities.Main2Activity;
+import com.example.geomhelper.Courses;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
@@ -77,4 +77,5 @@ public class FragmentCourses extends Fragment {
             }
         super.onResume();
     }
+
 }

@@ -1,22 +1,14 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.geomhelper.Fragments.FragmentCourseText">
 
-    <ScrollView
+    <WebView
+        android:id="@+id/web_fragment_course_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp">
-
-        <TextView
-            android:id="@+id/textViewFragmentCourseText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="#000000" />
-
-    </ScrollView>
+        android:layout_margin="16dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floatingActionButton2"
