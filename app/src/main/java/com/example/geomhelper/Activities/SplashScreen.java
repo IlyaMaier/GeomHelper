@@ -3,9 +3,11 @@ package com.example.geomhelper.Activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import com.example.geomhelper.Courses;
 import com.example.geomhelper.MainActivity;
@@ -20,6 +22,8 @@ import com.google.firebase.database.ValueEventListener;
 
 public class SplashScreen extends AppCompatActivity {
 
+    boolean d = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,50 +32,64 @@ public class SplashScreen extends AppCompatActivity {
         WebView webView = findViewById(R.id.web_loading);
         webView.loadUrl("file:///android_asset/loading.html");
 
-        final Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        int i = getIntent().getIntExtra("reg", -1);
+
+        Async async = new Async();
+        async.onPreExecute();
+        async.execute(i);
+    }
+
+    private class Async extends AsyncTask<Integer, Integer, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            while (Person.uId == null) {
                 try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
+                    Thread.sleep(10);
+                    Person.uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    Thread thread1 = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            getDataFromFirebase();
-                        }
-                    });
-                    thread1.start();
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = mSettings.edit();
-                    editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
-                    editor.apply();
-                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(i);
-                    finish();
                 }
             }
-        });
-        thread.start();
+            boolean q = false;
+            if (integers[integers.length - 1] == 0) {
+                getDataFromFirebase();
+                q = true;
+            }
+            if (integers[integers.length - 1] == 1)
+                sendDataToFirebase();
+
+            SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = mSettings.edit();
+            editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
+
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            while (d && q) {
+            }
+            editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
+            editor.apply();
+            startActivity(i);
+            finish();
+
+            return null;
+        }
+
     }
 
     void getDataFromFirebase() {
-        try {
-            Person.uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
         DatabaseReference f = FirebaseDatabase.getInstance().getReference();
         f.child(Person.uId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Person.name = dataSnapshot.child("name").getValue(String.class);
+                if (Person.name != null && d) {
+                    Toast.makeText(getApplicationContext(), "Добро пожаловть, " + Person.name + "!", Toast.LENGTH_LONG).show();
+                    d = false;
+                }
                 for (int i = 0; i < Courses.currentCourses.size(); i++) {
                     if ("added".equals(dataSnapshot.child("courses").child(String.valueOf(i)).getValue(String.class))) {
                         if (!Person.courses.contains(Courses.currentCourses.get(i)))
@@ -87,5 +105,11 @@ public class SplashScreen extends AppCompatActivity {
 
             }
         });
+    }
+
+    void sendDataToFirebase() {
+        DatabaseReference f = FirebaseDatabase.getInstance().getReference();
+        f.child(Person.uId).child("name").setValue(Person.name);
+
     }
 }

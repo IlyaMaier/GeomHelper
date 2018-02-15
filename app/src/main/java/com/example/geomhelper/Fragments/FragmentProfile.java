@@ -13,8 +13,8 @@ import com.example.geomhelper.R;
 
 public class FragmentProfile extends Fragment {
 
-    TextView textLevelName, textExperience;
-    static TextView textName;
+    TextView textLevelName, textExperience, textName;
+
     public FragmentProfile() {
     }
 
@@ -32,13 +32,8 @@ public class FragmentProfile extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         textName.setText(Person.name);
     }
-
-    public static void restart(){
-        textName.setText(Person.name);
-    }
-
 }

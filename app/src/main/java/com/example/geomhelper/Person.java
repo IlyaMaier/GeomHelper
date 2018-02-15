@@ -15,9 +15,8 @@ public class Person {
     public static final String APP_PREFERENCES_COURSES = "course";
     public static final String APP_PREFERENCES_WELCOME = "welcome";
 
-
-    public static String name = "";
-    public static String uId = "";
+    public static String name;
+    public static String uId ;
     public static String currentLevel = "Ученик";
     public static int experience = 0;
     public static int currentLevelExperience = 100;
@@ -28,6 +27,6 @@ public class Person {
     public static Course currentTestCourse = null;
     public static int currentTestTheme = 0;
     public static short backTests = 0;
-    public static short backCourses= 0;
+    public static short backCourses = 0;
 
 }

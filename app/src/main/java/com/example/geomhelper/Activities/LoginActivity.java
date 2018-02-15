@@ -18,8 +18,6 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private final String TAG = "LoginActivity";
-
     private FirebaseAuth mAuth;
 
     private EditText mEmail;
@@ -95,18 +93,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
+        Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
         switch (v.getId()) {
             case R.id.sign_in:
                 if (!validateForm(false)) return;
                 signIn(mEmail.getText().toString(), mPassword.getText().toString());
+                intent.putExtra("reg", 0);
                 break;
             case R.id.sign_up:
                 if (!validateForm(true)) return;
                 createAccount(mEmail.getText().toString(), mPassword.getText().toString());
                 Person.name = mName.getText().toString();
+                intent.putExtra("reg", 1);
                 break;
         }
-        Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
         startActivityForResult(intent, 1);
     }
 

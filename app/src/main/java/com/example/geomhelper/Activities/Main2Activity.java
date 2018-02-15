@@ -11,7 +11,6 @@ import android.widget.Toast;
 import com.example.geomhelper.Courses;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class Main2Activity extends AppCompatActivity {
@@ -43,6 +42,7 @@ public class Main2Activity extends AppCompatActivity {
             button[i].setBackgroundResource(R.drawable.backround_button_courses);
             button[i].setText(Courses.currentCourses.get(i).getCourseName());
             button[i].setTextSize(16);
+            button[i].setTextColor(getResources().getColor(R.color.dark));
             button[i].setId(i);
             linearLayout.addView(button[i]);
             button[i].setOnClickListener(new View.OnClickListener() {
@@ -60,8 +60,7 @@ public class Main2Activity extends AppCompatActivity {
 
     void sendDataToFirebase(String name) {
         FirebaseDatabase.getInstance().getReference().
-                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                child("courses").child(name).setValue("added");
+                child(Person.uId).child("courses").child(name).setValue("added");
     }
 
 }
