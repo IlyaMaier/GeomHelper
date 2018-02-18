@@ -22,7 +22,6 @@ import com.example.geomhelper.Fragments.FragmentSettings;
 import com.example.geomhelper.Fragments.FragmentTestThemes;
 import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Fragments.FragmentThemes;
-import com.example.geomhelper.Resources.BottomNavigationViewHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -103,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
         viewPager.setCurrentItem(2);
         bottomNavigationView.getMenu().findItem(R.id.navigation_profile).setChecked(true);
 
@@ -131,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
                     case 2:
                         setTitle(getString(R.string.profile));
                         bottomNavigationView.setSelectedItemId(R.id.navigation_profile);
+                        back = 0;
                         break;
                     case 3:
                         setTitle(getString(R.string.leaderboard));

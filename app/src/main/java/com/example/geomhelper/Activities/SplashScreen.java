@@ -87,7 +87,7 @@ public class SplashScreen extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Person.name = dataSnapshot.child("name").getValue(String.class);
                 if (Person.name != null && d) {
-                    Toast.makeText(getApplicationContext(), "Добро пожаловть, " + Person.name + "!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Добро пожаловать, " + Person.name + "!", Toast.LENGTH_LONG).show();
                     d = false;
                 }
                 for (int i = 0; i < Courses.currentCourses.size(); i++) {
