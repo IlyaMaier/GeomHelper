@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.RVLeaderboardAdapter;
@@ -28,7 +27,6 @@ public class FragmentLeaderboard extends Fragment {
     }
 
     RecyclerView recyclerView;
-    ImageView imageView;
     List<User> data;
     boolean w = false;
 
