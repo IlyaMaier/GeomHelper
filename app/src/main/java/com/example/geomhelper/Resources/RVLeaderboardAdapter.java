@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.geomhelper.R;
 
@@ -20,6 +19,10 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
 
     private Context context;
     private List<User> users;
+
+    public void setData(List<User> u) {
+        users = u;
+    }
 
     public RVLeaderboardAdapter(Context context, List<User> users) {
         this.context = context;
@@ -40,7 +43,7 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
         else if (position == 1) holder.linearLayout.setBackgroundColor(Color.parseColor("#c6ccd2"));
         else if (position == 2) holder.linearLayout.setBackgroundColor(Color.parseColor("#f6a120"));
 
-        if(position == 9) holder.place.setTextSize(17);
+        if (position == 9) holder.place.setTextSize(17);
         holder.place.setText(position + 1 + "");
         holder.name.setText(user.getName());
         holder.experience.setText(user.getExperience());
@@ -67,12 +70,7 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
             place = itemView.findViewById(R.id.text_place_leaderboard);
             image = itemView.findViewById(R.id.image_profile_leaderboard);
             cardView = itemView.findViewById(R.id.cardView_leaderboard);
-            cardView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(itemView.getContext(), "Ну и че мы выклабучиваемся?!?", Toast.LENGTH_SHORT).show();
-                }
-            });
         }
     }
+
 }

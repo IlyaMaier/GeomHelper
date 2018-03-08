@@ -8,6 +8,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.RVLeaderboardAdapter;
@@ -28,19 +30,32 @@ public class FragmentLeaderboard extends Fragment {
 
     RecyclerView recyclerView;
     List<User> data;
-    boolean w = false;
+    RelativeLayout relativeLayout;
+    RVLeaderboardAdapter rvLeaderboardAdapter;
+    ProgressBar progressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_leaderboard, container, false);
 
+        relativeLayout = rootView.findViewById(R.id.frame_leaderboard);
+
         List<User> users = getDataFromFirebase();
+
+        rvLeaderboardAdapter = new RVLeaderboardAdapter(getContext(), users);
 
         recyclerView = rootView.findViewById(R.id.rv_leaderboard);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(new RVLeaderboardAdapter(getContext(), users));
+        recyclerView.setAdapter(rvLeaderboardAdapter);
+        recyclerView.setVisibility(View.INVISIBLE);
+
+        progressBar = new ProgressBar(getContext(), null, android.R.attr.progressBarStyleLarge);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(200, 200);
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        relativeLayout.addView(progressBar, params);
+        progressBar.setVisibility(View.VISIBLE);
 
         return rootView;
     }
@@ -63,7 +78,10 @@ public class FragmentLeaderboard extends Fragment {
                             e.printStackTrace();
                         }
                     } while (q());
-                w = true;
+                rvLeaderboardAdapter.setData(data);
+                rvLeaderboardAdapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.INVISIBLE);
+                recyclerView.setVisibility(View.VISIBLE);
             }
 
             @Override
