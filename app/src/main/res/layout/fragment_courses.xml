@@ -5,10 +5,19 @@
     android:layout_height="match_parent"
     tools:context="com.example.geomhelper.Fragments.FragmentCourses">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_fragment_courses"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/line1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" />
+    </ScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floatingActionButton"

@@ -98,6 +98,11 @@ public class SplashScreen extends AppCompatActivity {
                         Person.courses.remove(Courses.currentCourses.get(i));
                     }
                 }
+                try {
+                    Person.experience = Integer.parseInt(dataSnapshot.child("experience").getValue().toString());
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -110,6 +115,6 @@ public class SplashScreen extends AppCompatActivity {
     void sendDataToFirebase() {
         DatabaseReference f = FirebaseDatabase.getInstance().getReference();
         f.child(Person.uId).child("name").setValue(Person.name);
-
+        f.child(Person.uId).child("experience").setValue(Person.experience + "");
     }
 }

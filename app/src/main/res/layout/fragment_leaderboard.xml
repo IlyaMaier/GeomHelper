@@ -4,9 +4,15 @@
     android:layout_height="match_parent"
     tools:context="com.example.geomhelper.Fragments.FragmentLeaderboard">
 
-    <TextView
+    <!--<ImageView-->
+        <!--android:id="@+id/image_leaderboard"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_gravity="center" />-->
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_leaderboard"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/leaderboard" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>
