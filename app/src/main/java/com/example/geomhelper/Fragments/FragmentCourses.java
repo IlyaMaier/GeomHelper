@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.example.geomhelper.Activities.Main2Activity;
+import com.example.geomhelper.Activities.AddCourseActivity;
 import com.example.geomhelper.Courses;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
@@ -40,7 +40,7 @@ public class FragmentCourses extends Fragment {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getContext(), Main2Activity.class);
+                Intent i = new Intent(getContext(), AddCourseActivity.class);
                 startActivity(i);
             }
         });

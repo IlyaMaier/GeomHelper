@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryDark">#323949a3</color>
     <color name="colorAccent">#00bfff</color>
     <color name="colorButton">#fbbe18</color>
     <color name="white">#ffffff</color>
     <color name="dark">#000000</color>
+    <color name="reg_btn_col">#29b297</color>
+    <color name="leaderboard">#607D8B</color>
+    <color name="leaderboardD">#5a7583</color>
+    <color name="profile">#E64A19</color>
+    <color name="profileD">#d24417</color>
+    <color name="settings">#388E3C</color>
+    <color name="settingsD">#348338</color>
+    <color name="courses">#009688</color>
+    <color name="coursesD">#00877b</color>
+    <color name="tests">#3F51B5</color>
+    <color name="testsD">#3d4eae</color>
+
 </resources>

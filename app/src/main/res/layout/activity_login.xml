@@ -68,7 +68,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:background="#29b297"
+                android:background="@color/reg_btn_col"
                 android:text="@string/SignIn"
                 android:textStyle="bold" />
 
@@ -78,7 +78,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="#29b297"
+                android:background="@color/reg_btn_col"
                 android:text="@string/SignUp"
                 android:textStyle="bold" />
         </LinearLayout>

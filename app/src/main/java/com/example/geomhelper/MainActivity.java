@@ -3,6 +3,7 @@ package com.example.geomhelper;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -13,6 +14,8 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
 
 import com.example.geomhelper.Activities.LoginActivity;
 import com.example.geomhelper.Fragments.FragmentCourses;
@@ -41,18 +44,23 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_tests:
+                    bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.tests));
                     viewPager.setCurrentItem(0);
                     return true;
                 case R.id.navigation_courses:
+                    bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.courses));
                     viewPager.setCurrentItem(1);
                     return true;
                 case R.id.navigation_profile:
+                    bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.profile));
                     viewPager.setCurrentItem(2);
                     return true;
                 case R.id.navigation_leaderboard:
+                    bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.leaderboard));
                     viewPager.setCurrentItem(3);
                     return true;
                 case R.id.navigation_settings:
+                    bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.settings));
                     viewPager.setCurrentItem(4);
                     return true;
             }
@@ -62,7 +70,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
+        try {
+            getSupportActionBar().hide();
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
         setContentView(R.layout.activity_main);
 
         if (!Courses.currentCourses.contains(Courses.basics))
@@ -98,12 +112,16 @@ public class MainActivity extends AppCompatActivity {
 
         viewPager = findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        viewPager.setPageTransformer(true, new FadePageTransformer());
         viewPager.setAdapter(pagerAdapter);
 
         bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         viewPager.setCurrentItem(2);
         bottomNavigationView.getMenu().findItem(R.id.navigation_profile).setChecked(true);
+        bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+        bottomNavigationView.setItemIconTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+        bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.profile));
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -113,30 +131,25 @@ public class MainActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 switch (position) {
                     case 0:
-                        setTitle(getString(R.string.tests));
                         bottomNavigationView.setSelectedItemId(R.id.navigation_tests);
                         backTests = true;
                         backCourses = false;
                         back = Person.backTests;
                         break;
                     case 1:
-                        setTitle(getString(R.string.courses));
                         bottomNavigationView.setSelectedItemId(R.id.navigation_courses);
                         backCourses = true;
                         backTests = false;
                         back = Person.backCourses;
                         break;
                     case 2:
-                        setTitle(getString(R.string.profile));
                         bottomNavigationView.setSelectedItemId(R.id.navigation_profile);
                         back = 0;
                         break;
                     case 3:
-                        setTitle(getString(R.string.leaderboard));
                         bottomNavigationView.setSelectedItemId(R.id.navigation_leaderboard);
                         break;
                     case 4:
-                        setTitle(getString(R.string.settings));
                         bottomNavigationView.setSelectedItemId(R.id.navigation_settings);
                         break;
                 }
@@ -229,4 +242,19 @@ public class MainActivity extends AppCompatActivity {
         onRestart();
     }
 
+    public class FadePageTransformer implements ViewPager.PageTransformer {
+        public void transformPage(View view, float position) {
+            if (position <= -1.0F || position >= 1.0F) {
+                view.setAlpha(0.0F);
+                view.setVisibility(View.GONE);
+            } else if (position == 0.0F) {     // [0]
+                view.setAlpha(1.0F);
+                view.setVisibility(View.VISIBLE);
+            } else {
+                view.setAlpha(1.0F - Math.abs(position));
+                view.setTranslationX(-position * (view.getWidth() / 2));
+                view.setVisibility(View.VISIBLE);
+            }
+        }
+    }
 }

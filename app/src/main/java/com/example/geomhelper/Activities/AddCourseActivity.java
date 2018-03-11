@@ -13,7 +13,7 @@ import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class Main2Activity extends AppCompatActivity {
+public class AddCourseActivity extends AppCompatActivity {
 
     Button[] button;
     int i;
