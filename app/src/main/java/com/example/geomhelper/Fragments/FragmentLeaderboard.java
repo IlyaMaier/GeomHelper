@@ -28,7 +28,7 @@ public class FragmentLeaderboard extends Fragment {
     public FragmentLeaderboard() {
     }
 
-    RecyclerView recyclerView;
+    static RecyclerView recyclerView;
     List<User> data;
     RelativeLayout relativeLayout;
     RVLeaderboardAdapter rvLeaderboardAdapter;
@@ -97,6 +97,10 @@ public class FragmentLeaderboard extends Fragment {
             if (data.get(i).getName() == null || data.get(i).getExperience() == null || data.get(i).getExperience().isEmpty() || data.get(i).getName().isEmpty())
                 return true;
         return false;
+    }
+
+    public static void top() {
+        recyclerView.smoothScrollToPosition(0);
     }
 
 }

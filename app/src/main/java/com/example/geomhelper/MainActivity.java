@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -45,23 +46,33 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_tests:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.tests));
-                    viewPager.setCurrentItem(0);
+                    if (viewPager.getCurrentItem() != 0) {
+                        viewPager.setCurrentItem(0);
+                    }
                     return true;
                 case R.id.navigation_courses:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.courses));
-                    viewPager.setCurrentItem(1);
+                    if (viewPager.getCurrentItem() != 1) {
+                        viewPager.setCurrentItem(1);
+                    }
                     return true;
                 case R.id.navigation_profile:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.profile));
-                    viewPager.setCurrentItem(2);
+                    if (viewPager.getCurrentItem() != 2) {
+                        viewPager.setCurrentItem(2);
+                    } else FragmentProfile.top();
                     return true;
                 case R.id.navigation_leaderboard:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.leaderboard));
-                    viewPager.setCurrentItem(3);
+                    if (viewPager.getCurrentItem() != 3) {
+                        viewPager.setCurrentItem(3);
+                    } else FragmentLeaderboard.top();
                     return true;
                 case R.id.navigation_settings:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.settings));
-                    viewPager.setCurrentItem(4);
+                    if (viewPager.getCurrentItem() != 4) {
+                        viewPager.setCurrentItem(4);
+                    }
                     return true;
             }
             return false;
@@ -72,9 +83,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
+        mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+        if (savedInstanceState == null) {
+            if (mSettings.getString("pref_day_night", "").equals("Включен")) {
+                AppCompatDelegate.setDefaultNightMode(
+                        AppCompatDelegate.MODE_NIGHT_YES);
+                recreate();
+            } else if (mSettings.getString("pref_day_night", "").equals("Выключен")) {
+                AppCompatDelegate.setDefaultNightMode(
+                        AppCompatDelegate.MODE_NIGHT_NO);
+                recreate();
+            } else  if (mSettings.getString("pref_day_night", "").equals("Авто")) {
+                AppCompatDelegate.setDefaultNightMode(
+                        AppCompatDelegate.MODE_NIGHT_AUTO);
+                recreate();
+            }
+        }
         try {
             getSupportActionBar().hide();
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
         setContentView(R.layout.activity_main);
@@ -88,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         if (!Courses.currentCourses.contains(Courses.fourth))
             Courses.currentCourses.add(3, Courses.fourth);
 
-        mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+
         if (mSettings.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
             Person.name = mSettings.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");
             Person.uId = mSettings.getString(Person.APP_PREFERENCES_UID, "-1");
@@ -117,11 +144,23 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        viewPager.setCurrentItem(2);
-        bottomNavigationView.getMenu().findItem(R.id.navigation_profile).setChecked(true);
-        bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-        bottomNavigationView.setItemIconTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-        bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.profile));
+        if(!mSettings.getBoolean("fragment_settings",false)) {
+            viewPager.setCurrentItem(2);
+            bottomNavigationView.getMenu().findItem(R.id.navigation_profile).setChecked(true);
+            bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            bottomNavigationView.setItemIconTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.profile));
+        } else{
+            viewPager.setCurrentItem(4);
+            bottomNavigationView.getMenu().findItem(R.id.navigation_settings).setChecked(true);
+            bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            bottomNavigationView.setItemIconTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.settings));
+            editor = mSettings.edit();
+            editor.putBoolean("fragment_settings",false);
+            editor.apply();
+        }
+
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -240,6 +279,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         onRestart();
+    }
+
+    public static void toSettings() {
+
     }
 
     public class FadePageTransformer implements ViewPager.PageTransformer {

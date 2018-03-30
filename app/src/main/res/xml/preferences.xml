@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:textSize="30sp"
+        android:title="Ночной режим">
+
+        <ListPreference
+            android:key="pref_day_night"
+            android:title="Ночной режим"
+            android:summary="Настройте внешний вид приложения"
+            android:defaultValue="3"
+            android:entries="@array/day_night"
+            android:entryValues="@array/day_night"
+            android:dialogTitle="Ночной режим"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -8,8 +8,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -41,7 +43,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     boolean d = true, e = true;
 
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
+        if (savedInstanceState == null) {
+            AppCompatDelegate.setDefaultNightMode(
+                    AppCompatDelegate.MODE_NIGHT_NO);
+            recreate();
+        }
         setContentView(R.layout.activity_login);
 
         //firebase
@@ -225,6 +233,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             f.child(Person.uId).child("name").setValue(Person.name);
             f.child(Person.uId).child("experience").setValue(Person.experience + "");
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+
     }
 }
 

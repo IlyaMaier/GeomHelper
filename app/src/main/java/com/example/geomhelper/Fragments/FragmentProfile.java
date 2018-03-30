@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.geomhelper.Person;
@@ -14,6 +15,7 @@ import com.example.geomhelper.R;
 public class FragmentProfile extends Fragment {
 
     TextView textLevelName, textExperience, textName;
+    static ScrollView scrollView;
 
     public FragmentProfile() {
     }
@@ -28,6 +30,8 @@ public class FragmentProfile extends Fragment {
         textLevelName.setText(Person.currentLevel);
         textExperience = rootView.findViewById(R.id.textExperince);
         textExperience.setText((Person.experience + "/" + Person.currentLevelExperience));
+
+        scrollView = rootView.findViewById(R.id.scroll_profile);
         return rootView;
     }
 
@@ -35,5 +39,9 @@ public class FragmentProfile extends Fragment {
     public void onResume() {
         super.onResume();
         textName.setText(Person.name);
+    }
+
+    public static void top(){
+        scrollView.scrollTo(0,0);
     }
 }

@@ -1,7 +1,6 @@
 package com.example.geomhelper.Resources;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -39,9 +38,9 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
     public void onBindViewHolder(UserViewHolder holder, int position) {
         final User user = users.get(position);
 
-        if (position == 0) holder.linearLayout.setBackgroundColor(Color.parseColor("#FFD700"));
-        else if (position == 1) holder.linearLayout.setBackgroundColor(Color.parseColor("#c6ccd2"));
-        else if (position == 2) holder.linearLayout.setBackgroundColor(Color.parseColor("#f6a120"));
+        if (position == 0) holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.gold));
+        else if (position == 1) holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.silver));
+        else if (position == 2) holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.bronze));
 
         if (position == 9) holder.place.setTextSize(17);
         holder.place.setText(position + 1 + "");
