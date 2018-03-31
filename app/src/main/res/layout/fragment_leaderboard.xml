@@ -1,19 +1,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frame_leaderboard"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/frame_leaderboard"
     tools:context="com.example.geomhelper.Fragments.FragmentLeaderboard">
-
-    <!--<ImageView-->
-        <!--android:id="@+id/image_leaderboard"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_gravity="center" />-->
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_leaderboard"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layoutAnimation="@anim/layout_animation_fall_down" />
 
 </RelativeLayout>

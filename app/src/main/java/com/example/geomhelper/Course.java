@@ -1,21 +1,23 @@
 package com.example.geomhelper;
 
 public class Course {
+
     private String courseName;
     private int numberOfThemes;
     private String[] themes;
     private int courseExperience;
     private int[] experienceOfEachTheme;
     private String[] courseTextUrl;
+    private int background;
 
-    public Course(String courseName, int numberOfThemes, String[] themes, int courseExperience, int[] experienceOfEachTheme, String[] courseTextUrl) {
-        this.numberOfThemes = numberOfThemes;
+    public Course(String courseName, int numberOfThemes, String[] themes, int courseExperience, int[] experienceOfEachTheme, String[] courseTextUrl, int background) {
         this.courseName = courseName;
+        this.numberOfThemes = numberOfThemes;
         this.themes = themes;
         this.courseExperience = courseExperience;
         this.experienceOfEachTheme = experienceOfEachTheme;
         this.courseTextUrl = courseTextUrl;
-
+        this.background = background;
     }
 
     public String getCourseTextUrl(int a) {
@@ -65,4 +67,13 @@ public class Course {
     public void setExperienceOfEachTheme(int experienceOfEachTheme, int i) {
         this.experienceOfEachTheme[i] = experienceOfEachTheme;
     }
+
+    public int getBackground() {
+        return background;
+    }
+
+    public void setBackground(int background) {
+        this.background = background;
+    }
+
 }

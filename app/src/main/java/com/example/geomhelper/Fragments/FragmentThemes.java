@@ -10,10 +10,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.example.geomhelper.Resources.Resources;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.example.geomhelper.Resources.Resources;
 
 public class FragmentThemes extends Fragment {
 

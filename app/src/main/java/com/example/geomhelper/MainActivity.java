@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.courses));
                     if (viewPager.getCurrentItem() != 1) {
                         viewPager.setCurrentItem(1);
-                    }
+                    } else FragmentCourses.top();
                     return true;
                 case R.id.navigation_profile:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.profile));
@@ -114,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
             Courses.currentCourses.add(2, Courses.third);
         if (!Courses.currentCourses.contains(Courses.fourth))
             Courses.currentCourses.add(3, Courses.fourth);
-
 
         if (mSettings.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
             Person.name = mSettings.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");

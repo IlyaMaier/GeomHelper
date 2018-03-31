@@ -10,8 +10,11 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.geomhelper.Courses;
+import com.example.geomhelper.Fragments.FragmentCourses;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.example.geomhelper.Resources.CoursesItem;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class AddCourseActivity extends AppCompatActivity {
@@ -24,7 +27,7 @@ public class AddCourseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.add_course_activity);
         if (Person.courses.size() == Courses.currentCourses.size()) {
             Intent intent = new Intent();
             setResult(RESULT_OK, intent);
@@ -51,6 +54,7 @@ public class AddCourseActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Person.courses.add(Courses.currentCourses.get(v.getId()));
+                    FragmentCourses.itemList.add(new CoursesItem(Courses.currentCourses.get(v.getId())));
                     sendDataToFirebase(v.getId() + "");
                     Intent intent = new Intent();
                     setResult(RESULT_OK, intent);
@@ -61,8 +65,12 @@ public class AddCourseActivity extends AppCompatActivity {
     }
 
     void sendDataToFirebase(String name) {
-        FirebaseDatabase.getInstance().getReference().
-                child(Person.uId).child("courses").child(name).setValue("added");
+        try {
+            FirebaseDatabase.getInstance().getReference().
+                    child(FirebaseAuth.getInstance().getUid()).child("courses").child(name).setValue("added");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

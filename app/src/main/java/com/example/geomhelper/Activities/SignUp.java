@@ -4,6 +4,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,36 +17,35 @@ import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.geomhelper.Courses;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.example.geomhelper.Resources.CircleImageView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
     private FirebaseAuth mAuth;
 
     private EditText mEmail;
     private EditText mPassword;
-
-    private TextView textView;
+    private EditText mName;
+    private CircleImageView circleImageView;
 
     ProgressDialog progressDialog;
 
@@ -57,36 +59,38 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     AppCompatDelegate.MODE_NIGHT_NO);
             recreate();
         }
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_sign_up);
 
         //firebase
         mAuth = FirebaseAuth.getInstance();
 
         //views
-        mEmail = findViewById(R.id.email);
-        mPassword = findViewById(R.id.password);
-        textView = findViewById(R.id.not_register);
-        textView.setOnClickListener(new View.OnClickListener() {
+        mEmail = findViewById(R.id.email_sign_up);
+        mPassword = findViewById(R.id.password_sign_up);
+        mName = findViewById(R.id.person_name);
+        circleImageView = findViewById(R.id.imageProfileSignUp);
+        circleImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), SignUp.class);
-                startActivity(i);
+                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                photoPickerIntent.setType("image/*");
+                startActivityForResult(photoPickerIntent, 6);
             }
         });
 
         //buttons
-        findViewById(R.id.sign_in).setOnClickListener(this);
+        findViewById(R.id.sign_up).setOnClickListener(this);
 
     }
 
-    private void signIn(String email, String password) {
-        mAuth.signInWithEmailAndPassword(email, password)
+    private void createAccount(String email, String key) {
+        mAuth.createUserWithEmailAndPassword(mEmail.getText().toString(), mPassword.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (!task.isSuccessful()) {
                             e = false;
-                            Toast.makeText(LoginActivity.this, "Вход провален",
+                            Toast.makeText(SignUp.this, "Регистрация провалена.",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -95,6 +99,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private boolean validateForm(boolean q) {
         boolean valid = true;
+
+        String name = mName.getText().toString();
+        if (q && TextUtils.isEmpty(name)) {
+            mName.setError("Заполните поле");
+            valid = false;
+        }
 
         String email = mEmail.getText().toString();
         if (TextUtils.isEmpty(email)) {
@@ -118,13 +128,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         int num = -1;
         switch (v.getId()) {
-            case R.id.sign_in:
-                if (!validateForm(false)) return;
-                signIn(mEmail.getText().toString(), mPassword.getText().toString());
-                num = 0;
+            case R.id.sign_up:
+                if (!validateForm(true)) return;
+                createAccount(mEmail.getText().toString(), mPassword.getText().toString());
+                Person.name = mName.getText().toString();
+                num = 1;
                 break;
         }
-        progressDialog = new ProgressDialog(LoginActivity.this);
+        progressDialog = new ProgressDialog(SignUp.this);
         progressDialog.setTitle("Загрузка...");
         progressDialog.show();
         Async async = new Async();
@@ -153,38 +164,32 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     return null;
                 }
             }
-            boolean q = false;
-            if (integers[integers.length - 1] == 0) {
-                getDataFromFirebase();
-                q = true;
-            }
+            if (integers[integers.length - 1] == 1)
+                sendDataToFirebase();
 
             StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+            Uri file = Uri.fromFile(new File(
+                    "/data/data/com.example.geomhelper/files/profileImage.png"));
             try {
                 StorageReference profileRef = mStorageRef.child(FirebaseAuth.getInstance().getUid());
-                File file = new File(
-                        "/data/data/com.example.geomhelper/files/profileImage.png");
-                profileRef.getFile(file).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        Toast.makeText(getApplicationContext(),
-                                "Не удалось загрузить изображение",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-            } catch (Exception e) {
+                profileRef.putFile(file)
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                Toast.makeText(getApplicationContext(),
+                                        "Не удалось загрузить изображение",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            } catch (NullPointerException e){
                 e.printStackTrace();
             }
 
             SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = mSettings.edit();
             editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
-            editor.putBoolean("image", true);
 
             Intent i = new Intent(getApplicationContext(), MainActivity.class);
-            while (d && q) {
-            }
             editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
             editor.apply();
             startActivity(i);
@@ -199,43 +204,45 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             e = true;
         }
 
-        void getDataFromFirebase() {
+        void sendDataToFirebase() {
             DatabaseReference f = FirebaseDatabase.getInstance().getReference();
-            f.child(Person.uId).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Person.name = dataSnapshot.child("name").getValue(String.class);
-                    if (Person.name != null && d) {
-                        Toast.makeText(getApplicationContext(), "Добро пожаловать, " + Person.name + "!", Toast.LENGTH_LONG).show();
-                        d = false;
-                    }
-                    for (int i = 0; i < Courses.currentCourses.size(); i++) {
-                        if ("added".equals(dataSnapshot.child("courses").child(String.valueOf(i)).getValue(String.class))) {
-                            if (!Person.courses.contains(Courses.currentCourses.get(i)))
-                                Person.courses.add(Courses.currentCourses.get(i));
-                        } else {
-                            Person.courses.remove(Courses.currentCourses.get(i));
-                        }
-                    }
-                    try {
-                        Person.experience = Integer.parseInt(dataSnapshot.child("experience").getValue().toString());
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
+            f.child(Person.uId).child("name").setValue(Person.name);
+            f.child(Person.uId).child("experience").setValue(Person.experience + "");
         }
-
     }
 
     @Override
-    public void onBackPressed() {
-
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 6:
+                if (resultCode == RESULT_OK) {
+                    Uri selectedImage = data.getData();
+                    InputStream imageStream = null;
+                    try {
+                        imageStream = getContentResolver().openInputStream(selectedImage);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
+                    circleImageView.setImageBitmap(yourSelectedImage);
+                    try {
+                        File file = new File(getFilesDir(), "profileImage.png");
+                        FileOutputStream fos = null;
+                        try {
+                            fos = new FileOutputStream(file);
+                            yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                        } finally {
+                            if (fos != null) fos.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    SharedPreferences.Editor editor = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
+                    editor.putBoolean("image", true);
+                    editor.apply();
+                }
+        }
     }
 }
 

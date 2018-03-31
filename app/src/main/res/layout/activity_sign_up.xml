@@ -1,6 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/ll_login"
+    android:id="@+id/ll_sign_up"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/back_login"
@@ -10,25 +10,39 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.geomhelper.Activities.LoginActivity">
+    tools:context="com.example.geomhelper.Activities.SignUp">
 
     <ScrollView
-        android:id="@+id/login_form"
+        android:id="@+id/sign_up_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/email_login_form"
+            android:id="@+id/email_sign_up_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <com.example.geomhelper.Resources.CircleImageView
+                android:id="@+id/imageProfileSignUp"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/ProfileImage"
+                android:src="@drawable/back_login" />
+
+            <EditText
+                android:id="@+id/person_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/name_or_nickname" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/email"
+                    android:id="@+id/email_sign_up"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/email"
@@ -43,7 +57,7 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/password"
+                    android:id="@+id/password_sign_up"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/Password"
@@ -57,23 +71,14 @@
             </android.support.design.widget.TextInputLayout>
 
             <Button
-                android:id="@+id/sign_in"
+                android:id="@+id/sign_up"
                 style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:background="@color/reg_btn_col"
-                android:text="@string/SignIn"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/not_register"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
-                android:text="@string/not_register"
-                android:textSize="16sp" />
+                android:background="@color/reg_btn_col"
+                android:text="@string/SignUp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 

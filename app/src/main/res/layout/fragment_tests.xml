@@ -14,6 +14,7 @@
             android:id="@+id/linearLayoutFragmentTests"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layoutAnimation="@anim/layout_animation_fall_down_courses"
             android:orientation="vertical">
 
         </LinearLayout>

@@ -5,18 +5,22 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.preference.EditTextPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import static android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class FragmentSettings extends PreferenceFragmentCompat {
 
-    //    CheckBoxPreference checkBoxNight, checkBoxDayNightAuto;
+    EditTextPreference editTextPreferenceName;
     ListPreference listPreference;
     SharedPreferences mSettings;
     SharedPreferences.Editor editor;
@@ -33,6 +37,35 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             e.printStackTrace();
         }
 
+        editTextPreferenceName = (EditTextPreference) findPreference("name");
+        editTextPreferenceName.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                editTextPreferenceName.setText(Person.name);
+                return false;
+            }
+        });
+        editTextPreferenceName.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String name = newValue.toString();
+                if (name.contains("\n"))
+                    name = name.replaceAll("\n", "");
+                if (newValue.toString().isEmpty()) {
+                    return false;
+                } else {
+                    Person.name = name;
+                    DatabaseReference f = FirebaseDatabase.getInstance().getReference();
+                    try {
+                        f.child(FirebaseAuth.getInstance().getUid()).child("name").setValue(name);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                }
+            }
+        });
+
         listPreference = (ListPreference) findPreference("pref_day_night");
         listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
@@ -47,8 +80,8 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
-                    editor.putString("pref_day_night","Включен");
-                } else if(newValue.equals("Выключен")) {
+                    editor.putString("pref_day_night", "Включен");
+                } else if (newValue.equals("Выключен")) {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                     try {
                         mCurrentActivity.finish();
@@ -57,8 +90,8 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
-                    editor.putString("pref_day_night","Выключен");
-                } else{
+                    editor.putString("pref_day_night", "Выключен");
+                } else {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
                     try {
                         mCurrentActivity.finish();
@@ -67,9 +100,9 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
-                    editor.putString("pref_day_night","Авто");
+                    editor.putString("pref_day_night", "Авто");
                 }
-                editor.putBoolean("fragment_settings",true);
+                editor.putBoolean("fragment_settings", true);
                 editor.apply();
                 return true;
             }

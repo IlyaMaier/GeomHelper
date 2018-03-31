@@ -3,6 +3,18 @@
 
     <PreferenceCategory
         android:textSize="30sp"
+        android:title="Профиль">
+
+        <EditTextPreference
+            android:key="name"
+            android:title="Имя"
+            android:inputType="textPersonName"
+            android:summary="Измените ваше имя"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:textSize="30sp"
         android:title="Ночной режим">
 
         <ListPreference
@@ -16,4 +28,13 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:textSize="30sp"
+        android:title="Поделиться">
+
+        <intent
+            android:action="android.intent.action.SEND"
+            android:data="Поделиться"/>
+
+    </PreferenceCategory>
 </PreferenceScreen>

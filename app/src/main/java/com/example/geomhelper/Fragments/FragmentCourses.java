@@ -1,28 +1,36 @@
 package com.example.geomhelper.Fragments;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
 
 import com.example.geomhelper.Activities.AddCourseActivity;
-import com.example.geomhelper.Courses;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.example.geomhelper.Resources.CoursesItem;
+import com.example.geomhelper.Resources.RVCoursesAdapter;
+
+import java.util.ArrayList;
 
 public class FragmentCourses extends Fragment {
 
-    LinearLayout linearLayout;
-    Button[] button;
-    FloatingActionButton floatingActionButton;
+    static RecyclerView recyclerView;
+    LinearLayoutManager verticalManager, horizontalManager;
+    RVCoursesAdapter adapterCourses;
+    static FloatingActionButton floatingActionButton;
     View rootView;
+    public static ArrayList<CoursesItem> itemList;
+    static FragmentManager fragmentManager;
     int i = 0;
 
     public FragmentCourses() {
@@ -33,49 +41,62 @@ public class FragmentCourses extends Fragment {
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_courses, container, false);
 
-        linearLayout = rootView.findViewById(R.id.line1);
-        button = new Button[Courses.currentCourses.size()];
+        recyclerView = rootView.findViewById(R.id.recyclerCourses);
+
+        fragmentManager = getFragmentManager();
+
+        verticalManager = new LinearLayoutManager(getContext());
+        horizontalManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+
+        recyclerView.setLayoutManager(verticalManager);
+
+        itemList = CoursesItem.getFakeItems();
+        adapterCourses = new RVCoursesAdapter(getContext(), itemList);
+        recyclerView.setAdapter(adapterCourses);
 
         floatingActionButton = rootView.findViewById(R.id.floatingActionButton);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getContext(), AddCourseActivity.class);
-                startActivity(i);
+                startActivityForResult(i, 10);
             }
         });
         return rootView;
     }
 
     @Override
-    public void onResume() {
-        if (linearLayout.getChildCount() < Person.courses.size())
-            for (i = linearLayout.getChildCount(); i < Person.courses.size(); i++) {
-                button[i] = new Button(getContext());
-                button[i].setBackgroundResource(R.drawable.backround_button_courses);
-                button[i].setText(Person.courses.get(i).getCourseName());
-                button[i].setTextSize(16);
-                button[i].setId(i);
-                linearLayout.addView(button[i]);
-                button[i].setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MainActivity.back = 1;
-                        Person.backCourses = 1;
-                        floatingActionButton.hide();
-                        for (int j = 0; j < Person.courses.size(); j++) {
-                            button[j].setEnabled(false);
-                            button[j].setVisibility(View.INVISIBLE);
-                        }
-                        Person.currentCourse = Person.courses.get(v.getId());
-                        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                        FragmentThemes fragmentThemes = new FragmentThemes();
-                        fragmentTransaction.replace(R.id.fragment, fragmentThemes);
-                        fragmentTransaction.commit();
-                    }
-                });
-            }
-        super.onResume();
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 10) {
+            adapterCourses.setItems(itemList);
+            adapterCourses.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            recyclerView.setLayoutManager(horizontalManager);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            recyclerView.setLayoutManager(verticalManager);
+        }
+    }
+
+    public static void click() {
+        MainActivity.back = 1;
+        Person.backCourses = 1;
+        floatingActionButton.hide();
+        recyclerView.setVisibility(View.INVISIBLE);
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        FragmentThemes fragmentThemes = new FragmentThemes();
+        fragmentTransaction.replace(R.id.fragment, fragmentThemes);
+        fragmentTransaction.commit();
+    }
+
+    public static void top(){
+        recyclerView.smoothScrollToPosition(0);
     }
 
 }
