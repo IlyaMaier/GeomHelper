@@ -37,4 +37,5 @@
     <string name="name_or_nickname">Имя или ник</string>
     <string name="title_activity_sign_up">Sign Up</string>
     <string name="not_register"><u>Еще не зарегестрированы?</u></string>
+    <string name="testname">TestName</string>
 </resources>

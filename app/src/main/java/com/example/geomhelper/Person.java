@@ -22,9 +22,9 @@ public class Person {
     public static int currentLevelExperience = 100;
     public static long leaderBoardPlace = 0;
     public static ArrayList<Course> courses = new ArrayList<>();
-    public static Course currentCourse = null;
+    public static Course currentCourse;
     public static int currentTheme = 0;
-    public static Course currentTestCourse = null;
+    public static Test currentTest;
     public static int currentTestTheme = 0;
     public static short backTests = 0;
     public static short backCourses = 0;

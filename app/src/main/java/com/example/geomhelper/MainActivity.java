@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.tests));
                     if (viewPager.getCurrentItem() != 0) {
                         viewPager.setCurrentItem(0);
-                    }
+                    } else FragmentTests.bottom();
                     return true;
                 case R.id.navigation_courses:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.courses));
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                 AppCompatDelegate.setDefaultNightMode(
                         AppCompatDelegate.MODE_NIGHT_NO);
                 recreate();
-            } else  if (mSettings.getString("pref_day_night", "").equals("Авто")) {
+            } else if (mSettings.getString("pref_day_night", "").equals("Авто")) {
                 AppCompatDelegate.setDefaultNightMode(
                         AppCompatDelegate.MODE_NIGHT_AUTO);
                 recreate();
@@ -114,6 +114,20 @@ public class MainActivity extends AppCompatActivity {
             Courses.currentCourses.add(2, Courses.third);
         if (!Courses.currentCourses.contains(Courses.fourth))
             Courses.currentCourses.add(3, Courses.fourth);
+
+        if (!Tests.currentTests.contains(Tests.fourth)) {
+            Tests.currentTests.add(0, Tests.fourth);
+        }
+        if (!Tests.currentTests.contains(Tests.third)) {
+            Tests.currentTests.add(1, Tests.third);
+        }
+        if (!Tests.currentTests.contains(Tests.second)) {
+            Tests.currentTests.add(2, Tests.second);
+        }
+        if (!Tests.currentTests.contains(Tests.basics)) {
+            Tests.currentTests.add(3, Tests.basics);
+        }
+
 
         if (mSettings.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
             Person.name = mSettings.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");
@@ -143,20 +157,20 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        if(!mSettings.getBoolean("fragment_settings",false)) {
+        if (!mSettings.getBoolean("fragment_settings", false)) {
             viewPager.setCurrentItem(2);
             bottomNavigationView.getMenu().findItem(R.id.navigation_profile).setChecked(true);
             bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             bottomNavigationView.setItemIconTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.profile));
-        } else{
+        } else {
             viewPager.setCurrentItem(4);
             bottomNavigationView.getMenu().findItem(R.id.navigation_settings).setChecked(true);
             bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             bottomNavigationView.setItemIconTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.settings));
             editor = mSettings.edit();
-            editor.putBoolean("fragment_settings",false);
+            editor.putBoolean("fragment_settings", false);
             editor.apply();
         }
 

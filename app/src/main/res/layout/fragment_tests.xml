@@ -5,18 +5,10 @@
     android:layout_height="match_parent"
     tools:context="com.example.geomhelper.Fragments.FragmentTests">
 
-    <ScrollView
-        android:id="@+id/scroll_tests"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:id="@+id/linearLayoutFragmentTests"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_tests"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layoutAnimation="@anim/layout_animation_fall_down_courses"
-            android:orientation="vertical">
+            android:layoutAnimation="@anim/layout_animation_fall_down_courses" />
 
-        </LinearLayout>
-    </ScrollView>
 </FrameLayout>
