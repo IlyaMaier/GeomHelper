@@ -96,7 +96,7 @@ public class FragmentProfile extends Fragment {
                                     textName.setText(name);
                                     DatabaseReference f = FirebaseDatabase.getInstance().getReference();
                                     try {
-                                        f.child(FirebaseAuth.getInstance().getUid()).child("name").setValue(name);
+                                        f.child(Person.uId).child("name").setValue(name);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }

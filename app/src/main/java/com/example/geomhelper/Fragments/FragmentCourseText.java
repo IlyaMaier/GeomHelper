@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
 
 import com.example.geomhelper.MainActivity;
@@ -30,7 +32,10 @@ public class FragmentCourseText extends Fragment {
         webView = view.findViewById(R.id.web_fragment_course_text);
         webView.loadUrl(Person.currentCourse.getCourseTextUrl(Person.currentTheme));
 
+        Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.simple_grow);
+
         floatingActionButton2 = view.findViewById(R.id.floatingActionButton3);
+        floatingActionButton2.startAnimation(animation);
         floatingActionButton2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,6 +57,7 @@ public class FragmentCourseText extends Fragment {
         floatingActionButton = view.findViewById(R.id.floatingActionButton2);
         if (Person.currentCourse.getThemesSize() - 1 == Person.currentTheme)
             floatingActionButton.setImageResource(R.drawable.ic_completed);
+        floatingActionButton.startAnimation(animation);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,6 +76,7 @@ public class FragmentCourseText extends Fragment {
                 }
             }
         });
+
         return view;
     }
 

@@ -12,6 +12,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 
 import com.example.geomhelper.Activities.AddCourseActivity;
 import com.example.geomhelper.MainActivity;
@@ -31,7 +35,9 @@ public class FragmentCourses extends Fragment {
     View rootView;
     public static ArrayList<CoursesItem> itemList;
     static FragmentManager fragmentManager;
-    int i = 0;
+    int scrollDist = 0;
+    boolean isVisible = true;
+    float MINIMUM = 25;
 
     public FragmentCourses() {
     }
@@ -54,12 +60,48 @@ public class FragmentCourses extends Fragment {
         adapterCourses = new RVCoursesAdapter(getContext(), itemList);
         recyclerView.setAdapter(adapterCourses);
 
+        Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.simple_grow);
+
         floatingActionButton = rootView.findViewById(R.id.floatingActionButton);
+        floatingActionButton.startAnimation(animation);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getContext(), AddCourseActivity.class);
                 startActivityForResult(i, 10);
+            }
+        });
+
+        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if (isVisible && scrollDist > MINIMUM) {
+                    hide();
+                    scrollDist = 0;
+                    isVisible = false;
+                } else if (!isVisible && scrollDist < -MINIMUM) {
+                    show();
+                    scrollDist = 0;
+                    isVisible = true;
+                }
+
+                if ((isVisible && dy > 0) || (!isVisible && dy < 0)) {
+                    scrollDist += dy;
+                }
+
+            }
+
+            public void show() {
+                floatingActionButton.animate().translationY(0)
+                        .setInterpolator(new DecelerateInterpolator(2)).start();
+            }
+
+            public void hide() {
+                floatingActionButton.animate().translationY(
+                        floatingActionButton.getHeight() + 16).
+                        setInterpolator(new AccelerateInterpolator(2)).start();
             }
         });
         return rootView;
@@ -95,7 +137,7 @@ public class FragmentCourses extends Fragment {
         fragmentTransaction.commit();
     }
 
-    public static void top(){
+    public static void top() {
         recyclerView.smoothScrollToPosition(0);
     }
 

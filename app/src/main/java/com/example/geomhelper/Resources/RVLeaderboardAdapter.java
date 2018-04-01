@@ -1,6 +1,7 @@
 package com.example.geomhelper.Resources;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -29,13 +30,13 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
     }
 
     @Override
-    public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rv_leaderboard_content, parent, false);
         return new UserViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(UserViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         final User user = users.get(position);
 
         if (position == 0) holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.gold));

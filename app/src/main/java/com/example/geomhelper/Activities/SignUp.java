@@ -171,7 +171,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
             Uri file = Uri.fromFile(new File(
                     "/data/data/com.example.geomhelper/files/profileImage.png"));
             try {
-                StorageReference profileRef = mStorageRef.child(FirebaseAuth.getInstance().getUid());
+                StorageReference profileRef = mStorageRef.child(Person.uId);
                 profileRef.putFile(file)
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -181,13 +181,14 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
-            } catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 e.printStackTrace();
             }
 
             SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = mSettings.edit();
             editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
+            editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
 
             Intent i = new Intent(getApplicationContext(), MainActivity.class);
             editor.putString(Person.APP_PREFERENCES_NAME, Person.name);

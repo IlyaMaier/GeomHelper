@@ -161,7 +161,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
             try {
-                StorageReference profileRef = mStorageRef.child(FirebaseAuth.getInstance().getUid());
+                StorageReference profileRef = mStorageRef.child(Person.uId);
                 File file = new File(
                         "/data/data/com.example.geomhelper/files/profileImage.png");
                 profileRef.getFile(file).addOnFailureListener(new OnFailureListener() {
@@ -181,6 +181,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             SharedPreferences.Editor editor = mSettings.edit();
             editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
             editor.putBoolean("image", true);
+            editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
 
             Intent i = new Intent(getApplicationContext(), MainActivity.class);
             while (d && q) {

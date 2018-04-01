@@ -28,12 +28,13 @@
             android:theme="@style/SettingsTheme" />
         <activity
             android:name=".Activities.LoginActivity"
-            android:label="@string/title_activity_login"
             android:theme="@style/SettingsTheme" />
         <activity
             android:name=".Activities.SignUp"
-            android:theme="@style/SettingsTheme"
-            android:label="@string/title_activity_sign_up"/>
+            android:theme="@style/SettingsTheme" />
+        <activity
+            android:name=".Activities.Others"
+            android:theme="@style/SettingsTheme" />
     </application>
 
 </manifest>

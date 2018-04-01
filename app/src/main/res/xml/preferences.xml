@@ -6,10 +6,10 @@
         android:title="Профиль">
 
         <EditTextPreference
-            android:key="name"
-            android:title="Имя"
             android:inputType="textPersonName"
-            android:summary="Измените ваше имя"/>
+            android:key="name"
+            android:summary="Измените ваше имя"
+            android:title="Имя" />
 
     </PreferenceCategory>
 
@@ -18,23 +18,36 @@
         android:title="Ночной режим">
 
         <ListPreference
-            android:key="pref_day_night"
-            android:title="Ночной режим"
-            android:summary="Настройте внешний вид приложения"
             android:defaultValue="3"
+            android:dialogTitle="Ночной режим"
             android:entries="@array/day_night"
             android:entryValues="@array/day_night"
-            android:dialogTitle="Ночной режим"/>
+            android:key="pref_day_night"
+            android:summary="Настройте внешний вид приложения"
+            android:title="Ночной режим" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
         android:textSize="30sp"
-        android:title="Поделиться">
+        android:title="Прочее">
 
-        <intent
-            android:action="android.intent.action.SEND"
-            android:data="Поделиться"/>
+        <Preference
+            android:key="share"
+            android:title="Поделиться" />
+
+        <Preference
+            android:key="news"
+            android:title="Что нового" />
+
+        <Preference
+            android:key="about_authors"
+            android:title="Об авторах" />
+
+        <Preference
+            android:key="about"
+            android:title="О приложении" />
 
     </PreferenceCategory>
+
 </PreferenceScreen>

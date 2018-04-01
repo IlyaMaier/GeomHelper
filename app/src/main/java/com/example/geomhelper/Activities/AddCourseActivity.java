@@ -14,7 +14,6 @@ import com.example.geomhelper.Fragments.FragmentCourses;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CoursesItem;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class AddCourseActivity extends AppCompatActivity {
@@ -67,7 +66,7 @@ public class AddCourseActivity extends AppCompatActivity {
     void sendDataToFirebase(String name) {
         try {
             FirebaseDatabase.getInstance().getReference().
-                    child(FirebaseAuth.getInstance().getUid()).child("courses").child(name).setValue("added");
+                    child(Person.uId).child("courses").child(name).setValue("added");
         } catch (Exception e) {
             e.printStackTrace();
         }

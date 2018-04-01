@@ -2,6 +2,7 @@ package com.example.geomhelper.Fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
@@ -10,9 +11,9 @@ import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
+import com.example.geomhelper.Activities.Others;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -20,6 +21,7 @@ import static android.support.v7.preference.PreferenceManager.getDefaultSharedPr
 
 public class FragmentSettings extends PreferenceFragmentCompat {
 
+    Preference share,news,aboutAuthors,about;
     EditTextPreference editTextPreferenceName;
     ListPreference listPreference;
     SharedPreferences mSettings;
@@ -57,7 +59,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                     Person.name = name;
                     DatabaseReference f = FirebaseDatabase.getInstance().getReference();
                     try {
-                        f.child(FirebaseAuth.getInstance().getUid()).child("name").setValue(name);
+                        f.child(Person.uId).child("name").setValue(name);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -105,6 +107,52 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 editor.putBoolean("fragment_settings", true);
                 editor.apply();
                 return true;
+            }
+        });
+
+        share = findPreference("share");
+        share.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent i = new Intent();
+                i.setAction(Intent.ACTION_SEND);
+                i.putExtra(Intent.EXTRA_TEXT,
+                        "Скачай приложение GeomHelper! Оно поможет тебе в изучении геометрии по школьной программе!" +
+                                "https://yadi.sk/d/ub5kRUYy3SSHWC");
+                i.setType("text/plain");
+                startActivity(Intent.createChooser(i,"Поделиться"));
+                return false;
+            }
+        });
+
+        news = findPreference("news");
+        news.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent i = new Intent(getContext(), Others.class);
+                i.putExtra("num_others",0);
+                startActivity(i);
+                return false;
+            }
+        });
+        aboutAuthors = findPreference("about_authors");
+        aboutAuthors.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent i = new Intent(getContext(), Others.class);
+                i.putExtra("num_others",1);
+                startActivity(i);
+                return false;
+            }
+        });
+        about = findPreference("about");
+        about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent i = new Intent(getContext(), Others.class);
+                i.putExtra("num_others",2);
+                startActivity(i);
+                return false;
             }
         });
     }
