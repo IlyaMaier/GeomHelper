@@ -21,19 +21,16 @@ import com.example.geomhelper.Activities.AddCourseActivity;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.example.geomhelper.Resources.CoursesItem;
 import com.example.geomhelper.Resources.RVCoursesAdapter;
-
-import java.util.ArrayList;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class FragmentCourses extends Fragment {
 
     static RecyclerView recyclerView;
     LinearLayoutManager verticalManager, horizontalManager;
-    RVCoursesAdapter adapterCourses;
+    static RVCoursesAdapter adapterCourses;
     static FloatingActionButton floatingActionButton;
     View rootView;
-    public static ArrayList<CoursesItem> itemList;
     static FragmentManager fragmentManager;
     int scrollDist = 0;
     boolean isVisible = true;
@@ -56,8 +53,7 @@ public class FragmentCourses extends Fragment {
 
         recyclerView.setLayoutManager(verticalManager);
 
-        itemList = CoursesItem.getFakeItems();
-        adapterCourses = new RVCoursesAdapter(getContext(), itemList);
+        adapterCourses = new RVCoursesAdapter(getContext(), Person.courses);
         recyclerView.setAdapter(adapterCourses);
 
         Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.simple_grow);
@@ -111,7 +107,7 @@ public class FragmentCourses extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 10) {
-            adapterCourses.setItems(itemList);
+            adapterCourses.setItems(Person.courses);
             adapterCourses.notifyDataSetChanged();
         }
     }
@@ -139,6 +135,17 @@ public class FragmentCourses extends Fragment {
 
     public static void top() {
         recyclerView.smoothScrollToPosition(0);
+    }
+
+    public static void delete(String name) {
+        adapterCourses.setItems(Person.courses);
+        adapterCourses.notifyDataSetChanged();
+        try {
+            FirebaseDatabase.getInstance().getReference().
+                    child(Person.uId).child("courses").child(name).setValue("deleted");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
