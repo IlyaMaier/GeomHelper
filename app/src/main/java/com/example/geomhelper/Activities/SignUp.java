@@ -50,7 +50,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
     ProgressDialog progressDialog;
 
-    boolean d = true, e = true;
+    boolean e = true;
 
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
@@ -68,7 +68,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         //views
         mEmail = findViewById(R.id.email_sign_up);
         mPassword = findViewById(R.id.password_sign_up);
-        mPassword = findViewById(R.id.confirm_sign_up);
+        mConfirm = findViewById(R.id.confirm_sign_up);
         mName = findViewById(R.id.person_name);
         circleImageView = findViewById(R.id.imageProfileSignUp);
         circleImageView.setOnClickListener(new View.OnClickListener() {

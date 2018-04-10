@@ -69,7 +69,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         //views
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
-        mPassword = findViewById(R.id.confirm);
+        mConfirm = findViewById(R.id.confirm);
         textView = findViewById(R.id.not_register);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,13 +109,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         String password = mPassword.getText().toString();
 
-        if (password.length() < 6) {
-            mPassword.setError("Пароль не может быть меньше 6 символов!");
+        if (TextUtils.isEmpty(password)) {
+            mPassword.setError("Заполните поле");
             valid = false;
         }
 
-        if (TextUtils.isEmpty(password)) {
-            mPassword.setError("Заполните поле");
+        if (password.length() < 6) {
+            mPassword.setError("Пароль не может быть меньше 6 символов!");
             valid = false;
         }
 
