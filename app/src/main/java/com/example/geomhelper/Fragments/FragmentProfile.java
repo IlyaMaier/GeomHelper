@@ -1,6 +1,5 @@
 package com.example.geomhelper.Fragments;
 
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,7 +23,6 @@ import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -34,40 +32,53 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
+import static com.example.geomhelper.Person.pref;
 
 public class FragmentProfile extends Fragment {
 
     TextView textLevelName, textExperience, textName;
     CircleImageView circleImageView;
-    static ScrollView scrollView;
+    Bitmap bitmap;
+    ScrollView scrollView;
+    Context context;
 
     public FragmentProfile() {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        context = getContext();
+
         textName = rootView.findViewById(R.id.textName);
-        textName.setText(Person.name);
         textLevelName = rootView.findViewById(R.id.textLevelName);
-        textLevelName.setText(Person.currentLevel);
         textExperience = rootView.findViewById(R.id.textExperince);
+        circleImageView = rootView.findViewById(R.id.imageProfile);
+
+        textName.setText(Person.name);
+        textLevelName.setText(Person.currentLevel);
         textExperience.setText((Person.experience + "/" + Person.currentLevelExperience));
 
-        Bitmap bitmap;
-        circleImageView = rootView.findViewById(R.id.imageProfile);
-        if (getActivity().getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE).
-                getBoolean("image", false))
-            try {
-                bitmap = BitmapFactory.decodeFile("/data/data/com.example.geomhelper/files/profileImage.png");
-                circleImageView.setImageBitmap(bitmap);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        else circleImageView.setImageDrawable(getResources().getDrawable(R.drawable.back_login));
+        try {
+            if (pref.getBoolean("image", false))
+                try {
+                    bitmap = BitmapFactory.decodeFile(
+                            context.getFilesDir().getPath() +
+                            "/profileImage.png");
+                    circleImageView.setImageBitmap(bitmap);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            else
+                circleImageView.setImageDrawable(getResources().getDrawable(R.drawable.back_login));
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
         circleImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,9 +91,9 @@ public class FragmentProfile extends Fragment {
         textName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final EditText et = new EditText(getContext());
+                final EditText et = new EditText(context);
                 et.setText(Person.name);
-                final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                final AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setView(et)
                         .setPositiveButton("ОК", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -122,10 +133,6 @@ public class FragmentProfile extends Fragment {
         textName.setText(Person.name);
     }
 
-    public static void top() {
-        scrollView.scrollTo(0, 0);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -135,14 +142,17 @@ public class FragmentProfile extends Fragment {
                     Uri selectedImage = data.getData();
                     InputStream imageStream = null;
                     try {
-                        imageStream = getActivity().getContentResolver().openInputStream(selectedImage);
+                        if (selectedImage != null) {
+                            imageStream = Objects.requireNonNull(getActivity())
+                                    .getContentResolver().openInputStream(selectedImage);
+                        }
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
                     Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
                     circleImageView.setImageBitmap(yourSelectedImage);
                     try {
-                        File file = new File(getContext().getFilesDir(), "profileImage.png");
+                        File file = new File(context.getFilesDir(), "profileImage.png");
                         FileOutputStream fos = null;
                         try {
                             fos = new FileOutputStream(file);
@@ -159,14 +169,15 @@ public class FragmentProfile extends Fragment {
                     editor.apply();
                     StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
                     Uri file = Uri.fromFile(new File(
-                            "/data/data/com.example.geomhelper/files/profileImage.png"));
+                            context.getFilesDir().getPath() +
+                                    "/profileImage.png"));
                     try {
-                        StorageReference profileRef = mStorageRef.child(FirebaseAuth.getInstance().getUid());
+                        StorageReference profileRef = mStorageRef.child(Person.uId);
                         profileRef.putFile(file)
                                 .addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception exception) {
-                                        Toast.makeText(getContext(),
+                                        Toast.makeText(context,
                                                 "Не удалось загрузить изображение",
                                                 Toast.LENGTH_SHORT).show();
                                     }

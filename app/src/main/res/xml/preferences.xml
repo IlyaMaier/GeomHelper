@@ -30,6 +30,16 @@
 
     <PreferenceCategory
         android:textSize="30sp"
+        android:title="Аккаунт">
+
+        <Preference
+            android:key = "acc"
+            android:title="Выйти из аккаунта"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:textSize="30sp"
         android:title="Прочее">
 
         <Preference

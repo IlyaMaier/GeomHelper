@@ -1,6 +1,5 @@
 package com.example.geomhelper.Resources;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -9,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Test;
@@ -18,15 +16,13 @@ import java.util.List;
 
 public class RVTestsAdapter extends RecyclerView.Adapter<RVTestsAdapter.TestViewHolder> {
 
-    private Context context;
     private List<Test> tests;
 
     public void setData(List<Test> t) {
         tests = t;
     }
 
-    public RVTestsAdapter(Context context, List<Test> tests) {
-        this.context = context;
+    public RVTestsAdapter(List<Test> tests) {
         this.tests = tests;
     }
 
@@ -73,7 +69,6 @@ public class RVTestsAdapter extends RecyclerView.Adapter<RVTestsAdapter.TestView
                 @Override
                 public void onClick(View view) {
                     Person.currentTest = test;
-                    FragmentTests.click();
                 }
             });
         }

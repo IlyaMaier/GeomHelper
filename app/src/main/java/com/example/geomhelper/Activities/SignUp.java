@@ -44,6 +44,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
     private EditText mEmail;
     private EditText mPassword;
+    private EditText mConfirm;
     private EditText mName;
     private CircleImageView circleImageView;
 
@@ -67,6 +68,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         //views
         mEmail = findViewById(R.id.email_sign_up);
         mPassword = findViewById(R.id.password_sign_up);
+        mPassword = findViewById(R.id.confirm_sign_up);
         mName = findViewById(R.id.person_name);
         circleImageView = findViewById(R.id.imageProfileSignUp);
         circleImageView.setOnClickListener(new View.OnClickListener() {
@@ -113,8 +115,19 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         }
 
         String password = mPassword.getText().toString();
+
+        if (password.length() < 6) {
+            mPassword.setError("Пароль не может быть меньше 6 символов!");
+            valid = false;
+        }
+
         if (TextUtils.isEmpty(password)) {
             mPassword.setError("Заполните поле");
+            valid = false;
+        }
+
+        if (!password.equals(mConfirm.getText().toString())) {
+            mConfirm.setError("Пароли не совпадают");
             valid = false;
         }
 

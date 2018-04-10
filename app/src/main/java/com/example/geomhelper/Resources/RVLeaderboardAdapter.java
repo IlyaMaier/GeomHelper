@@ -29,6 +29,7 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
         this.users = users;
     }
 
+    @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rv_leaderboard_content, parent, false);
@@ -39,12 +40,15 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         final User user = users.get(position);
 
-        if (position == 0) holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.gold));
-        else if (position == 1) holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.silver));
-        else if (position == 2) holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.bronze));
+        if (position == 0)
+            holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.gold));
+        else if (position == 1)
+            holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.silver));
+        else if (position == 2)
+            holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.bronze));
 
         if (position == 9) holder.place.setTextSize(17);
-        holder.place.setText(position + 1 + "");
+        holder.place.setText((position + 1 + ""));
         holder.name.setText(user.getName());
         holder.experience.setText(user.getExperience());
     }
@@ -61,7 +65,7 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
         CardView cardView;
         LinearLayout linearLayout;
 
-        public UserViewHolder(final View itemView) {
+        UserViewHolder(final View itemView) {
             super(itemView);
 
             linearLayout = itemView.findViewById(R.id.line_leaderboard);
@@ -71,6 +75,7 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
             image = itemView.findViewById(R.id.image_profile_leaderboard);
             cardView = itemView.findViewById(R.id.cardView_leaderboard);
         }
+
     }
 
 }

@@ -2,6 +2,7 @@ package com.example.geomhelper.Activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -42,10 +43,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private EditText mEmail;
     private EditText mPassword;
+    private EditText mConfirm;
 
     private TextView textView;
 
     ProgressDialog progressDialog;
+
+    Async async;
 
     boolean d = true, e = true;
 
@@ -65,6 +69,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         //views
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
+        mPassword = findViewById(R.id.confirm);
         textView = findViewById(R.id.not_register);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,8 +108,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
 
         String password = mPassword.getText().toString();
+
+        if (password.length() < 6) {
+            mPassword.setError("Пароль не может быть меньше 6 символов!");
+            valid = false;
+        }
+
         if (TextUtils.isEmpty(password)) {
             mPassword.setError("Заполните поле");
+            valid = false;
+        }
+
+        if (!password.equals(mConfirm.getText().toString())) {
+            mConfirm.setError("Пароли не совпадают");
             valid = false;
         }
 
@@ -127,7 +143,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setTitle("Загрузка...");
         progressDialog.show();
-        Async async = new Async();
+        e = true;
+        async = new Async();
+        progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                e = false;
+                async.cancel(true);
+                async = null;
+            }
+        });
         async.onPreExecute();
         async.execute(num);
     }
@@ -162,8 +187,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
             try {
                 StorageReference profileRef = mStorageRef.child(Person.uId);
-                File file = new File(
-                        "/data/data/com.example.geomhelper/files/profileImage.png");
+                File file = new File(getApplicationContext().getFilesDir().getPath() +
+                        "/profileImage.png");
                 profileRef.getFile(file).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
@@ -238,6 +263,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onBackPressed() {
 
     }
+
 }
 
 

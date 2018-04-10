@@ -1,11 +1,14 @@
 package com.example.geomhelper.Fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -22,20 +25,22 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FragmentLeaderboard extends Fragment {
 
     public FragmentLeaderboard() {
     }
 
-    static RecyclerView recyclerView;
+    RecyclerView recyclerView;
     List<User> data;
     RelativeLayout relativeLayout;
     RVLeaderboardAdapter rvLeaderboardAdapter;
     ProgressBar progressBar;
+    BottomNavigationView bottomNavigationView;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_leaderboard, container, false);
 
@@ -57,6 +62,18 @@ public class FragmentLeaderboard extends Fragment {
         relativeLayout.addView(progressBar, params);
         progressBar.setVisibility(View.VISIBLE);
 
+        bottomNavigationView = Objects.requireNonNull(getActivity()).
+                findViewById(R.id.navigation);
+        bottomNavigationView.setOnNavigationItemReselectedListener(
+                new BottomNavigationView.OnNavigationItemReselectedListener() {
+            @Override
+            public void onNavigationItemReselected(@NonNull MenuItem item) {
+                if(item.getItemId() == R.id.navigation_leaderboard){
+                    recyclerView.smoothScrollToPosition(0);
+                }
+            }
+        });
+
         return rootView;
     }
 
@@ -72,8 +89,12 @@ public class FragmentLeaderboard extends Fragment {
                 do
                     for (int i = 1; i < 11; i++) {
                         try {
-                            data.get(i - 1).setName(dataSnapshot.child(i + "").child("name").getValue().toString());
-                            data.get(i - 1).setExperience(dataSnapshot.child(i + "").child("experience").getValue().toString());
+                            data.get(i - 1).setName(Objects.requireNonNull(
+                                    dataSnapshot.child(i + "").child("name").
+                                            getValue()).toString());
+                            data.get(i - 1).setExperience(Objects.requireNonNull(
+                                    dataSnapshot.child(i + "").child("experience").
+                                            getValue()).toString());
                         } catch (NullPointerException e) {
                             e.printStackTrace();
                         }
@@ -97,10 +118,6 @@ public class FragmentLeaderboard extends Fragment {
             if (data.get(i).getName() == null || data.get(i).getExperience() == null || data.get(i).getExperience().isEmpty() || data.get(i).getName().isEmpty())
                 return true;
         return false;
-    }
-
-    public static void top() {
-        recyclerView.smoothScrollToPosition(0);
     }
 
 }

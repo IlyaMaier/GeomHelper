@@ -11,16 +11,16 @@
     <color name="leaderboardD">#5a7583</color>
     <color name="profile">#E64A19</color>
     <color name="profileD">#d24417</color>
-    <color name="settings">#348338</color>
+    <color name="settings">#388E3C</color>
     <color name="settingsD">#348338</color>
     <color name="courses">#009688</color>
     <color name="coursesD">#00877b</color>
     <color name="tests">#3F51B5</color>
     <color name="testsD">#3d4eae</color>
-    <color name="textColor">#000000</color>
-    <color name="backgroundColor">#ffffff</color>
-    <color name="gold">#FFD700</color>
-    <color name="silver">#c6ccd2</color>
-    <color name="bronze">#f6a120</color>
+    <color name="textColor">#e7e7e7</color>
+    <color name="backgroundColor">#3b3b3b</color>
+    <color name="gold">#efca00</color>
+    <color name="silver">#c4cacf</color>
+    <color name="bronze">#e7971e</color>
 
 </resources>

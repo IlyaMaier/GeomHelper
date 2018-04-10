@@ -23,7 +23,7 @@
     </string>
     <string name="SignIn">Войти</string>
     <string name="SignUp">Зарегистрироваться</string>
-    <string name="Password">Пароль</string>
+    <string name="Password">Password</string>
     <string name="Name">Имя</string>
     <string name="Error">Случилась непридведенная ошибка</string>
     <string name="_7"><![CDATA[< < - - - - - - 7 класс - - - - - - > >]]></string>
@@ -38,4 +38,5 @@
     <string name="title_activity_sign_up">Sign Up</string>
     <string name="not_register"><u>Еще не зарегестрированы?</u></string>
     <string name="testname">TestName</string>
+    <string name="confirm_password">Confirm password</string>
 </resources>

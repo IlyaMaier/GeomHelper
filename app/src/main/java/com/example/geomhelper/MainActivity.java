@@ -27,15 +27,18 @@ import com.example.geomhelper.Fragments.FragmentTestThemes;
 import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Fragments.FragmentThemes;
 
+import java.util.Objects;
+
+import static com.example.geomhelper.Person.pref;
+
 public class MainActivity extends AppCompatActivity {
 
     public static int back = 0;
-    SharedPreferences mSettings;
     final int NUM_PAGES = 5;
     BottomNavigationView bottomNavigationView;
     ViewPager viewPager;
     PagerAdapter pagerAdapter;
-    SharedPreferences.Editor editor;
+    static SharedPreferences.Editor editor;
     boolean backCourses = false, backTests = false;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -48,25 +51,25 @@ public class MainActivity extends AppCompatActivity {
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.tests));
                     if (viewPager.getCurrentItem() != 0) {
                         viewPager.setCurrentItem(0);
-                    } else FragmentTests.bottom();
+                    }
                     return true;
                 case R.id.navigation_courses:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.courses));
                     if (viewPager.getCurrentItem() != 1) {
                         viewPager.setCurrentItem(1);
-                    } else FragmentCourses.top();
+                    }
                     return true;
                 case R.id.navigation_profile:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.profile));
                     if (viewPager.getCurrentItem() != 2) {
                         viewPager.setCurrentItem(2);
-                    } else FragmentProfile.top();
+                    }
                     return true;
                 case R.id.navigation_leaderboard:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.leaderboard));
                     if (viewPager.getCurrentItem() != 3) {
                         viewPager.setCurrentItem(3);
-                    } else FragmentLeaderboard.top();
+                    }
                     return true;
                 case R.id.navigation_settings:
                     bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.settings));
@@ -81,31 +84,38 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        pref = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
-        mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
         if (savedInstanceState == null) {
-            if (mSettings.getString("pref_day_night", "").equals("Включен")) {
-                AppCompatDelegate.setDefaultNightMode(
-                        AppCompatDelegate.MODE_NIGHT_YES);
-                recreate();
-            } else if (mSettings.getString("pref_day_night", "").equals("Выключен")) {
-                AppCompatDelegate.setDefaultNightMode(
-                        AppCompatDelegate.MODE_NIGHT_NO);
-                recreate();
-            } else if (mSettings.getString("pref_day_night", "").equals("Авто")) {
-                AppCompatDelegate.setDefaultNightMode(
-                        AppCompatDelegate.MODE_NIGHT_AUTO);
-                recreate();
+            switch (pref.getString("pref_day_night", "")) {
+                case "Включен":
+                    AppCompatDelegate.setDefaultNightMode(
+                            AppCompatDelegate.MODE_NIGHT_YES);
+                    recreate();
+                    break;
+                case "Выключен":
+                    AppCompatDelegate.setDefaultNightMode(
+                            AppCompatDelegate.MODE_NIGHT_NO);
+                    recreate();
+                    break;
+                case "Авто":
+                    AppCompatDelegate.setDefaultNightMode(
+                            AppCompatDelegate.MODE_NIGHT_AUTO);
+                    recreate();
+                    break;
             }
         }
+
         try {
-            getSupportActionBar().hide();
+            Objects.requireNonNull(getSupportActionBar()).hide();
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+
         setContentView(R.layout.activity_main);
 
+        getWindow().setBackgroundDrawable(null);
         if (!Courses.currentCourses.contains(Courses.basics))
             Courses.currentCourses.add(0, Courses.basics);
         if (!Courses.currentCourses.contains(Courses.second))
@@ -128,19 +138,18 @@ public class MainActivity extends AppCompatActivity {
             Tests.currentTests.add(3, Tests.basics);
         }
 
-
-        if (mSettings.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
-            Person.name = mSettings.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");
-            Person.uId = mSettings.getString(Person.APP_PREFERENCES_UID, "-1");
-            Person.currentLevel = mSettings.getString(Person.APP_PREFERENCES_LEVEL, "Произошла ошибка");
-            Person.experience = mSettings.getInt(Person.APP_PREFERENCES_EXPERIENCE, -1);
-            Person.currentLevelExperience = mSettings.getInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, -1);
-            Person.leaderBoardPlace = mSettings.getLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, -1);
-            for (int i = 0; i < mSettings.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
-                if (Person.courses.size() != mSettings.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0)) {
+        if (pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
+            Person.name = pref.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");
+            Person.uId = pref.getString(Person.APP_PREFERENCES_UID, "-1");
+            Person.currentLevel = pref.getString(Person.APP_PREFERENCES_LEVEL, "Произошла ошибка");
+            Person.experience = pref.getInt(Person.APP_PREFERENCES_EXPERIENCE, -1);
+            Person.currentLevelExperience = pref.getInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, -1);
+            Person.leaderBoardPlace = pref.getLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, -1);
+            for (int i = 0; i < pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
+                if (Person.courses.size() != pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0)) {
                     String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
                     for (int j = 0; j < Courses.currentCourses.size(); j++) {
-                        if (mSettings.getString(course, "").equals(Courses.currentCourses.get(j).getCourseName()))
+                        if (pref.getString(course, "").equals(Courses.currentCourses.get(j).getCourseName()))
                             Person.courses.add(i, Courses.currentCourses.get(j));
                     }
                 }
@@ -157,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        if (!mSettings.getBoolean("fragment_settings", false)) {
+        if (!pref.getBoolean("fragment_settings", false)) {
             viewPager.setCurrentItem(2);
             bottomNavigationView.getMenu().findItem(R.id.navigation_profile).setChecked(true);
             bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
@@ -169,11 +178,10 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setItemTextColor(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             bottomNavigationView.setItemIconTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             bottomNavigationView.setBackgroundColor(getResources().getColor(R.color.settings));
-            editor = mSettings.edit();
+            editor = pref.edit();
             editor.putBoolean("fragment_settings", false);
             editor.apply();
         }
-
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -273,7 +281,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        editor = mSettings.edit();
+        saveAll(true, Person.pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false));
+    }
+
+    public static void saveAll(boolean d, boolean welcome) {
+        editor = pref.edit();
         editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
         editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
         editor.putString(Person.APP_PREFERENCES_LEVEL, Person.currentLevel);
@@ -281,6 +293,8 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, Person.currentLevelExperience);
         editor.putLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, Person.leaderBoardPlace);
         editor.putInt(Person.APP_PREFERENCES_COURSES_SIZE, Person.courses.size());
+        if (d) editor.putBoolean("image", false);
+        if (d) editor.putBoolean(Person.APP_PREFERENCES_WELCOME, welcome);
         for (int i = 0; i < Person.courses.size(); i++) {
             String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
             editor.putString(course, Person.courses.get(i).getCourseName());
@@ -294,12 +308,8 @@ public class MainActivity extends AppCompatActivity {
         onRestart();
     }
 
-    public static void toSettings() {
-
-    }
-
     public class FadePageTransformer implements ViewPager.PageTransformer {
-        public void transformPage(View view, float position) {
+        public void transformPage(@NonNull View view, float position) {
             if (position <= -1.0F || position >= 1.0F) {
                 view.setAlpha(0.0F);
                 view.setVisibility(View.GONE);
@@ -311,6 +321,9 @@ public class MainActivity extends AppCompatActivity {
                 view.setTranslationX(-position * (view.getWidth() / 2));
                 view.setVisibility(View.VISIBLE);
             }
+
         }
+
     }
+
 }

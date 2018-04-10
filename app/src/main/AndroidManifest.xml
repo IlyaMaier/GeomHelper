@@ -32,9 +32,7 @@
         <activity
             android:name=".Activities.SignUp"
             android:theme="@style/SettingsTheme" />
-        <activity
-            android:name=".Activities.Others"
-            android:theme="@style/SettingsTheme" />
+        <activity android:name=".Activities.Main2Activity"></activity>
     </application>
 
 </manifest>

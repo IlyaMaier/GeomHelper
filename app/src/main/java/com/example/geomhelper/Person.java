@@ -1,5 +1,7 @@
 package com.example.geomhelper;
 
+import android.content.SharedPreferences;
+
 import java.util.ArrayList;
 
 public class Person {
@@ -28,5 +30,6 @@ public class Person {
     public static int currentTestTheme = 0;
     public static short backTests = 0;
     public static short backCourses = 0;
+    public static SharedPreferences pref;
 
 }
