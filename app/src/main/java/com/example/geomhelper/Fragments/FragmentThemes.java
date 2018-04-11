@@ -2,6 +2,7 @@ package com.example.geomhelper.Fragments;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
@@ -15,6 +16,8 @@ import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.Resources;
 
+import java.util.Objects;
+
 public class FragmentThemes extends Fragment {
 
     public FragmentThemes() {
@@ -25,7 +28,7 @@ public class FragmentThemes extends Fragment {
     LinearLayout linearLayout;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_themes, container, false);
 
@@ -46,7 +49,8 @@ public class FragmentThemes extends Fragment {
                     MainActivity.back = 2;
                     Person.backCourses = 2;
                     Person.currentTheme = v.getId();
-                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    FragmentTransaction fragmentTransaction = Objects.
+                            requireNonNull(getFragmentManager()).beginTransaction();
                     FragmentCourseText fragmentCourseText = new FragmentCourseText();
                     fragmentTransaction.replace(R.id.fragment, fragmentCourseText);
                     fragmentTransaction.commit();

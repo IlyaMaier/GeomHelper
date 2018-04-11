@@ -9,7 +9,7 @@ public class Test {
     private int[] experienceOfEachTheme;
     private int background;
 
-    public Test(String testName, int numberOfThemes, String[] themes, int courseExperience, int[] experienceOfEachTheme, int background) {
+    Test(String testName, int numberOfThemes, String[] themes, int courseExperience, int[] experienceOfEachTheme, int background) {
         this.testName = testName;
         this.numberOfThemes = numberOfThemes;
         this.themes = themes;

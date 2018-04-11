@@ -1,5 +1,6 @@
 package com.example.geomhelper.Activities;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +38,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Objects;
 
 public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
@@ -86,7 +88,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
     }
 
     private void createAccount(String email, String key) {
-        mAuth.createUserWithEmailAndPassword(mEmail.getText().toString(), mPassword.getText().toString())
+        mAuth.createUserWithEmailAndPassword(email, key)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -99,11 +101,11 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                 });
     }
 
-    private boolean validateForm(boolean q) {
+    private boolean validateForm() {
         boolean valid = true;
 
         String name = mName.getText().toString();
-        if (q && TextUtils.isEmpty(name)) {
+        if (TextUtils.isEmpty(name)) {
             mName.setError("Заполните поле");
             valid = false;
         }
@@ -142,7 +144,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         int num = -1;
         switch (v.getId()) {
             case R.id.sign_up:
-                if (!validateForm(true)) return;
+                if (!validateForm()) return;
                 createAccount(mEmail.getText().toString(), mPassword.getText().toString());
                 Person.name = mName.getText().toString();
                 num = 1;
@@ -156,6 +158,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         async.execute(num);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class Async extends AsyncTask<Integer, Integer, Void> {
         @Override
         protected void onPreExecute() {
@@ -168,7 +171,8 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                 if (e) {
                     try {
                         Thread.sleep(50);
-                        Person.uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        Person.uId = Objects.requireNonNull(FirebaseAuth.
+                                getInstance().getCurrentUser()).getUid();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -181,8 +185,8 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                 sendDataToFirebase();
 
             StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
-            Uri file = Uri.fromFile(new File(
-                    "/data/data/com.example.geomhelper/files/profileImage.png"));
+            Uri file = Uri.fromFile(new File(getFilesDir().getPath() +
+                    "/profileImage.png"));
             try {
                 StorageReference profileRef = mStorageRef.child(Person.uId);
                 profileRef.putFile(file)
@@ -234,7 +238,9 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                     Uri selectedImage = data.getData();
                     InputStream imageStream = null;
                     try {
-                        imageStream = getContentResolver().openInputStream(selectedImage);
+                        if (selectedImage != null) {
+                            imageStream = getContentResolver().openInputStream(selectedImage);
+                        }
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }

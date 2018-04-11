@@ -10,7 +10,7 @@ public class Course {
     private String[] courseTextUrl;
     private int background;
 
-    public Course(String courseName, int numberOfThemes, String[] themes, int courseExperience, int[] experienceOfEachTheme, String[] courseTextUrl, int background) {
+    Course(String courseName, int numberOfThemes, String[] themes, int courseExperience, int[] experienceOfEachTheme, String[] courseTextUrl, int background) {
         this.courseName = courseName;
         this.numberOfThemes = numberOfThemes;
         this.themes = themes;

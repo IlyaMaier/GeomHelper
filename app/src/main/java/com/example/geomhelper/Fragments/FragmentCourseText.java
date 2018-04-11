@@ -1,6 +1,7 @@
 package com.example.geomhelper.Fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -15,6 +16,8 @@ import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 
+import java.util.Objects;
+
 public class FragmentCourseText extends Fragment {
 
     public FragmentCourseText() {
@@ -24,7 +27,7 @@ public class FragmentCourseText extends Fragment {
     WebView webView;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_course_text, container, false);
         view.setBackgroundColor(getResources().getColor(R.color.white));
@@ -40,7 +43,8 @@ public class FragmentCourseText extends Fragment {
             @Override
             public void onClick(View v) {
                 if (Person.currentTheme == 0) {
-                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    FragmentTransaction fragmentTransaction = Objects.
+                            requireNonNull(getFragmentManager()).beginTransaction();
                     FragmentThemes fragmentThemes = new FragmentThemes();
                     fragmentTransaction.replace(R.id.fragment, fragmentThemes);
                     fragmentTransaction.commit();
@@ -62,7 +66,8 @@ public class FragmentCourseText extends Fragment {
             @Override
             public void onClick(View v) {
                 if (Person.currentCourse.getThemesSize() - 1 == Person.currentTheme) {
-                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    FragmentTransaction fragmentTransaction = Objects.
+                            requireNonNull(getFragmentManager()).beginTransaction();
                     FragmentThemes fragmentThemes = new FragmentThemes();
                     fragmentTransaction.replace(R.id.fragment, fragmentThemes);
                     fragmentTransaction.commit();

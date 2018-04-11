@@ -15,7 +15,8 @@
     <ScrollView
         android:id="@+id/sign_up_form"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@null">
 
         <LinearLayout
             android:id="@+id/email_sign_up_form"
@@ -35,7 +36,8 @@
                 android:id="@+id/person_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/name_or_nickname" />
+                android:hint="@string/name_or_nickname"
+                android:inputType="textPersonName" />
 
             <EditText
                 android:id="@+id/email_sign_up"

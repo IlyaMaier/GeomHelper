@@ -2,8 +2,8 @@ package com.example.geomhelper.Resources;
 
 public class User {
 
-    String name;
-    String experience;
+    private String name;
+    private String experience;
 
     public User(String name, String experience) {
         this.name = name;

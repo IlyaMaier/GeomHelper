@@ -38,7 +38,6 @@ public class Courses {
             "Медианы, биссектрисы и высоты треугольника",
             "Второй и третий признаки равенства треугольников",
             "Задачи на построение"};
-    private static String[] secondThemesText = {"1", "2", "3", "4"};
     private static int secondExperience = 150;
     private static int[] secondExperienceOfEachTheme = {50, 30, 50, 20};
     private static String[] secondCourseTextUrl = {
@@ -60,7 +59,6 @@ public class Courses {
     private static String[] thirdThemes = {"Признаки параллельности двух прямых",
             "Аксиома параллельных прямых",
             "Практические задачи"};
-    private static String[] thirdThemesText = {"1", "2", "3"};
     private static int thirdExperience = 100;
     private static int[] thirdExperienceOfEachTheme = {40, 35, 25};
     private static String[] thirdCourseTextUrl = {
@@ -82,7 +80,6 @@ public class Courses {
             "Соотношения между сторонами и углами",
             "Прямоугольные треугольники",
             "Построение треугольника по трем элементам"};
-    private static String[] fourthThemesText = {"1", "2", "3", "4"};
     private static int fourthExperience = 160;
     private static int[] fourthExperienceOfEachTheme = {30, 30, 50, 50};
     private static String[] fourthCourseTextUrl = {

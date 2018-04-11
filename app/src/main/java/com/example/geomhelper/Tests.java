@@ -29,7 +29,6 @@ public class Tests {
             "Медианы, биссектрисы и высоты треугольника",
             "Второй и третий признаки равенства треугольников",
             "Задачи на построение"};
-    private static String[] secondThemesText = {"1", "2", "3", "4"};
     private static int secondExperience = 150;
     private static int[] secondExperienceOfEachTheme = {50, 30, 50, 20};
     public static Test second = new Test("Треугольники",
@@ -44,7 +43,6 @@ public class Tests {
     private static String[] thirdThemes = {"Признаки параллельности двух прямых",
             "Аксиома параллельных прямых",
             "Практические задачи"};
-    private static String[] thirdThemesText = {"1", "2", "3"};
     private static int thirdExperience = 100;
     private static int[] thirdExperienceOfEachTheme = {40, 35, 25};
     public static Test third = new Test("Параллельные прямые",
@@ -60,7 +58,6 @@ public class Tests {
             "Соотношения между сторонами и углами",
             "Прямоугольные треугольники",
             "Построение треугольника по трем элементам"};
-    private static String[] fourthThemesText = {"1", "2", "3", "4"};
     private static int fourthExperience = 160;
     private static int[] fourthExperienceOfEachTheme = {30, 30, 50, 50};
     public static Test fourth = new Test("Соотношения между сторонами и углами ▲",

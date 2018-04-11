@@ -1,5 +1,6 @@
 package com.example.geomhelper.Activities;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,6 +37,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -44,8 +46,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mEmail;
     private EditText mPassword;
     private EditText mConfirm;
-
-    private TextView textView;
 
     ProgressDialog progressDialog;
 
@@ -70,7 +70,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
         mConfirm = findViewById(R.id.confirm);
-        textView = findViewById(R.id.not_register);
+        TextView textView = findViewById(R.id.not_register);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,7 +98,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 });
     }
 
-    private boolean validateForm(boolean q) {
+    private boolean validateForm() {
         boolean valid = true;
 
         String email = mEmail.getText().toString();
@@ -135,7 +135,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         int num = -1;
         switch (v.getId()) {
             case R.id.sign_in:
-                if (!validateForm(false)) return;
+                if (!validateForm()) return;
                 signIn(mEmail.getText().toString(), mPassword.getText().toString());
                 num = 0;
                 break;
@@ -157,6 +157,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         async.execute(num);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class Async extends AsyncTask<Integer, Integer, Void> {
         @Override
         protected void onPreExecute() {
@@ -169,7 +170,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (e) {
                     try {
                         Thread.sleep(50);
-                        Person.uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        Person.uId = Objects.requireNonNull(FirebaseAuth.
+                                getInstance().getCurrentUser()).getUid();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -243,11 +245,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             Person.courses.remove(Courses.currentCourses.get(i));
                         }
                     }
-                    try {
-                        Person.experience = Integer.parseInt(dataSnapshot.child("experience").getValue().toString());
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
+                        Person.experience = Integer.parseInt(Objects.requireNonNull(
+                                dataSnapshot.child("experience").getValue()).toString());
                 }
 
                 @Override

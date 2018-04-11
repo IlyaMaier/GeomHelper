@@ -84,7 +84,7 @@ public class FragmentTests extends Fragment {
             tests = t;
         }
 
-        public RVAdpater(List<Test> tests) {
+        RVAdpater(List<Test> tests) {
             this.tests = tests;
         }
 
