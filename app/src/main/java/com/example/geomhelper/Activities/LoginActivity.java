@@ -45,7 +45,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private EditText mEmail;
     private EditText mPassword;
-    private EditText mConfirm;
 
     ProgressDialog progressDialog;
 
@@ -69,7 +68,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         //views
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
-        mConfirm = findViewById(R.id.confirm);
         TextView textView = findViewById(R.id.not_register);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,11 +114,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         if (password.length() < 6) {
             mPassword.setError("Пароль не может быть меньше 6 символов!");
-            valid = false;
-        }
-
-        if (!password.equals(mConfirm.getText().toString())) {
-            mConfirm.setError("Пароли не совпадают");
             valid = false;
         }
 
