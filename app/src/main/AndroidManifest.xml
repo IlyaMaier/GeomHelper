@@ -32,7 +32,8 @@
         <activity
             android:name=".Activities.SignUp"
             android:theme="@style/SettingsTheme" />
-        <activity android:name=".Activities.Main2Activity"></activity>
+
+        <service android:name=".Resources.ShowNotification" />
     </application>
 
 </manifest>

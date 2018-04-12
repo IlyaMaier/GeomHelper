@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,12 +39,13 @@ import java.util.Objects;
 
 public class FragmentCourses extends Fragment {
 
+
     RecyclerView recyclerView;
-    LinearLayoutManager verticalManager, horizontalManager;
+    LinearLayoutManager verticalManager;
     RVAdapter adapterCourses;
     FloatingActionButton floatingActionButton;
     View rootView;
-    static FragmentManager fragmentManager;
+    FragmentManager fragmentManager;
     int scrollDist = 0;
     boolean isVisible = true;
     float MINIMUM = 25;
@@ -64,7 +64,6 @@ public class FragmentCourses extends Fragment {
         fragmentManager = getFragmentManager();
 
         verticalManager = new LinearLayoutManager(getContext());
-        horizontalManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
 
         recyclerView.setLayoutManager(verticalManager);
 
@@ -114,6 +113,7 @@ public class FragmentCourses extends Fragment {
                         floatingActionButton.getHeight() + 16).
                         setInterpolator(new AccelerateInterpolator(2)).start();
             }
+
         });
 
         bottomNavigationView = Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
@@ -135,16 +135,6 @@ public class FragmentCourses extends Fragment {
         if (requestCode == 10) {
             adapterCourses.setItems(Person.courses);
             adapterCourses.notifyDataSetChanged();
-        }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            recyclerView.setLayoutManager(horizontalManager);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            recyclerView.setLayoutManager(verticalManager);
         }
     }
 
@@ -197,8 +187,10 @@ public class FragmentCourses extends Fragment {
                         Person.currentCourse = course;
                         MainActivity.back = 1;
                         Person.backCourses = 1;
-                        floatingActionButton.hide();
                         recyclerView.setVisibility(View.INVISIBLE);
+                        recyclerView.setClickable(false);
+                        recyclerView = null;
+                        floatingActionButton = null;
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                         FragmentThemes fragmentThemes = new FragmentThemes();
                         fragmentTransaction.replace(R.id.fragment, fragmentThemes);

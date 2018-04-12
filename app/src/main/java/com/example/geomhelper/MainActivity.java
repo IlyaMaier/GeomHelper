@@ -1,5 +1,7 @@
 package com.example.geomhelper;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,6 +28,7 @@ import com.example.geomhelper.Fragments.FragmentSettings;
 import com.example.geomhelper.Fragments.FragmentTestThemes;
 import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Fragments.FragmentThemes;
+import com.example.geomhelper.Resources.ShowNotification;
 
 import java.util.Objects;
 
@@ -218,6 +221,20 @@ public class MainActivity extends AppCompatActivity {
             public void onPageScrollStateChanged(int state) {
             }
         });
+
+        Intent notificationIntent = new Intent(getApplicationContext(), ShowNotification.class);
+        PendingIntent contentIntent = PendingIntent.getService(getApplicationContext(), 0, notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+
+        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (am != null) {
+            am.cancel(contentIntent);
+            am.setRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + AlarmManager.INTERVAL_DAY * 2,
+                    AlarmManager.INTERVAL_DAY * 2, contentIntent);
+        }
+
     }
 
     @Override

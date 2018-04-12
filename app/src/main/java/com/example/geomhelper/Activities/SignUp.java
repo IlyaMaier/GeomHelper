@@ -52,7 +52,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
     ProgressDialog progressDialog;
 
-    boolean e = true;
+    boolean e = true, g = false;
 
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
@@ -185,7 +185,24 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                 sendDataToFirebase();
 
             StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
-            Uri file = Uri.fromFile(new File(getFilesDir().getPath() +
+            Uri file;
+            if (!g) {
+                Bitmap yourSelectedImage = BitmapFactory.decodeResource(
+                        getResources(), R.drawable.back_login);
+                try {
+                    File f = new File(getFilesDir(), "profileImage.png");
+                    FileOutputStream fos = null;
+                    try {
+                        fos = new FileOutputStream(f);
+                        yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                    } finally {
+                        if (fos != null) fos.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            file = Uri.fromFile(new File(getFilesDir().getPath() +
                     "/profileImage.png"));
             try {
                 StorageReference profileRef = mStorageRef.child(Person.uId);
@@ -235,6 +252,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         switch (requestCode) {
             case 6:
                 if (resultCode == RESULT_OK) {
+                    Bitmap yourSelectedImage;
                     Uri selectedImage = data.getData();
                     InputStream imageStream = null;
                     try {
@@ -244,7 +262,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
-                    Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
+                    yourSelectedImage = BitmapFactory.decodeStream(imageStream);
                     circleImageView.setImageBitmap(yourSelectedImage);
                     try {
                         File file = new File(getFilesDir(), "profileImage.png");
@@ -261,6 +279,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                     SharedPreferences.Editor editor = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
                     editor.putBoolean("image", true);
                     editor.apply();
+                    g = true;
                 }
         }
     }
