@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -161,9 +160,10 @@ public class FragmentProfile extends Fragment {
                                             context.getFilesDir().getPath() +
                                                     "/profileImage.png"));
                                     mStorageRef.child(Person.uId).getFile(file);
-                                    Drawable drawable = Drawable.createFromPath(
-                                            getContext().getFilesDir() + "/profileimage.png");
-                                    circleImageView.setImageDrawable(drawable);
+                                    bitmap = BitmapFactory.decodeFile(
+                                            context.getFilesDir().getPath() +
+                                                    "/profileImage.png");
+                                    circleImageView.setImageBitmap(bitmap);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -240,7 +240,7 @@ public class FragmentProfile extends Fragment {
                                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                                         FirebaseDatabase.getInstance().getReference()
                                                 .child(Person.uId).child("image")
-                                                .setValue(new Random());
+                                                .setValue(new Random().nextInt());
                                     }
                                 });
                     } catch (NullPointerException e) {
