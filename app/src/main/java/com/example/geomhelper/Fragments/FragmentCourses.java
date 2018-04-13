@@ -32,7 +32,11 @@ import com.example.geomhelper.Courses;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -50,6 +54,7 @@ public class FragmentCourses extends Fragment {
     boolean isVisible = true;
     float MINIMUM = 25;
     BottomNavigationView bottomNavigationView;
+    boolean count = false;
 
     public FragmentCourses() {
     }
@@ -125,6 +130,41 @@ public class FragmentCourses extends Fragment {
                     }
                 }
         );
+
+        if (Person.pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
+
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+
+            for (int i = 0; i < Courses.currentCourses.size(); i++) {
+                final int finalI = i;
+                databaseReference.child(Person.uId).child("courses").child(i + "")
+                        .addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                try {
+                                    String name = dataSnapshot.getValue().toString();
+                                    if (name.equals("deleted")) {
+                                        Person.courses.remove(Courses.currentCourses.get(finalI));
+                                        adapterCourses.setItems(Person.courses);
+                                        adapterCourses.notifyDataSetChanged();
+                                    } else if (name.equals("added")) {
+                                        if (!Person.courses.contains(Courses.currentCourses.get(finalI)))
+                                            Person.courses.add(0,Courses.currentCourses.get(finalI));
+                                        adapterCourses.setItems(Person.courses);
+                                        adapterCourses.notifyDataSetChanged();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+            }
+        }
 
         return rootView;
     }

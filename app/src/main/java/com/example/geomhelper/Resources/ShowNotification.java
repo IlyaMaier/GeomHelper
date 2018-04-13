@@ -30,7 +30,7 @@ public class ShowNotification extends Service {
                 new NotificationCompat.Builder(this, "0")
                         .setSmallIcon(R.drawable.ic_menu_leaderboard)
                         .setColor(getResources().getColor(R.color.leaderboard))
-                        .setContentTitle("Geomhelper")
+                        .setContentTitle("GeomHelper")
                         .setContentText("Ты уже давно не занимался!")
                         .setContentIntent(resultPendingIntent)
                         .setAutoCancel(true)

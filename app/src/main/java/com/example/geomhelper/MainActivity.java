@@ -229,10 +229,9 @@ public class MainActivity extends AppCompatActivity {
         AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         if (am != null) {
             am.cancel(contentIntent);
-            am.setRepeating(
-                    AlarmManager.RTC_WAKEUP,
+            am.setExact(AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + AlarmManager.INTERVAL_DAY * 2,
-                    AlarmManager.INTERVAL_DAY * 2, contentIntent);
+                    contentIntent);
         }
 
     }

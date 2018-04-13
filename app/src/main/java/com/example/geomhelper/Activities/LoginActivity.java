@@ -37,7 +37,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
-import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -125,12 +124,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         InputMethodManager imm = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null)
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-        int num = -1;
         switch (v.getId()) {
             case R.id.sign_in:
                 if (!validateForm()) return;
                 signIn(mEmail.getText().toString(), mPassword.getText().toString());
-                num = 0;
                 break;
         }
         progressDialog = new ProgressDialog(LoginActivity.this);
@@ -147,7 +144,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         });
         async.onPreExecute();
-        async.execute(num);
+        async.execute();
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -163,8 +160,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (e) {
                     try {
                         Thread.sleep(50);
-                        Person.uId = Objects.requireNonNull(FirebaseAuth.
-                                getInstance().getCurrentUser()).getUid();
+                        Person.uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -173,10 +169,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     return null;
                 }
             }
-            boolean q = false;
-            if (integers[integers.length - 1] == 0) {
-                getDataFromFirebase();
-                q = true;
+            getDataFromFirebase();
+
+            while (d) {
             }
 
             StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -202,12 +197,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
             editor.putBoolean("image", true);
             editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
-
-            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-            while (d && q) {
-            }
             editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
             editor.apply();
+
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(i);
             finish();
             return null;
@@ -226,7 +219,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Person.name = dataSnapshot.child("name").getValue(String.class);
-                    if (Person.name != null && d) {
+                    if (d) {
                         Toast.makeText(getApplicationContext(), "Добро пожаловать, " + Person.name + "!", Toast.LENGTH_LONG).show();
                         d = false;
                     }
@@ -238,8 +231,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             Person.courses.remove(Courses.currentCourses.get(i));
                         }
                     }
-                        Person.experience = Integer.parseInt(Objects.requireNonNull(
-                                dataSnapshot.child("experience").getValue()).toString());
+                    try {
+                        Person.experience = Integer.parseInt(dataSnapshot.child("experience").getValue(String.class));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 @Override

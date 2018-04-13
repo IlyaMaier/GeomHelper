@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,17 +23,24 @@ import android.widget.Toast;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.Random;
 
 import static android.app.Activity.RESULT_OK;
 import static com.example.geomhelper.Person.pref;
@@ -44,6 +52,7 @@ public class FragmentProfile extends Fragment {
     Bitmap bitmap;
     ScrollView scrollView;
     Context context;
+    boolean count = false;
 
     public FragmentProfile() {
     }
@@ -69,7 +78,7 @@ public class FragmentProfile extends Fragment {
                 try {
                     bitmap = BitmapFactory.decodeFile(
                             context.getFilesDir().getPath() +
-                            "/profileImage.png");
+                                    "/profileImage.png");
                     circleImageView.setImageBitmap(bitmap);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -124,6 +133,50 @@ public class FragmentProfile extends Fragment {
             }
         });
         scrollView = rootView.findViewById(R.id.scroll_profile);
+
+        if (Person.pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+            databaseReference.child(Person.uId).child("name").
+                    addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            Person.name = Objects.requireNonNull(dataSnapshot.getValue()).toString();
+                            textName.setText(Person.name);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+            databaseReference.child(Person.uId).child("image").
+                    addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (count) {
+                                try {
+                                    StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
+                                    Uri file = Uri.fromFile(new File(
+                                            context.getFilesDir().getPath() +
+                                                    "/profileImage.png"));
+                                    mStorageRef.child(Person.uId).getFile(file);
+                                    Drawable drawable = Drawable.createFromPath(
+                                            getContext().getFilesDir() + "/profileimage.png");
+                                    circleImageView.setImageDrawable(drawable);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            } else count = true;
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+        }
+
         return rootView;
     }
 
@@ -180,6 +233,14 @@ public class FragmentProfile extends Fragment {
                                         Toast.makeText(context,
                                                 "Не удалось загрузить изображение",
                                                 Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                        FirebaseDatabase.getInstance().getReference()
+                                                .child(Person.uId).child("image")
+                                                .setValue(new Random());
                                     }
                                 });
                     } catch (NullPointerException e) {

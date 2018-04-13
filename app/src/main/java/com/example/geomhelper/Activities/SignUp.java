@@ -38,7 +38,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.Objects;
+import java.util.UUID;
 
 public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
@@ -171,8 +171,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                 if (e) {
                     try {
                         Thread.sleep(50);
-                        Person.uId = Objects.requireNonNull(FirebaseAuth.
-                                getInstance().getCurrentUser()).getUid();
+                        Person.uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -243,6 +242,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
             DatabaseReference f = FirebaseDatabase.getInstance().getReference();
             f.child(Person.uId).child("name").setValue(Person.name);
             f.child(Person.uId).child("experience").setValue(Person.experience + "");
+            f.child(Person.uId).child("image").setValue(UUID.randomUUID());
         }
     }
 
