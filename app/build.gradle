@@ -10,6 +10,11 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath false
+            }
+        }
     }
     buildTypes {
         release {
@@ -20,6 +25,10 @@ android {
 }
 
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation ':kinvey-android:+@aar'
+    implementation ':relinker:+@aar'
+    implementation ':realm-android-library:+@aar'
     implementation 'com.google.firebase:firebase-storage:12.0.1'
     implementation 'com.takisoft.fix:preference-v7:27.0.0.0'
     implementation 'com.android.support:multidex:1.0.3'

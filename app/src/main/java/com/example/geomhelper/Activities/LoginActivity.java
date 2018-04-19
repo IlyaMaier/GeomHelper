@@ -1,14 +1,10 @@
 package com.example.geomhelper.Activities;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.text.TextUtils;
@@ -16,40 +12,40 @@ import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.geomhelper.Courses;
+import com.example.geomhelper.Fragments.FragmentProfile;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+import com.kinvey.android.Client;
+import com.kinvey.android.callback.AsyncDownloaderProgressListener;
+import com.kinvey.android.model.User;
+import com.kinvey.android.store.FileStore;
+import com.kinvey.android.store.UserStore;
+import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.MediaHttpDownloader;
+import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.store.StoreType;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private FirebaseAuth mAuth;
 
     private EditText mEmail;
     private EditText mPassword;
 
     ProgressDialog progressDialog;
 
-    Async async;
+    LinearLayout linearLayout;
 
-    boolean d = true, e = true;
+    Client mKinveyClient;
 
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
@@ -62,9 +58,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
 
         //firebase
-        mAuth = FirebaseAuth.getInstance();
+//        mAuth = FirebaseAuth.getInstance();
 
         //views
+        linearLayout = findViewById(R.id.ll_login);
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
         TextView textView = findViewById(R.id.not_register);
@@ -79,20 +76,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         //buttons
         findViewById(R.id.sign_in).setOnClickListener(this);
 
-    }
+        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
+                "602d7fccc790477ca6505a1daa3aa894",
+                this.getApplicationContext()).setBaseUrl("https://baas.kinvey.com").build();
 
-    private void signIn(String email, String password) {
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            e = false;
-                            Toast.makeText(LoginActivity.this, "Вход провален",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
     }
 
     private boolean validateForm() {
@@ -119,132 +106,140 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         return valid;
     }
 
+    void intent() {
+        User user = mKinveyClient.getActiveUser();
+
+        Person.uId = user.getId();
+        if (user.get("name") == null)
+            Person.name = "";
+        else Person.name = user.get("name").toString();
+        if (user.get("experience") == null)
+            Person.experience = 0;
+        else Person.experience = Integer.parseInt(user.get("experience").toString());
+        if (user.get("courses") == null)
+            Person.c = "";
+        else Person.c = user.get("courses").toString();
+        for (int i = 0; i < Person.c.length(); i++)
+            Person.courses.add(0, Courses.currentCourses.get(
+                    Integer.parseInt(Person.c.charAt(i) + "")));
+
+        File file = new File(getApplicationContext().getFilesDir(), "profileImage.png");
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file);
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+        }
+
+        FileMetaData fileMetaDataForDownload = new FileMetaData();
+        String img;
+        if (user.get("image") == null)
+            img = "Произошла ошибка";
+        else img = user.get("image").toString();
+        fileMetaDataForDownload.setId(img);
+        FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
+        try {
+            final FileOutputStream finalFos = fos;
+            fileStore.download(fileMetaDataForDownload, fos, new AsyncDownloaderProgressListener<FileMetaData>() {
+                @Override
+                public void onSuccess(FileMetaData fileMetaData) {
+                    try {
+                        if (finalFos != null) {
+                            finalFos.close();
+                        }
+                        FragmentProfile.d = false;
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void progressChanged(MediaHttpDownloader mediaHttpDownloader) {
+                }
+
+                @Override
+                public void onCancelled() {
+                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public boolean isCancelled() {
+                    return false;
+                }
+            });
+            FragmentProfile.d = true;
+        } catch (IOException e1) {
+            Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
+                    Toast.LENGTH_SHORT).show();
+            e1.printStackTrace();
+        }
+
+        SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
+        editor.putBoolean("image", true);
+        editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
+        editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
+        editor.putString("id", Person.id);
+        editor.putString("c", Person.c);
+        editor.apply();
+
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(i);
+        finish();
+
+        CharSequence text = "Добро пожаловать снова, " + Person.name + "!";
+        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+        progressDialog.cancel();
+    }
+
     @Override
     public void onClick(View v) {
         InputMethodManager imm = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null)
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-        switch (v.getId()) {
-            case R.id.sign_in:
-                if (!validateForm()) return;
-                signIn(mEmail.getText().toString(), mPassword.getText().toString());
-                break;
+        if (v.getId() == R.id.sign_in) {
+            if (!validateForm()) return;
+            try {
+                UserStore.logout(mKinveyClient, new KinveyClientCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+
+                    }
+                });
+                UserStore.login(mEmail.getText().toString(), mPassword.getText().toString(),
+                        mKinveyClient, new KinveyClientCallback<User>() {
+                            @Override
+                            public void onFailure(Throwable t) {
+                                CharSequence text = "Неправильный логин или пароль.";
+                                Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                                progressDialog.cancel();
+                            }
+
+                            @Override
+                            public void onSuccess(User u) {
+                                intent();
+                            }
+                        });
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
         progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setTitle("Загрузка...");
         progressDialog.show();
-        e = true;
-        async = new Async();
-        progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                e = false;
-                async.cancel(true);
-                async = null;
-            }
-        });
-        async.onPreExecute();
-        async.execute();
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private class Async extends AsyncTask<Integer, Integer, Void> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Integer... integers) {
-            while (Person.uId == null) {
-                if (e) {
-                    try {
-                        Thread.sleep(50);
-                        Person.uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    publishProgress();
-                    return null;
-                }
-            }
-            getDataFromFirebase();
-
-            while (d) {
-            }
-
-            StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
-            try {
-                StorageReference profileRef = mStorageRef.child(Person.uId);
-                File file = new File(getApplicationContext().getFilesDir().getPath() +
-                        "/profileImage.png");
-                profileRef.getFile(file).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        Toast.makeText(getApplicationContext(),
-                                "Не удалось загрузить изображение",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = mSettings.edit();
-            editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
-            editor.putBoolean("image", true);
-            editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
-            editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
-            editor.apply();
-
-            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(i);
-            finish();
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            progressDialog.hide();
-            e = true;
-        }
-
-        void getDataFromFirebase() {
-            DatabaseReference f = FirebaseDatabase.getInstance().getReference();
-            f.child(Person.uId).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Person.name = dataSnapshot.child("name").getValue(String.class);
-                    if (d) {
-                        Toast.makeText(getApplicationContext(), "Добро пожаловать, " + Person.name + "!", Toast.LENGTH_LONG).show();
-                        d = false;
-                    }
-                    for (int i = 0; i < Courses.currentCourses.size(); i++) {
-                        if ("added".equals(dataSnapshot.child("courses").child(String.valueOf(i)).getValue(String.class))) {
-                            if (!Person.courses.contains(Courses.currentCourses.get(i)))
-                                Person.courses.add(Courses.currentCourses.get(i));
-                        } else {
-                            Person.courses.remove(Courses.currentCourses.get(i));
-                        }
-                    }
-                    try {
-                        Person.experience = Integer.parseInt(dataSnapshot.child("experience").getValue(String.class));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-
     }
 
     @Override

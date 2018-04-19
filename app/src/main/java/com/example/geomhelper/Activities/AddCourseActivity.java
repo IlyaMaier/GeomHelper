@@ -12,7 +12,8 @@ import android.widget.Toast;
 import com.example.geomhelper.Courses;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.google.firebase.database.FirebaseDatabase;
+import com.kinvey.android.Client;
+import com.kinvey.java.core.KinveyClientCallback;
 
 public class AddCourseActivity extends AppCompatActivity {
 
@@ -50,7 +51,7 @@ public class AddCourseActivity extends AppCompatActivity {
             button[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Person.courses.add(0,Courses.currentCourses.get(v.getId()));
+                    Person.courses.add(0, Courses.currentCourses.get(v.getId()));
                     sendDataToFirebase(v.getId() + "");
                     Intent intent = new Intent();
                     setResult(RESULT_OK, intent);
@@ -61,12 +62,24 @@ public class AddCourseActivity extends AppCompatActivity {
     }
 
     void sendDataToFirebase(String name) {
-        try {
-            FirebaseDatabase.getInstance().getReference().
-                    child(Person.uId).child("courses").child(name).setValue("added");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Person.c += name;
+        Person.map.put("courses", Person.c);
+        Client mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
+                "602d7fccc790477ca6505a1daa3aa894",
+                this.getApplicationContext()).setBaseUrl("https://baas.kinvey.com").build();
+        com.kinvey.android.model.User user = mKinveyClient.getActiveUser();
+        user.putAll(Person.map);
+        user.update(new KinveyClientCallback() {
+            @Override
+            public void onSuccess(Object o) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+
+            }
+        });
     }
 
 }

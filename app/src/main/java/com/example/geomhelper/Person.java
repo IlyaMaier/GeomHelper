@@ -3,6 +3,8 @@ package com.example.geomhelper;
 import android.content.SharedPreferences;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Person {
 
@@ -19,11 +21,13 @@ public class Person {
 
     public static String name;
     public static String uId;
+    public static String id;
     public static String currentLevel = "Ученик";
     public static int experience = 0;
     public static int currentLevelExperience = 100;
     public static long leaderBoardPlace = 0;
     public static ArrayList<Course> courses = new ArrayList<>();
+    public static String c = "";
     public static Course currentCourse;
     public static int currentTheme = 0;
     public static Test currentTest;
@@ -31,5 +35,6 @@ public class Person {
     public static short backTests = 0;
     public static short backCourses = 0;
     public static SharedPreferences pref;
+    public static Map<String, Object> map = new HashMap<>();
 
 }

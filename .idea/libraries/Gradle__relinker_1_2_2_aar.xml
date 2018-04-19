@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: relinker:1.2.2@aar">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../Gradle/caches/transforms-1/files-1.1/relinker-1.2.2.aar/3364360258d43b5b267535ef654f710f/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../Gradle/caches/transforms-1/files-1.1/relinker-1.2.2.aar/3364360258d43b5b267535ef654f710f/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -32,17 +32,14 @@ import com.example.geomhelper.Courses;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.kinvey.android.Client;
+import com.kinvey.android.model.User;
+import com.kinvey.java.core.KinveyClientCallback;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class FragmentCourses extends Fragment {
-
 
     RecyclerView recyclerView;
     LinearLayoutManager verticalManager;
@@ -54,7 +51,7 @@ public class FragmentCourses extends Fragment {
     boolean isVisible = true;
     float MINIMUM = 25;
     BottomNavigationView bottomNavigationView;
-    boolean count = false;
+    Client mKinveyClient;
 
     public FragmentCourses() {
     }
@@ -131,40 +128,10 @@ public class FragmentCourses extends Fragment {
                 }
         );
 
-        if (Person.pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
-
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-
-            for (int i = 0; i < Courses.currentCourses.size(); i++) {
-                final int finalI = i;
-                databaseReference.child(Person.uId).child("courses").child(i + "")
-                        .addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                try {
-                                    String name = dataSnapshot.getValue().toString();
-                                    if (name.equals("deleted")) {
-                                        Person.courses.remove(Courses.currentCourses.get(finalI));
-                                        adapterCourses.setItems(Person.courses);
-                                        adapterCourses.notifyDataSetChanged();
-                                    } else if (name.equals("added")) {
-                                        if (!Person.courses.contains(Courses.currentCourses.get(finalI)))
-                                            Person.courses.add(0,Courses.currentCourses.get(finalI));
-                                        adapterCourses.setItems(Person.courses);
-                                        adapterCourses.notifyDataSetChanged();
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-            }
-        }
+        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
+                "602d7fccc790477ca6505a1daa3aa894",
+                Objects.requireNonNull(getActivity().getApplicationContext())).
+                setBaseUrl("https://baas.kinvey.com").build();
 
         return rootView;
     }
@@ -176,6 +143,7 @@ public class FragmentCourses extends Fragment {
             adapterCourses.setItems(Person.courses);
             adapterCourses.notifyDataSetChanged();
         }
+
     }
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.RecyclerViewCoursesHolder> {
@@ -227,6 +195,7 @@ public class FragmentCourses extends Fragment {
                         Person.currentCourse = course;
                         MainActivity.back = 1;
                         Person.backCourses = 1;
+                        floatingActionButton.hide();
                         recyclerView.setVisibility(View.INVISIBLE);
                         recyclerView.setClickable(false);
                         recyclerView = null;
@@ -250,14 +219,22 @@ public class FragmentCourses extends Fragment {
                                 Person.courses.remove(course);
                                 adapterCourses.setItems(Person.courses);
                                 adapterCourses.notifyDataSetChanged();
-                                try {
-                                    FirebaseDatabase.getInstance().getReference().
-                                            child(Person.uId).child("courses").child(
-                                            Courses.currentCourses.indexOf(course) + "")
-                                            .setValue("deleted");
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                Person.c = Person.c.replace(String.valueOf(
+                                        Courses.currentCourses.indexOf(course)), "");
+                                Person.map.put("courses", Person.c);
+                                User user = mKinveyClient.getActiveUser();
+                                user.putAll(Person.map);
+                                user.update(new KinveyClientCallback() {
+                                    @Override
+                                    public void onSuccess(Object o) {
+
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable throwable) {
+
+                                    }
+                                });
                             }
                         });
                         ad.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {

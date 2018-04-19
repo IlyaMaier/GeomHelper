@@ -1,6 +1,5 @@
 package com.example.geomhelper.Activities;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -8,9 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.text.TextUtils;
@@ -24,25 +21,24 @@ import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+import com.kinvey.android.Client;
+import com.kinvey.android.callback.AsyncUploaderProgressListener;
+import com.kinvey.android.model.User;
+import com.kinvey.android.store.FileStore;
+import com.kinvey.android.store.UserStore;
+import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.store.StoreType;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
 
 public class SignUp extends AppCompatActivity implements View.OnClickListener {
-
-    private FirebaseAuth mAuth;
 
     private EditText mEmail;
     private EditText mPassword;
@@ -52,7 +48,9 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
     ProgressDialog progressDialog;
 
-    boolean e = true, g = false;
+    boolean g = false;
+
+    Client mKinveyClient;
 
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
@@ -63,9 +61,6 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
             recreate();
         }
         setContentView(R.layout.activity_sign_up);
-
-        //firebase
-        mAuth = FirebaseAuth.getInstance();
 
         //views
         mEmail = findViewById(R.id.email_sign_up);
@@ -85,20 +80,10 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         //buttons
         findViewById(R.id.sign_up).setOnClickListener(this);
 
-    }
+        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
+                "602d7fccc790477ca6505a1daa3aa894",
+                this.getApplicationContext()).setBaseUrl("https://baas.kinvey.com").build();
 
-    private void createAccount(String email, String key) {
-        mAuth.createUserWithEmailAndPassword(email, key)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            e = false;
-                            Toast.makeText(SignUp.this, "Регистрация провалена.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
     }
 
     private boolean validateForm() {
@@ -141,109 +126,133 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         InputMethodManager imm = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null)
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-        int num = -1;
-        switch (v.getId()) {
-            case R.id.sign_up:
-                if (!validateForm()) return;
-                createAccount(mEmail.getText().toString(), mPassword.getText().toString());
-                Person.name = mName.getText().toString();
-                num = 1;
-                break;
+        if (v.getId() == R.id.sign_up) {
+            if (!validateForm()) return;
+            UserStore.logout(mKinveyClient, new KinveyClientCallback<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+
+                }
+            });
+            UserStore.signUp(mEmail.getText().toString(),
+                    mPassword.getText().toString(), mKinveyClient,
+                    new KinveyClientCallback<User>() {
+                        @Override
+                        public void onFailure(Throwable t) {
+                            CharSequence text = "Регистрация провалена.";
+                            Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                            progressDialog.cancel();
+                        }
+
+                        @Override
+                        public void onSuccess(User u) {
+                            CharSequence text = "Добро пожаловать, " + mName.getText() + "!";
+                            Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                            intent();
+                        }
+                    });
         }
         progressDialog = new ProgressDialog(SignUp.this);
         progressDialog.setTitle("Загрузка...");
         progressDialog.show();
-        Async async = new Async();
-        async.onPreExecute();
-        async.execute(num);
+        FirebaseAuth.getInstance().signInWithEmailAndPassword("qwerty@gmail.com", "qwerty");
     }
 
-    @SuppressLint("StaticFieldLeak")
-    private class Async extends AsyncTask<Integer, Integer, Void> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
+    void intent() {
+        User user = mKinveyClient.getActiveUser();
 
-        @Override
-        protected Void doInBackground(Integer... integers) {
-            while (Person.uId == null) {
-                if (e) {
-                    try {
-                        Thread.sleep(50);
-                        Person.uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    publishProgress();
-                    return null;
-                }
-            }
-            if (integers[integers.length - 1] == 1)
-                sendDataToFirebase();
+        Person.name = mName.getText().toString();
+        Person.uId = user.getId();
 
-            StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
-            Uri file;
-            if (!g) {
-                Bitmap yourSelectedImage = BitmapFactory.decodeResource(
-                        getResources(), R.drawable.back_login);
-                try {
-                    File f = new File(getFilesDir(), "profileImage.png");
-                    FileOutputStream fos = null;
-                    try {
-                        fos = new FileOutputStream(f);
-                        yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                    } finally {
-                        if (fos != null) fos.close();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            file = Uri.fromFile(new File(getFilesDir().getPath() +
-                    "/profileImage.png"));
+        if (!g) {
+            Bitmap yourSelectedImage = BitmapFactory.decodeResource(
+                    getResources(), R.drawable.back_login);
             try {
-                StorageReference profileRef = mStorageRef.child(Person.uId);
-                profileRef.putFile(file)
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception exception) {
-                                Toast.makeText(getApplicationContext(),
-                                        "Не удалось загрузить изображение",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            } catch (NullPointerException e) {
+                File f = new File(getFilesDir(), "profileImage.png");
+                FileOutputStream fos = null;
+                try {
+                    fos = new FileOutputStream(f);
+                    yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                } finally {
+                    if (fos != null) fos.close();
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = mSettings.edit();
-            editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
-            editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
-
-            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-            editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
-            editor.apply();
-            startActivity(i);
-            finish();
-            return null;
         }
 
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            progressDialog.hide();
-            e = true;
+        final java.io.File file = new java.io.File(getFilesDir(), "profileImage.png");
+        final boolean isCancelled = false;
+        FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
+        try {
+            fileStore.upload(file, new AsyncUploaderProgressListener<FileMetaData>() {
+                @Override
+                public void onSuccess(FileMetaData fileMetaData) {
+                    Person.id = fileMetaData.getId();
+                    Person.map.put("name", Person.name);
+                    Person.map.put("experience", Person.experience);
+                    Person.map.put("courses", "");
+                    Person.map.put("image", Person.id);
+
+                    Client client = new Client.Builder("kid_B1OS_p1hM",
+                            "602d7fccc790477ca6505a1daa3aa894",
+                            getApplicationContext()).setBaseUrl("https://baas.kinvey.com").build();
+                    User user = client.getActiveUser();
+                    user.putAll(Person.map);
+                    user.update(new KinveyClientCallback() {
+                        @Override
+                        public void onSuccess(Object o) {
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable throwable) {
+
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void progressChanged(MediaHttpUploader mediaHttpUploader) throws IOException {
+                }
+
+                @Override
+                public void onCancelled() {
+                }
+
+                @Override
+                public boolean isCancelled() {
+                    return isCancelled;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
+                    Toast.LENGTH_SHORT).show();
         }
 
-        void sendDataToFirebase() {
-            DatabaseReference f = FirebaseDatabase.getInstance().getReference();
-            f.child(Person.uId).child("name").setValue(Person.name);
-            f.child(Person.uId).child("experience").setValue(Person.experience + "");
-            f.child(Person.uId).child("image").setValue(UUID.randomUUID());
-        }
+        SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
+        editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
+
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
+        editor.apply();
+        startActivity(i);
+        finish();
+        progressDialog.cancel();
     }
 
     @Override

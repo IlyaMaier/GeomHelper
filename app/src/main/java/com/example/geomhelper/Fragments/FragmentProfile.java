@@ -1,16 +1,22 @@
 package com.example.geomhelper.Fragments;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,27 +28,23 @@ import android.widget.Toast;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.kinvey.android.Client;
+import com.kinvey.android.callback.AsyncUploaderProgressListener;
+import com.kinvey.android.callback.KinveyDeleteCallback;
+import com.kinvey.android.store.FileStore;
+import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.model.FileMetaData;
+import com.kinvey.java.store.StoreType;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
-import java.util.Random;
 
 import static android.app.Activity.RESULT_OK;
-import static com.example.geomhelper.Person.pref;
 
 public class FragmentProfile extends Fragment {
 
@@ -51,7 +53,9 @@ public class FragmentProfile extends Fragment {
     Bitmap bitmap;
     ScrollView scrollView;
     Context context;
-    boolean count = false;
+    Client mKinveyClient;
+    BottomNavigationView bottomNavigationView;
+    public static volatile boolean d = false;
 
     public FragmentProfile() {
     }
@@ -63,36 +67,43 @@ public class FragmentProfile extends Fragment {
 
         context = getContext();
 
+        bottomNavigationView = Objects.requireNonNull(getActivity())
+                .findViewById(R.id.navigation);
         textName = rootView.findViewById(R.id.textName);
         textLevelName = rootView.findViewById(R.id.textLevelName);
         textExperience = rootView.findViewById(R.id.textExperince);
         circleImageView = rootView.findViewById(R.id.imageProfile);
+
+        if(d) {
+            Toast.makeText(getContext(), "Дождитесь окончания загрузки изображения" +
+                    "", Toast.LENGTH_LONG).show();
+            Async async = new Async();
+            async.execute();
+        }
 
         textName.setText(Person.name);
         textLevelName.setText(Person.currentLevel);
         textExperience.setText((Person.experience + "/" + Person.currentLevelExperience));
 
         try {
-            if (pref.getBoolean("image", false))
-                try {
-                    bitmap = BitmapFactory.decodeFile(
-                            context.getFilesDir().getPath() +
-                                    "/profileImage.png");
-                    circleImageView.setImageBitmap(bitmap);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            else
-                circleImageView.setImageDrawable(getResources().getDrawable(R.drawable.back_login));
+            try {
+                bitmap = BitmapFactory.decodeFile(
+                        context.getFilesDir().getPath() +
+                                "/profileImage.png");
+                circleImageView.setImageBitmap(bitmap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+
         circleImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
                 photoPickerIntent.setType("image/*");
-                startActivityForResult(photoPickerIntent, 5);
+                startActivityForResult(photoPickerIntent, 500);
             }
         });
 
@@ -111,14 +122,26 @@ public class FragmentProfile extends Fragment {
                                 if (name.isEmpty()) {
                                     dialog.cancel();
                                 } else {
+                                    if (name.length() > 20) name = name.substring(0, 20);
                                     Person.name = name;
+                                    Person.map.put("name", Person.name);
+                                    Client mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
+                                            "602d7fccc790477ca6505a1daa3aa894",
+                                            Objects.requireNonNull(getActivity()).getApplicationContext()).setBaseUrl(
+                                            "https://baas.kinvey.com").build();
+                                    mKinveyClient.getActiveUser().putAll(Person.map);
+                                    mKinveyClient.getActiveUser().update(new KinveyClientCallback() {
+                                        @Override
+                                        public void onSuccess(Object o) {
+
+                                        }
+
+                                        @Override
+                                        public void onFailure(Throwable throwable) {
+
+                                        }
+                                    });
                                     textName.setText(name);
-                                    DatabaseReference f = FirebaseDatabase.getInstance().getReference();
-                                    try {
-                                        f.child(Person.uId).child("name").setValue(name);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
                                 }
                             }
                         }).setNegativeButton("ОТМЕНИТЬ", new DialogInterface.OnClickListener() {
@@ -133,50 +156,6 @@ public class FragmentProfile extends Fragment {
         });
         scrollView = rootView.findViewById(R.id.scroll_profile);
 
-        if (Person.pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-            databaseReference.child(Person.uId).child("name").
-                    addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Person.name = Objects.requireNonNull(dataSnapshot.getValue()).toString();
-                            textName.setText(Person.name);
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-
-            databaseReference.child(Person.uId).child("image").
-                    addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (count) {
-                                try {
-                                    StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
-                                    Uri file = Uri.fromFile(new File(
-                                            context.getFilesDir().getPath() +
-                                                    "/profileImage.png"));
-                                    mStorageRef.child(Person.uId).getFile(file);
-                                    bitmap = BitmapFactory.decodeFile(
-                                            context.getFilesDir().getPath() +
-                                                    "/profileImage.png");
-                                    circleImageView.setImageBitmap(bitmap);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            } else count = true;
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-        }
-
         return rootView;
     }
 
@@ -190,12 +169,20 @@ public class FragmentProfile extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case 5:
+            case 500:
                 if (resultCode == RESULT_OK) {
                     Uri selectedImage = data.getData();
                     InputStream imageStream = null;
                     try {
                         if (selectedImage != null) {
+                            if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()),
+                                    Manifest.permission.READ_EXTERNAL_STORAGE)
+                                    != PackageManager.PERMISSION_GRANTED) {
+
+                                ActivityCompat.requestPermissions(getActivity(),
+                                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                        1);
+                            }
                             imageStream = Objects.requireNonNull(getActivity())
                                     .getContentResolver().openInputStream(selectedImage);
                         }
@@ -218,35 +205,103 @@ public class FragmentProfile extends Fragment {
                     }
                     SharedPreferences.Editor editor = getActivity().getSharedPreferences(
                             Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
-                    editor.putBoolean("image", true);
                     editor.apply();
-                    StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
-                    Uri file = Uri.fromFile(new File(
-                            context.getFilesDir().getPath() +
-                                    "/profileImage.png"));
+                    java.io.File file = new java.io.File(Objects.requireNonNull(
+                            getContext()).getFilesDir(), "profileImage.png");
+                    final boolean isCancelled = false;
+                    mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
+                            "602d7fccc790477ca6505a1daa3aa894",
+                            Objects.requireNonNull(getActivity().getApplicationContext())).
+                            setBaseUrl("https://baas.kinvey.com").build();
+                    FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
+                    FileMetaData fileMetaData = new FileMetaData();
+                    fileMetaData.setId(Person.id);
                     try {
-                        StorageReference profileRef = mStorageRef.child(Person.uId);
-                        profileRef.putFile(file)
-                                .addOnFailureListener(new OnFailureListener() {
+                        fileStore.remove(fileMetaData, new KinveyDeleteCallback() {
+                            @Override
+                            public void onSuccess(Integer integer) {
+                            }
+
+                            @Override
+                            public void onFailure(Throwable throwable) {
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        fileStore.upload(file, new AsyncUploaderProgressListener<FileMetaData>() {
+                            @Override
+                            public void onSuccess(FileMetaData fileMetaData) {
+                                Person.id = fileMetaData.getId();
+                                Person.map.put("image", Person.id);
+                                mKinveyClient.getActiveUser().putAll(Person.map);
+                                mKinveyClient.getActiveUser().update(new KinveyClientCallback() {
                                     @Override
-                                    public void onFailure(@NonNull Exception exception) {
-                                        Toast.makeText(context,
-                                                "Не удалось загрузить изображение",
-                                                Toast.LENGTH_SHORT).show();
+                                    public void onSuccess(Object o) {
+
                                     }
-                                })
-                                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+
                                     @Override
-                                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                        FirebaseDatabase.getInstance().getReference()
-                                                .child(Person.uId).child("image")
-                                                .setValue(new Random().nextInt());
+                                    public void onFailure(Throwable throwable) {
+
                                     }
                                 });
-                    } catch (NullPointerException e) {
+                            }
+
+                            @Override
+                            public void onFailure(Throwable throwable) {
+                                Toast.makeText(getContext(), "Не удалось загрузить изображение.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void progressChanged(MediaHttpUploader mediaHttpUploader) throws IOException {
+                            }
+
+                            @Override
+                            public void onCancelled() {
+                            }
+
+                            @Override
+                            public boolean isCancelled() {
+                                return isCancelled;
+                            }
+                        });
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
         }
     }
+
+    class Async extends AsyncTask<Integer, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            while (d) {
+
+            }
+            publishProgress();
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            try {
+                try {
+                    bitmap = BitmapFactory.decodeFile(
+                            context.getFilesDir().getPath() +
+                                    "/profileImage.png");
+                    circleImageView.setImageBitmap(bitmap);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

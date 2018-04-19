@@ -17,9 +17,12 @@ import com.example.geomhelper.Activities.LoginActivity;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyPurgeCallback;
+import com.kinvey.android.store.UserStore;
+import com.kinvey.java.core.KinveyClientCallback;
+
+import java.util.Objects;
 
 public class FragmentSettings extends PreferenceFragmentCompat {
 
@@ -30,12 +33,18 @@ public class FragmentSettings extends PreferenceFragmentCompat {
     SharedPreferences.Editor editor;
     Activity mCurrentActivity;
     AlertDialog.Builder builder;
+    Client mKinveyClient;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
         mCurrentActivity = getActivity();
         setPreferencesFromResource(R.xml.preferences, rootKey);
+
+        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
+                "602d7fccc790477ca6505a1daa3aa894",
+                Objects.requireNonNull(this.getContext())).setBaseUrl(
+                "https://baas.kinvey.com").build();
 
         try {
             mSettings = mCurrentActivity.getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
@@ -61,13 +70,21 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 if (newValue.toString().isEmpty()) {
                     return false;
                 } else {
+                    if (name.length() > 20) name = name.substring(0, 20);
                     Person.name = name;
-                    DatabaseReference f = FirebaseDatabase.getInstance().getReference();
-                    try {
-                        f.child(Person.uId).child("name").setValue(name);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    Person.map.put("name", Person.name);
+                    mKinveyClient.getActiveUser().putAll(Person.map);
+                    mKinveyClient.getActiveUser().update(new KinveyClientCallback() {
+                        @Override
+                        public void onSuccess(Object o) {
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable throwable) {
+
+                        }
+                    });
                     return true;
                 }
             }
@@ -198,12 +215,25 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 builder.setMessage("Вы действительно хотите выйти из аккаунта?");
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int arg1) {
-                        FirebaseAuth.getInstance().signOut();
+                        UserStore.logout(mKinveyClient, new KinveyPurgeCallback() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+
+                            }
+
+                            @Override
+                            public void onFailure(Throwable throwable) {
+
+                            }
+                        });
+
                         Person.name = "";
                         Person.uId = "";
                         Person.courses.clear();
                         Person.experience = 0;
                         Person.leaderBoardPlace = 0;
+                        Person.c = "";
+                        Person.id = "";
                         MainActivity.saveAll(true, false);
                         Intent i = new Intent(getContext(), LoginActivity.class);
                         startActivity(i);
