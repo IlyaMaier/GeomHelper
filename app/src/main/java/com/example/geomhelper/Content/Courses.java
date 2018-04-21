@@ -1,4 +1,6 @@
-package com.example.geomhelper;
+package com.example.geomhelper.Content;
+
+import com.example.geomhelper.R;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -27,8 +27,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.geomhelper.Activities.AddCourseActivity;
-import com.example.geomhelper.Course;
-import com.example.geomhelper.Courses;
+import com.example.geomhelper.Content.Course;
+import com.example.geomhelper.Content.Courses;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;

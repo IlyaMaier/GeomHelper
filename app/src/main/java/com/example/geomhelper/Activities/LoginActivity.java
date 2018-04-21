@@ -16,7 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.geomhelper.Courses;
+import com.example.geomhelper.Content.Courses;
 import com.example.geomhelper.Fragments.FragmentProfile;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;

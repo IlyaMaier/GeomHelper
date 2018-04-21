@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.example.geomhelper.Courses;
+import com.example.geomhelper.Content.Courses;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.kinvey.android.Client;

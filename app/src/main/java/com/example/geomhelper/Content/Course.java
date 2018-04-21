@@ -1,4 +1,4 @@
-package com.example.geomhelper;
+package com.example.geomhelper.Content;
 
 public class Course {
 

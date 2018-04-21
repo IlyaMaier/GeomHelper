@@ -2,6 +2,9 @@ package com.example.geomhelper;
 
 import android.content.SharedPreferences;
 
+import com.example.geomhelper.Content.Course;
+import com.example.geomhelper.Content.Test;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;

@@ -16,11 +16,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.geomhelper.Content.Test;
+import com.example.geomhelper.Content.Tests;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.example.geomhelper.Test;
-import com.example.geomhelper.Tests;
 
 import java.util.List;
 import java.util.Objects;

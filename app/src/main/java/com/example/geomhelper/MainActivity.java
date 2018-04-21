@@ -21,6 +21,8 @@ import android.view.View;
 import android.view.Window;
 
 import com.example.geomhelper.Activities.LoginActivity;
+import com.example.geomhelper.Content.Courses;
+import com.example.geomhelper.Content.Tests;
 import com.example.geomhelper.Fragments.FragmentCourses;
 import com.example.geomhelper.Fragments.FragmentLeaderboard;
 import com.example.geomhelper.Fragments.FragmentProfile;

@@ -1,4 +1,4 @@
-package com.example.geomhelper;
+package com.example.geomhelper.Content;
 
 public class Test {
 
@@ -6,15 +6,13 @@ public class Test {
     private int numberOfThemes;
     private String[] themes;
     private int courseExperience;
-    private int[] experienceOfEachTheme;
     private int background;
 
-    Test(String testName, int numberOfThemes, String[] themes, int courseExperience, int[] experienceOfEachTheme, int background) {
+    Test(String testName, int numberOfThemes, String[] themes, int courseExperience, int background) {
         this.testName = testName;
         this.numberOfThemes = numberOfThemes;
         this.themes = themes;
         this.courseExperience = courseExperience;
-        this.experienceOfEachTheme = experienceOfEachTheme;
         this.background = background;
     }
 
@@ -48,14 +46,6 @@ public class Test {
 
     public void setCourseExperience(int courseExperience) {
         this.courseExperience = courseExperience;
-    }
-
-    public int[] getExperienceOfEachTheme() {
-        return experienceOfEachTheme;
-    }
-
-    public void setExperienceOfEachTheme(int experience, int i) {
-        this.experienceOfEachTheme[i] = experience;
     }
 
     public int getBackground() {

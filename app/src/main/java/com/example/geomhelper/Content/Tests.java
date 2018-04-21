@@ -1,4 +1,6 @@
-package com.example.geomhelper;
+package com.example.geomhelper.Content;
+
+import com.example.geomhelper.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +17,10 @@ public class Tests {
             "Измерение углов",
             "Перпендикулярные прямые"};
     private static int basicsExperience = 95;
-    private static int[] basicsExperienceOfEachTheme = {15, 20, 10, 10, 10, 30};
     public static Test basics = new Test("Начальные геометрические сведения",
             6,
             basicsThemes,
             basicsExperience,
-            basicsExperienceOfEachTheme,
             R.drawable.background_test_1);
     // end basics
 
@@ -30,12 +30,10 @@ public class Tests {
             "Второй и третий признаки равенства треугольников",
             "Задачи на построение"};
     private static int secondExperience = 150;
-    private static int[] secondExperienceOfEachTheme = {50, 30, 50, 20};
     public static Test second = new Test("Треугольники",
             4,
             secondThemes,
             secondExperience,
-            secondExperienceOfEachTheme,
             R.drawable.background_test_2);
     // end second
 
@@ -44,12 +42,10 @@ public class Tests {
             "Аксиома параллельных прямых",
             "Практические задачи"};
     private static int thirdExperience = 100;
-    private static int[] thirdExperienceOfEachTheme = {40, 35, 25};
     public static Test third = new Test("Параллельные прямые",
             3,
             thirdThemes,
             thirdExperience,
-            thirdExperienceOfEachTheme,
             R.drawable.background_test_3);
     // end third
 
@@ -59,12 +55,10 @@ public class Tests {
             "Прямоугольные треугольники",
             "Построение треугольника по трем элементам"};
     private static int fourthExperience = 160;
-    private static int[] fourthExperienceOfEachTheme = {30, 30, 50, 50};
     public static Test fourth = new Test("Соотношения между сторонами и углами ▲",
             4,
             fourthThemes,
             fourthExperience,
-            fourthExperienceOfEachTheme,
             R.drawable.background_test_4);
     // end fourth
 
