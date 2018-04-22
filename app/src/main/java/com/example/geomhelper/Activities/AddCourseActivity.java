@@ -58,30 +58,6 @@ public class AddCourseActivity extends AppCompatActivity {
         }
     }
 
-    void initializeButtons() {
-//        button = new Button[Courses.currentCourses.size()];
-//        for (i = 0; i < Courses.currentCourses.size(); i++) {
-//            if (Person.courses.contains(Courses.currentCourses.get(i))) continue;
-//            button[i] = new Button(getApplicationContext());
-//            button[i].setBackgroundResource(R.drawable.backround_button_add_course);
-//            button[i].setText(Courses.currentCourses.get(i).getCourseName());
-//            button[i].setTextSize(16);
-//            button[i].setTextColor(getResources().getColor(R.color.textColor));
-//            button[i].setId(i);
-//            linearLayout.addView(button[i]);
-//            button[i].setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    Person.courses.add(0, Courses.currentCourses.get(v.getId()));
-//                    sendDataToFirebase(v.getId() + "");
-//                    Intent intent = new Intent();
-//                    setResult(RESULT_OK, intent);
-//                    finish();
-//                }
-//            });
-//        }
-    }
-
     void sendDataToFirebase(String name) {
         Person.c += name;
         Person.map.put("courses", Person.c);
