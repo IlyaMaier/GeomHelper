@@ -39,4 +39,6 @@
     <string name="not_register"><u>Еще не зарегестрированы?</u></string>
     <string name="testname">TestName</string>
     <string name="confirm_password">Confirm password</string>
+    <string name="search_icon">Search icon</string>
+    <string name="search">Search</string>
 </resources>

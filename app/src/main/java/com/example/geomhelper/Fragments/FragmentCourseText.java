@@ -1,5 +1,6 @@
 package com.example.geomhelper.Fragments;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -8,8 +9,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.webkit.WebView;
 
 import com.example.geomhelper.MainActivity;
@@ -25,6 +28,8 @@ public class FragmentCourseText extends Fragment {
 
     FloatingActionButton floatingActionButton, floatingActionButton2;
     WebView webView;
+    int scrollDist = 0;
+    boolean isVisible = true;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -35,11 +40,51 @@ public class FragmentCourseText extends Fragment {
         webView = view.findViewById(R.id.web_fragment_course_text);
         webView.loadUrl(Person.currentCourse.getCourseTextUrl(Person.currentTheme));
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            webView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    int dy = scrollY - oldScrollY;
+                    if (isVisible && scrollDist > 25) {
+                        hide();
+                        scrollDist = 0;
+                        isVisible = false;
+                    } else if (!isVisible && scrollDist < -25) {
+                        show();
+                        scrollDist = 0;
+                        isVisible = true;
+                    }
+
+                    if ((isVisible && dy > 0) || (!isVisible && dy < 0)) {
+                        scrollDist += dy;
+                    }
+                }
+
+                void show() {
+                    floatingActionButton.animate().translationY(0)
+                            .setInterpolator(new DecelerateInterpolator(2)).start();
+                    floatingActionButton2.animate().translationY(0)
+                            .setInterpolator(new DecelerateInterpolator(2)).start();
+                }
+
+                void hide() {
+                    floatingActionButton.animate().translationY(
+                            floatingActionButton.getHeight() + 16).
+                            setInterpolator(new AccelerateInterpolator(2)).start();
+                    floatingActionButton2.animate().translationY(
+                            floatingActionButton.getHeight() + 16).
+                            setInterpolator(new AccelerateInterpolator(2)).start();
+                }
+            });
+        }
+
         Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.simple_grow);
 
         floatingActionButton2 = view.findViewById(R.id.floatingActionButton3);
         floatingActionButton2.startAnimation(animation);
-        floatingActionButton2.setOnClickListener(new View.OnClickListener() {
+        floatingActionButton2.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
                 if (Person.currentTheme == 0) {
@@ -62,7 +107,9 @@ public class FragmentCourseText extends Fragment {
         if (Person.currentCourse.getThemesSize() - 1 == Person.currentTheme)
             floatingActionButton.setImageResource(R.drawable.ic_completed);
         floatingActionButton.startAnimation(animation);
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+        floatingActionButton.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
                 if (Person.currentCourse.getThemesSize() - 1 == Person.currentTheme) {

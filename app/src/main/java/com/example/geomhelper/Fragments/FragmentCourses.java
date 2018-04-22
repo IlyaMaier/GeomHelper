@@ -1,5 +1,6 @@
 package com.example.geomhelper.Fragments;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,14 +16,17 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -52,6 +56,7 @@ public class FragmentCourses extends Fragment {
     float MINIMUM = 25;
     BottomNavigationView bottomNavigationView;
     Client mKinveyClient;
+    FrameLayout frameLayout;
 
     public FragmentCourses() {
     }
@@ -60,6 +65,23 @@ public class FragmentCourses extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_courses, container, false);
+
+        frameLayout = rootView.findViewById(R.id.fragment);
+
+        @SuppressLint("InflateParams") final CardView cardView =
+                (CardView) LayoutInflater.from(getContext()).inflate(R.layout.card_search, null);
+        int width = 1000;
+        int height = 175;
+        WindowManager wm = (WindowManager) Objects.requireNonNull(
+                getContext()).getSystemService(Context.WINDOW_SERVICE);
+        if (wm != null) {
+            width = wm.getDefaultDisplay().getWidth() - 50;
+            height = (int) (wm.getDefaultDisplay().getHeight() * 0.1);
+        }
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(width, height);
+        layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
+        frameLayout.addView(cardView, layoutParams);
+        cardView.setTranslationY(-height);
 
         recyclerView = rootView.findViewById(R.id.recyclerCourses);
 
