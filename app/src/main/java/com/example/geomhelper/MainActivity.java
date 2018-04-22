@@ -265,10 +265,12 @@ public class MainActivity extends AppCompatActivity {
         } else if (back == 1 && backCourses) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new FragmentCourses()).commit();
             getSupportFragmentManager().beginTransaction().remove(new FragmentCourses()).commit();
+            Person.backCourses = 0;
             back = 0;
         } else if (back == 2 && backCourses) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment, new FragmentThemes()).commit();
             getSupportFragmentManager().beginTransaction().remove(new FragmentThemes()).commit();
+            Person.backCourses = 1;
             back = 1;
         } else if (back == 3 && backTests) {
             getSupportFragmentManager().beginTransaction().replace(R.id.frameTests, new FragmentTests()).commit();

@@ -3,15 +3,15 @@
     android:id="@+id/fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/backgroundColor"
     tools:context="com.example.geomhelper.Fragments.FragmentCourses">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerCourses"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layoutAnimation="@anim/layout_animation_fall_down_courses"
         android:clipToPadding="false"
+        android:layoutAnimation="@anim/layout_animation_fall_down_courses"
         android:padding="8dp" />
 
     <android.support.design.widget.FloatingActionButton
