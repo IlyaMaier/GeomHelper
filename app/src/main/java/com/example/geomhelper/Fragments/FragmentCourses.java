@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -19,6 +20,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -26,9 +28,11 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.geomhelper.Activities.AddCourseActivity;
 import com.example.geomhelper.Content.Course;
@@ -52,15 +56,26 @@ public class FragmentCourses extends Fragment {
     View rootView;
     FragmentManager fragmentManager;
     int scrollDist = 0;
-    boolean isVisible = true;
+    boolean isVisible = true, j = true;
     float MINIMUM = 25;
     BottomNavigationView bottomNavigationView;
     Client mKinveyClient;
     FrameLayout frameLayout;
+    CardView cardView;
+    float y, y0;
+    long millis;
+    public static boolean h = false;
+    int height;
+    Async async;
+    ArrayList<String> themesAll, themesP;
+    EditText et;
+    ImageView imageView;
+    ArrayList<Short> shortsAll, shortsP;
 
     public FragmentCourses() {
     }
 
+    @SuppressLint({"ClickableViewAccessibility", "InflateParams"})
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -68,10 +83,10 @@ public class FragmentCourses extends Fragment {
 
         frameLayout = rootView.findViewById(R.id.fragment);
 
-        @SuppressLint("InflateParams") final CardView cardView =
+        cardView =
                 (CardView) LayoutInflater.from(getContext()).inflate(R.layout.card_search, null);
         int width = 1000;
-        int height = 175;
+        height = 175;
         WindowManager wm = (WindowManager) Objects.requireNonNull(
                 getContext()).getSystemService(Context.WINDOW_SERVICE);
         if (wm != null) {
@@ -82,6 +97,8 @@ public class FragmentCourses extends Fragment {
         layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
         frameLayout.addView(cardView, layoutParams);
         cardView.setTranslationY(-height);
+
+        et = rootView.findViewById(R.id.search);
 
         recyclerView = rootView.findViewById(R.id.recyclerCourses);
 
@@ -94,7 +111,7 @@ public class FragmentCourses extends Fragment {
         adapterCourses = new RVAdapter(getContext(), Person.courses);
         recyclerView.setAdapter(adapterCourses);
 
-        Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.simple_grow);
+        final Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.simple_grow);
 
         floatingActionButton = rootView.findViewById(R.id.floatingActionButton);
         floatingActionButton.startAnimation(animation);
@@ -106,10 +123,85 @@ public class FragmentCourses extends Fragment {
             }
         });
 
+        final int finalHeight = height;
+        recyclerView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (System.currentTimeMillis() - millis > 500) {
+                    y = event.getY();
+                    millis = System.currentTimeMillis();
+                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (event.getY() - y > 90 && y0 == 0) {
+                        recyclerView.animate().translationY(finalHeight + 25).start();
+                        cardView.animate().translationY(25).alpha(1).start();
+                        h = true;
+                        async = new Async();
+                        async.execute();
+                        if (j) {
+                            themesAll = new ArrayList<>();
+                            themesP = new ArrayList<>();
+
+                            for (int i = 0; i < Courses.currentCourses.size(); i++)
+                                for (int j = 0; j < Courses.currentCourses.get(i).getNumberOfThemes(); j++) {
+                                    themesAll.add(Courses.currentCourses.get(i).getTheme(j).toLowerCase());
+                                    shortsAll.add((short) i);
+                                }
+
+                            for (int i = 0; i < Person.courses.size(); i++)
+                                for (int j = 0; j < Person.courses.get(i).getNumberOfThemes(); j++) {
+                                    themesP.add(Person.courses.get(i).getTheme(j).toLowerCase());
+                                    shortsP.add((short) i);
+                                }
+                            j = false;
+                        }
+                    } else if (h && y - event.getY() > 90) {
+                        cardView.animate().translationY(-height).alpha(0).start();
+                        recyclerView.animate().translationY(0).start();
+                        h = false;
+                        if (async != null)
+                            async.cancel(true);
+                    }
+                }
+                return false;
+            }
+
+        });
+
+        imageView = rootView.findViewById(R.id.image_search);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String theme = et.getText().toString().toLowerCase();
+                if (!themesAll.contains(theme))
+                    Toast.makeText(getContext(),
+                            "Такой темы не существует.",
+                            Toast.LENGTH_SHORT).show();
+                else if (themesP.contains(theme)) {
+                    recyclerView.smoothScrollToPosition(
+                            adapterCourses.items.indexOf(
+                                    Person.courses.get(
+                                            shortsP.get(
+                                                    themesP.indexOf(theme)))));
+                    Toast.makeText(getContext(),
+                            "Откройте курс " + theme,
+                            Toast.LENGTH_SHORT).show();
+                } else if (themesAll.contains(theme)) {
+                    Toast.makeText(getContext(),
+                            "Добавьте курс " +
+                                    Courses.currentCourses.get(
+                                            shortsAll.get(
+                                                    themesAll.indexOf(theme)))
+                                            .getCourseName(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                y0 += dy;
 
                 if (isVisible && scrollDist > MINIMUM) {
                     hide();
@@ -280,5 +372,27 @@ public class FragmentCourses extends Fragment {
         }
 
     }
+
+    class Async extends AsyncTask<Integer, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            while (h) {
+
+            }
+            publishProgress();
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            cardView.animate().translationY(-height).alpha(0).start();
+            recyclerView.animate().translationY(0).start();
+            h = false;
+            cancel(true);
+        }
+    }
+
 
 }

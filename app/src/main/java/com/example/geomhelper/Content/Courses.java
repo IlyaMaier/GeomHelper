@@ -16,8 +16,6 @@ public class Courses {
             "Измерение отрезков",
             "Измерение углов",
             "Перпендикулярные прямые"};
-    private static int basicsExperience = 95;
-    private static int[] basicsExperienceOfEachTheme = {15, 20, 10, 10, 10, 30};
     private static String[] basicCourseTextUrl = {
             "file:///android_asset/courses/first/text1.html",
             "file:///android_asset/courses/first/text2.html",
@@ -29,8 +27,6 @@ public class Courses {
     public static Course basics = new Course("Начальные геометрические сведения",
             6,
             basicsThemes,
-            basicsExperience,
-            basicsExperienceOfEachTheme,
             basicCourseTextUrl,
             R.drawable.backround_button_courses);
     // end basics
@@ -40,8 +36,6 @@ public class Courses {
             "Медианы, биссектрисы и высоты треугольника",
             "Второй и третий признаки равенства треугольников",
             "Задачи на построение"};
-    private static int secondExperience = 150;
-    private static int[] secondExperienceOfEachTheme = {50, 30, 50, 20};
     private static String[] secondCourseTextUrl = {
             "file:///android_asset/courses/second/text1.html",
             "file:///android_asset/courses/second/text2.html",
@@ -51,8 +45,6 @@ public class Courses {
     public static Course second = new Course("Треугольники",
             4,
             secondThemes,
-            secondExperience,
-            secondExperienceOfEachTheme,
             secondCourseTextUrl,
             R.drawable.backround_button_courses);
     // end second
@@ -61,8 +53,6 @@ public class Courses {
     private static String[] thirdThemes = {"Признаки параллельности двух прямых",
             "Аксиома параллельных прямых",
             "Практические задачи"};
-    private static int thirdExperience = 100;
-    private static int[] thirdExperienceOfEachTheme = {40, 35, 25};
     private static String[] thirdCourseTextUrl = {
             "file:///android_asset/courses/third/text1.html",
             "file:///android_asset/courses/third/text2.html",
@@ -71,8 +61,6 @@ public class Courses {
     public static Course third = new Course("Параллельные прямые",
             3,
             thirdThemes,
-            thirdExperience,
-            thirdExperienceOfEachTheme,
             thirdCourseTextUrl,
             R.drawable.backround_button_courses);
     // end third
@@ -82,8 +70,6 @@ public class Courses {
             "Соотношения между сторонами и углами",
             "Прямоугольные треугольники",
             "Построение треугольника по трем элементам"};
-    private static int fourthExperience = 160;
-    private static int[] fourthExperienceOfEachTheme = {30, 30, 50, 50};
     private static String[] fourthCourseTextUrl = {
             "file:///android_asset/courses/fourth/text1.html",
             "file:///android_asset/courses/fourth/text2.html",
@@ -93,8 +79,6 @@ public class Courses {
     public static Course fourth = new Course("Соотношения между сторонами и углами ▲",
             4,
             fourthThemes,
-            fourthExperience,
-            fourthExperienceOfEachTheme,
             fourthCourseTextUrl,
             R.drawable.backround_button_courses);
     // end fourth

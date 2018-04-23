@@ -254,6 +254,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (FragmentCourses.h){
+            FragmentCourses.h = false;
+            return;
+        }
         if (back == 0) {
             if (viewPager.getCurrentItem() == 2) {
                 super.onBackPressed();

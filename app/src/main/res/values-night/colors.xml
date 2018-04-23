@@ -17,8 +17,10 @@
     <color name="coursesD">#00877b</color>
     <color name="tests">#3F51B5</color>
     <color name="testsD">#3d4eae</color>
-    <color name="textColor">#e7e7e7</color>
-    <color name="backgroundColor">#3b3b3b</color>
+    <color name="text_color">#e7e7e7</color>
+    <color name="text_color_search">#000000</color>
+    <color name="background_color">#3b3b3b</color>
+    <color name="background_color_search">#f0ffffff</color>
     <color name="gold">#efca00</color>
     <color name="silver">#c4cacf</color>
     <color name="bronze">#e7971e</color>

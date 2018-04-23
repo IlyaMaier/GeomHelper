@@ -5,17 +5,13 @@ public class Course {
     private String courseName;
     private int numberOfThemes;
     private String[] themes;
-    private int courseExperience;
-    private int[] experienceOfEachTheme;
     private String[] courseTextUrl;
     private int background;
 
-    Course(String courseName, int numberOfThemes, String[] themes, int courseExperience, int[] experienceOfEachTheme, String[] courseTextUrl, int background) {
+    Course(String courseName, int numberOfThemes, String[] themes, String[] courseTextUrl, int background) {
         this.courseName = courseName;
         this.numberOfThemes = numberOfThemes;
         this.themes = themes;
-        this.courseExperience = courseExperience;
-        this.experienceOfEachTheme = experienceOfEachTheme;
         this.courseTextUrl = courseTextUrl;
         this.background = background;
     }
@@ -44,28 +40,16 @@ public class Course {
         return themes[i];
     }
 
+    public String[] getTheme() {
+        return themes;
+    }
+
     public void setTheme(String theme, int i) {
         this.themes[i] = theme;
     }
 
     public int getThemesSize() {
         return themes.length;
-    }
-
-    public int getCourseExperience() {
-        return courseExperience;
-    }
-
-    public void setCourseExperience(int courseExperience) {
-        this.courseExperience = courseExperience;
-    }
-
-    public int getExperienceOfEachTheme(int i) {
-        return experienceOfEachTheme[i];
-    }
-
-    public void setExperienceOfEachTheme(int experienceOfEachTheme, int i) {
-        this.experienceOfEachTheme[i] = experienceOfEachTheme;
     }
 
     public int getBackground() {

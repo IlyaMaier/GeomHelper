@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:gravity="center_horizontal"
-    card_view:cardBackgroundColor="#e6000000"
+    card_view:cardBackgroundColor="@color/background_color_search"
     card_view:cardCornerRadius="16dp">
 
     <EditText
@@ -16,8 +16,8 @@
         android:layout_margin="6dp"
         android:hint="@string/search"
         android:inputType="text"
-        android:textColorHint="@color/white"
-        android:textColor="@color/white"
+        android:textColorHint="@color/text_color_search"
+        android:textColor="@color/text_color_search"
         android:textSize="16sp" />
 
     <ImageView
