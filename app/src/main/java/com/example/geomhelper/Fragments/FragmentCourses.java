@@ -28,6 +28,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -61,7 +62,7 @@ public class FragmentCourses extends Fragment {
     BottomNavigationView bottomNavigationView;
     Client mKinveyClient;
     FrameLayout frameLayout;
-    CardView cardView;
+    CardView card;
     float y, y0;
     long millis;
     public static boolean h = false;
@@ -83,7 +84,7 @@ public class FragmentCourses extends Fragment {
 
         frameLayout = rootView.findViewById(R.id.fragment);
 
-        cardView =
+        card =
                 (CardView) LayoutInflater.from(getContext()).inflate(R.layout.card_search, null);
         int width = 1000;
         height = 175;
@@ -95,8 +96,8 @@ public class FragmentCourses extends Fragment {
         }
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(width, height);
         layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
-        frameLayout.addView(cardView, layoutParams);
-        cardView.setTranslationY(-height);
+        frameLayout.addView(card, layoutParams);
+        card.setTranslationY(-height);
 
         et = rootView.findViewById(R.id.search);
 
@@ -133,13 +134,15 @@ public class FragmentCourses extends Fragment {
                 } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                     if (event.getY() - y > 90 && y0 == 0) {
                         recyclerView.animate().translationY(finalHeight + 25).start();
-                        cardView.animate().translationY(25).alpha(1).start();
+                        card.animate().translationY(25).alpha(1).start();
                         h = true;
                         async = new Async();
                         async.execute();
                         if (j) {
                             themesAll = new ArrayList<>();
                             themesP = new ArrayList<>();
+                            shortsAll = new ArrayList<>();
+                            shortsP = new ArrayList<>();
 
                             for (int i = 0; i < Courses.currentCourses.size(); i++)
                                 for (int j = 0; j < Courses.currentCourses.get(i).getNumberOfThemes(); j++) {
@@ -155,7 +158,7 @@ public class FragmentCourses extends Fragment {
                             j = false;
                         }
                     } else if (h && y - event.getY() > 90) {
-                        cardView.animate().translationY(-height).alpha(0).start();
+                        card.animate().translationY(-height).alpha(0).start();
                         recyclerView.animate().translationY(0).start();
                         h = false;
                         if (async != null)
@@ -177,21 +180,54 @@ public class FragmentCourses extends Fragment {
                             "Такой темы не существует.",
                             Toast.LENGTH_SHORT).show();
                 else if (themesP.contains(theme)) {
-                    recyclerView.smoothScrollToPosition(
-                            adapterCourses.items.indexOf(
-                                    Person.courses.get(
-                                            shortsP.get(
-                                                    themesP.indexOf(theme)))));
-                    Toast.makeText(getContext(),
-                            "Откройте курс " + theme,
-                            Toast.LENGTH_SHORT).show();
+//                    recyclerView.smoothScrollToPosition(
+//                            adapterCourses.items.indexOf(
+//                                    Person.courses.get(
+//                                            shortsP.get(
+//                                                    themesP.indexOf(theme)))));
+                    InputMethodManager imm = (InputMethodManager)
+                            getContext().getSystemService(
+                                    Context.INPUT_METHOD_SERVICE);
+                    if (imm != null)
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+//                    Toast.makeText(getContext(),
+//                            "Откройте курс  \"" +
+//                                    Person.courses.get(
+//                                            shortsP.get(
+//                                                    themesP.indexOf(theme)))
+//                                            .getCourseName() + "\".",
+//                            Toast.LENGTH_SHORT).show();
+                    card.animate().translationY(-height).alpha(0).start();
+                    if (async != null)
+                        async.cancel(true);
+                    async = null;
+                    h = false;
+                    Person.currentCourse = Person.courses.get(
+                            shortsP.get(
+                                    themesP.indexOf(theme)));
+                    for (int i = 0; i < Person.currentCourse.getNumberOfThemes(); i++) {
+                        if (Person.currentCourse.getTheme(i).toLowerCase().equals(theme))
+                            Person.currentTheme = i;
+                    }
+                    MainActivity.back = 2;
+                    Person.backCourses = 2;
+                    floatingActionButton.hide();
+                    recyclerView.setVisibility(View.INVISIBLE);
+                    recyclerView.setClickable(false);
+                    FragmentTransaction fragmentTransaction = Objects.
+                            requireNonNull(getFragmentManager()).beginTransaction();
+                    FragmentCourseText fragmentCourseText = new FragmentCourseText();
+                    fragmentTransaction.replace(R.id.fragment, fragmentCourseText);
+                    fragmentTransaction.commit();
                 } else if (themesAll.contains(theme)) {
+                    Intent i = new Intent(getContext(), AddCourseActivity.class);
+                    startActivityForResult(i, 10);
                     Toast.makeText(getContext(),
-                            "Добавьте курс " +
+                            "Добавьте курс  \"" +
                                     Courses.currentCourses.get(
                                             shortsAll.get(
                                                     themesAll.indexOf(theme)))
-                                            .getCourseName(),
+                                            .getCourseName() + "\".",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -256,6 +292,24 @@ public class FragmentCourses extends Fragment {
         if (requestCode == 10) {
             adapterCourses.setItems(Person.courses);
             adapterCourses.notifyDataSetChanged();
+            if (!j) {
+                themesAll = new ArrayList<>();
+                themesP = new ArrayList<>();
+                shortsAll = new ArrayList<>();
+                shortsP = new ArrayList<>();
+
+                for (int i = 0; i < Courses.currentCourses.size(); i++)
+                    for (int j = 0; j < Courses.currentCourses.get(i).getNumberOfThemes(); j++) {
+                        themesAll.add(Courses.currentCourses.get(i).getTheme(j).toLowerCase());
+                        shortsAll.add((short) i);
+                    }
+
+                for (int i = 0; i < Person.courses.size(); i++)
+                    for (int j = 0; j < Person.courses.get(i).getNumberOfThemes(); j++) {
+                        themesP.add(Person.courses.get(i).getTheme(j).toLowerCase());
+                        shortsP.add((short) i);
+                    }
+            }
         }
 
     }
@@ -306,6 +360,11 @@ public class FragmentCourses extends Fragment {
                 cardView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        card.animate().translationY(-height).alpha(0).start();
+                        if (async != null)
+                            async.cancel(true);
+                        async = null;
+                        h = false;
                         Person.currentCourse = course;
                         MainActivity.back = 1;
                         Person.backCourses = 1;
@@ -333,9 +392,30 @@ public class FragmentCourses extends Fragment {
                                 Person.courses.remove(course);
                                 adapterCourses.setItems(Person.courses);
                                 adapterCourses.notifyDataSetChanged();
+                                floatingActionButton.show();
                                 Person.c = Person.c.replace(String.valueOf(
                                         Courses.currentCourses.indexOf(course)), "");
                                 Person.map.put("courses", Person.c);
+
+                                if (!j) {
+                                    themesAll = new ArrayList<>();
+                                    themesP = new ArrayList<>();
+                                    shortsAll = new ArrayList<>();
+                                    shortsP = new ArrayList<>();
+
+                                    for (int i = 0; i < Courses.currentCourses.size(); i++)
+                                        for (int j = 0; j < Courses.currentCourses.get(i).getNumberOfThemes(); j++) {
+                                            themesAll.add(Courses.currentCourses.get(i).getTheme(j).toLowerCase());
+                                            shortsAll.add((short) i);
+                                        }
+
+                                    for (int i = 0; i < Person.courses.size(); i++)
+                                        for (int j = 0; j < Person.courses.get(i).getNumberOfThemes(); j++) {
+                                            themesP.add(Person.courses.get(i).getTheme(j).toLowerCase());
+                                            shortsP.add((short) i);
+                                        }
+                                }
+
                                 User user = mKinveyClient.getActiveUser();
                                 user.putAll(Person.map);
                                 user.update(new KinveyClientCallback() {
@@ -387,8 +467,10 @@ public class FragmentCourses extends Fragment {
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            cardView.animate().translationY(-height).alpha(0).start();
-            recyclerView.animate().translationY(0).start();
+            if (card != null)
+                card.animate().translationY(-height).alpha(0).start();
+            if (recyclerView != null)
+                recyclerView.animate().translationY(0).start();
             h = false;
             cancel(true);
         }

@@ -40,5 +40,6 @@
     <string name="testname">TestName</string>
     <string name="confirm_password">Confirm password</string>
     <string name="search_icon">Search icon</string>
-    <string name="search">Search</string>
+    <string name="search">Поиск темы</string>
+    <string name="testimage">TestImage</string>
 </resources>

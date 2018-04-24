@@ -7,12 +7,18 @@
     android:foreground="?android:selectableItemBackground"
     card_view:cardCornerRadius="6dp">
 
+    <ImageView
+        android:id="@+id/card_tests_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/testimage" />
+
     <TextView
         android:id="@+id/text_rv_tests"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
         android:padding="4dp"
         android:textColor="@color/text_color"
         android:textSize="24sp" />

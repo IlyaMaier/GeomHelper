@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.geomhelper.Content.Test;
@@ -101,7 +102,7 @@ public class FragmentTests extends Fragment {
             final Test test = tests.get(position);
             holder.test = test;
 
-            holder.cardView.setBackgroundResource(test.getBackground());
+            holder.imageView.setBackgroundResource(test.getBackground());
             holder.name.setText(test.getTestName());
 
         }
@@ -114,6 +115,7 @@ public class FragmentTests extends Fragment {
         class TestViewHolder extends RecyclerView.ViewHolder {
 
             TextView name;
+            ImageView imageView;
             CardView cardView;
             Test test;
 
@@ -125,6 +127,7 @@ public class FragmentTests extends Fragment {
                 super(itemView);
 
                 name = itemView.findViewById(R.id.text_rv_tests);
+                imageView = itemView.findViewById(R.id.card_tests_image);
                 cardView = itemView.findViewById(R.id.card_tests);
 
                 cardView.setOnClickListener(new View.OnClickListener() {
