@@ -122,7 +122,7 @@ public class AddCourseActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Person.courses.add(0, course);
-                        sendDataToFirebase(v.getId() + "");
+                        sendDataToFirebase(Courses.currentCourses.indexOf(course) + "");
                         Intent intent = new Intent();
                         setResult(RESULT_OK, intent);
                         finish();

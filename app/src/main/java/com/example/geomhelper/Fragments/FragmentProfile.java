@@ -25,6 +25,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
@@ -55,7 +57,8 @@ public class FragmentProfile extends Fragment {
     Context context;
     Client mKinveyClient;
     BottomNavigationView bottomNavigationView;
-    public static volatile boolean d = false;
+    public static volatile boolean d = false, a = false, google = false;
+    public static String personPhotoUrl = "";
 
     public FragmentProfile() {
     }
@@ -67,6 +70,10 @@ public class FragmentProfile extends Fragment {
 
         context = getContext();
 
+        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
+                "602d7fccc790477ca6505a1daa3aa894",
+                Objects.requireNonNull(context)).setBaseUrl("https://baas.kinvey.com").build();
+
         bottomNavigationView = Objects.requireNonNull(getActivity())
                 .findViewById(R.id.navigation);
         textName = rootView.findViewById(R.id.textName);
@@ -74,11 +81,37 @@ public class FragmentProfile extends Fragment {
         textExperience = rootView.findViewById(R.id.textExperince);
         circleImageView = rootView.findViewById(R.id.imageProfile);
 
-        if(d) {
+        if (d) {
             Toast.makeText(getContext(), "Дождитесь окончания загрузки изображения" +
                     "", Toast.LENGTH_LONG).show();
             Async async = new Async();
             async.execute();
+        }
+
+        if (google) {
+            Glide.with(getContext()).load(personPhotoUrl)
+                    .thumbnail(0.5f)
+                    .crossFade()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(circleImageView);
+
+            Bitmap bitmap = circleImageView.getDrawingCache();
+            File file = new File(context.getFilesDir(), "profileImage.png");
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
 
         textName.setText(Person.name);
@@ -90,6 +123,7 @@ public class FragmentProfile extends Fragment {
                 bitmap = BitmapFactory.decodeFile(
                         context.getFilesDir().getPath() +
                                 "/profileImage.png");
+
                 circleImageView.setImageBitmap(bitmap);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -101,6 +135,14 @@ public class FragmentProfile extends Fragment {
         circleImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()),
+                        Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(getActivity(),
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            1);
+                }
                 Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
                 photoPickerIntent.setType("image/*");
                 startActivityForResult(photoPickerIntent, 500);
@@ -125,20 +167,17 @@ public class FragmentProfile extends Fragment {
                                     if (name.length() > 20) name = name.substring(0, 20);
                                     Person.name = name;
                                     Person.map.put("name", Person.name);
-                                    Client mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
-                                            "602d7fccc790477ca6505a1daa3aa894",
-                                            Objects.requireNonNull(getActivity()).getApplicationContext()).setBaseUrl(
-                                            "https://baas.kinvey.com").build();
+
                                     mKinveyClient.getActiveUser().putAll(Person.map);
                                     mKinveyClient.getActiveUser().update(new KinveyClientCallback() {
                                         @Override
                                         public void onSuccess(Object o) {
-
+                                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
                                         }
 
                                         @Override
                                         public void onFailure(Throwable throwable) {
-
+                                            Toast.makeText(context, "Failure", Toast.LENGTH_SHORT).show();
                                         }
                                     });
                                     textName.setText(name);
@@ -175,14 +214,6 @@ public class FragmentProfile extends Fragment {
                     InputStream imageStream = null;
                     try {
                         if (selectedImage != null) {
-                            if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()),
-                                    Manifest.permission.READ_EXTERNAL_STORAGE)
-                                    != PackageManager.PERMISSION_GRANTED) {
-
-                                ActivityCompat.requestPermissions(getActivity(),
-                                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                                        1);
-                            }
                             imageStream = Objects.requireNonNull(getActivity())
                                     .getContentResolver().openInputStream(selectedImage);
                         }
@@ -256,7 +287,7 @@ public class FragmentProfile extends Fragment {
                             }
 
                             @Override
-                            public void progressChanged(MediaHttpUploader mediaHttpUploader) throws IOException {
+                            public void progressChanged(MediaHttpUploader mediaHttpUploader) {
                             }
 
                             @Override
@@ -280,26 +311,32 @@ public class FragmentProfile extends Fragment {
         @Override
         protected Void doInBackground(Integer... integers) {
             while (d) {
-
+                if (a) publishProgress(1);
             }
-            publishProgress();
+            publishProgress(0);
             return null;
         }
 
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            try {
+            if (values[0] == 0) {
                 try {
-                    bitmap = BitmapFactory.decodeFile(
-                            context.getFilesDir().getPath() +
-                                    "/profileImage.png");
-                    circleImageView.setImageBitmap(bitmap);
-                } catch (Exception e) {
+                    try {
+                        bitmap = BitmapFactory.decodeFile(
+                                context.getFilesDir().getPath() +
+                                        "/profileImage.png");
+                        circleImageView.setImageBitmap(bitmap);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } catch (NullPointerException e) {
                     e.printStackTrace();
                 }
-            } catch (NullPointerException e) {
-                e.printStackTrace();
+                cancel(true);
+            } else if (values[0] == 1) {
+                textName.setText(Person.name);
+                a = false;
             }
         }
     }

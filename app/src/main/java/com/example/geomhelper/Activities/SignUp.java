@@ -1,13 +1,17 @@
 package com.example.geomhelper.Activities;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.text.TextUtils;
@@ -21,7 +25,6 @@ import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
-import com.google.firebase.auth.FirebaseAuth;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.AsyncUploaderProgressListener;
 import com.kinvey.android.model.User;
@@ -53,6 +56,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
     Client mKinveyClient;
 
     protected void onCreate(Bundle savedInstanceState) {
+        //action bar
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
@@ -60,6 +64,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                     AppCompatDelegate.MODE_NIGHT_NO);
             recreate();
         }
+
         setContentView(R.layout.activity_sign_up);
 
         //views
@@ -68,9 +73,17 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         mConfirm = findViewById(R.id.confirm_sign_up);
         mName = findViewById(R.id.person_name);
         circleImageView = findViewById(R.id.imageProfileSignUp);
+
         circleImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                        Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(SignUp.this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                }
                 Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
                 photoPickerIntent.setType("image/*");
                 startActivityForResult(photoPickerIntent, 6);
@@ -151,8 +164,6 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
                         @Override
                         public void onSuccess(User u) {
-                            CharSequence text = "Добро пожаловать, " + mName.getText() + "!";
-                            Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                             intent();
                         }
                     });
@@ -160,7 +171,6 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         progressDialog = new ProgressDialog(SignUp.this);
         progressDialog.setTitle("Загрузка...");
         progressDialog.show();
-        FirebaseAuth.getInstance().signInWithEmailAndPassword("qwerty@gmail.com", "qwerty");
     }
 
     void intent() {
@@ -168,6 +178,23 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
         Person.name = mName.getText().toString();
         Person.uId = user.getId();
+
+        user.set("name", Person.name);
+        user.set("experience", 0);
+        user.set("courses", "");
+        user.set("image", "");
+
+        mKinveyClient.getActiveUser().update(new KinveyClientCallback() {
+            @Override
+            public void onSuccess(Object o) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+
+            }
+        });
 
         if (!g) {
             Bitmap yourSelectedImage = BitmapFactory.decodeResource(
@@ -187,34 +214,17 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         }
 
         final java.io.File file = new java.io.File(getFilesDir(), "profileImage.png");
-        final boolean isCancelled = false;
         FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
         try {
             fileStore.upload(file, new AsyncUploaderProgressListener<FileMetaData>() {
                 @Override
                 public void onSuccess(FileMetaData fileMetaData) {
                     Person.id = fileMetaData.getId();
-                    Person.map.put("name", Person.name);
-                    Person.map.put("experience", Person.experience);
-                    Person.map.put("courses", "");
-                    Person.map.put("image", Person.id);
 
-                    Client client = new Client.Builder("kid_B1OS_p1hM",
-                            "602d7fccc790477ca6505a1daa3aa894",
-                            getApplicationContext()).setBaseUrl("https://baas.kinvey.com").build();
-                    User user = client.getActiveUser();
-                    user.putAll(Person.map);
-                    user.update(new KinveyClientCallback() {
-                        @Override
-                        public void onSuccess(Object o) {
-
-                        }
-
-                        @Override
-                        public void onFailure(Throwable throwable) {
-
-                        }
-                    });
+                    SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = mSettings.edit();
+                    editor.putString("id", Person.id);
+                    editor.apply();
                 }
 
                 @Override
@@ -233,7 +243,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
                 @Override
                 public boolean isCancelled() {
-                    return isCancelled;
+                    return false;
                 }
             });
         } catch (IOException e) {
@@ -252,6 +262,8 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         editor.apply();
         startActivity(i);
         finish();
+        CharSequence text = "Добро пожаловать, " + mName.getText() + "!";
+        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
         progressDialog.cancel();
     }
 
@@ -285,7 +297,8 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    SharedPreferences.Editor editor = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
+                    SharedPreferences.Editor editor = getSharedPreferences(
+                            Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
                     editor.putBoolean("image", true);
                     editor.apply();
                     g = true;

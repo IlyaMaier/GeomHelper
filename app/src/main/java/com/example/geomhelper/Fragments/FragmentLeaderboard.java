@@ -1,5 +1,6 @@
 package com.example.geomhelper.Fragments;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -13,19 +14,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.example.geomhelper.Content.Leader;
+import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.RVLeaderboardAdapter;
-import com.example.geomhelper.Resources.User;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.kinvey.android.Client;
+import com.kinvey.android.store.DataStore;
+import com.kinvey.java.KinveyException;
+import com.kinvey.java.cache.KinveyCachedClientCallback;
+import com.kinvey.java.store.StoreType;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static com.example.geomhelper.Person.pref;
 
 public class FragmentLeaderboard extends Fragment {
 
@@ -33,11 +39,13 @@ public class FragmentLeaderboard extends Fragment {
     }
 
     RecyclerView recyclerView;
-    List<User> data;
     RelativeLayout relativeLayout;
     RVLeaderboardAdapter rvLeaderboardAdapter;
     ProgressBar progressBar;
     BottomNavigationView bottomNavigationView;
+    Client mKinveyClient;
+    DataStore<Leader> dataStore;
+    List<Leader> users;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -46,7 +54,9 @@ public class FragmentLeaderboard extends Fragment {
 
         relativeLayout = rootView.findViewById(R.id.frame_leaderboard);
 
-        List<User> users = getDataFromFirebase();
+        users = new ArrayList<>();
+        for (int i = 0; i < 10; i++)
+            users.add(new Leader("", 0));
 
         rvLeaderboardAdapter = new RVLeaderboardAdapter(getContext(), users);
 
@@ -66,58 +76,67 @@ public class FragmentLeaderboard extends Fragment {
                 findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemReselectedListener(
                 new BottomNavigationView.OnNavigationItemReselectedListener() {
-            @Override
-            public void onNavigationItemReselected(@NonNull MenuItem item) {
-                if(item.getItemId() == R.id.navigation_leaderboard){
-                    recyclerView.smoothScrollToPosition(0);
-                }
-            }
-        });
+                    @Override
+                    public void onNavigationItemReselected(@NonNull MenuItem item) {
+                        if (item.getItemId() == R.id.navigation_leaderboard) {
+                            recyclerView.smoothScrollToPosition(0);
+                        }
+                    }
+                });
+        if (pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
+            mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
+                    "602d7fccc790477ca6505a1daa3aa894",
+                    Objects.requireNonNull(this.getContext())).setBaseUrl("https://baas.kinvey.com").build();
 
+            dataStore = DataStore.collection("leaders",
+                    Leader.class, StoreType.CACHE, mKinveyClient);
+
+            Async async = new Async();
+            async.onPreExecute();
+            async.execute();
+        }
         return rootView;
     }
 
-    List<User> getDataFromFirebase() {
-        data = new ArrayList<>(10);
-        for (int i = 0; i < 10; i++) {
-            data.add(new User("", ""));
+    class Async extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
         }
-        final DatabaseReference f = FirebaseDatabase.getInstance().getReference();
-        f.child("leaderboard").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                do
-                    for (int i = 1; i < 11; i++) {
-                        try {
-                            data.get(i - 1).setName(Objects.requireNonNull(
-                                    dataSnapshot.child(i + "").child("name").
-                                            getValue()).toString());
-                            data.get(i - 1).setExperience(Objects.requireNonNull(
-                                    dataSnapshot.child(i + "").child("experience").
-                                            getValue()).toString());
-                        } catch (NullPointerException e) {
-                            e.printStackTrace();
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                try {
+                    dataStore.find(new KinveyCachedClientCallback<List<Leader>>() {
+                        @Override
+                        public void onSuccess(List<Leader> leaders) {
+                            users = leaders;
+                            publishProgress();
                         }
-                    } while (q());
-                rvLeaderboardAdapter.setData(data);
-                rvLeaderboardAdapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.INVISIBLE);
-                recyclerView.setVisibility(View.VISIBLE);
+
+                        @Override
+                        public void onFailure(Throwable throwable) {
+                            Toast.makeText(getContext(), "Failure", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (KinveyException e) {
+                e.printStackTrace();
             }
+            return null;
+        }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        return data;
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+            rvLeaderboardAdapter.setData(users);
+            rvLeaderboardAdapter.notifyDataSetChanged();
+            progressBar.setVisibility(View.INVISIBLE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
-
-    boolean q() {
-        for (int i = 0; i < 10; i++)
-            if (data.get(i).getName() == null || data.get(i).getExperience() == null || data.get(i).getExperience().isEmpty() || data.get(i).getName().isEmpty())
-                return true;
-        return false;
-    }
-
 }

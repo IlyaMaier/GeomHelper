@@ -42,4 +42,18 @@
     <string name="search_icon">Search icon</string>
     <string name="search">Поиск темы</string>
     <string name="testimage">TestImage</string>
+    <string name="start_2">start_2</string>
+    <string name="start_1">start_1</string>
+    <string name="start">start</string>
+    <string name="welcome">Добро пожаловать!</string>
+    <string name="learn_new">Узнать новое</string>
+    <string name="practise_new">Закрепить старое</string>
+    <string name="lets_begin">Давайте начнем</string>
+    <string name="success">И добиться успеха</string>
+    <string name="begin">Начните, чтобы</string>
+    <string name="social">vk</string>
+    <string name="facebook_app_id">227878137947449</string>
+    <string name="fb_login_protocol_scheme">fb227878137947449</string>
+    <string name="server_client_id">1021657095056-0g139d0uof3m7q25jc2aaei1naridfdj.apps.googleusercontent.com</string>
+
 </resources>

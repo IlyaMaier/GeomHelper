@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#323949a3</color>
+    <color name="colorPrimary">#ffffff</color>
+    <color name="colorPrimaryDark">#c9000000</color>
     <color name="colorAccent">#00bfff</color>
     <color name="colorButton">#fbbe18</color>
     <color name="white">#ffffff</color>
@@ -24,5 +24,7 @@
     <color name="gold">#FFD700</color>
     <color name="silver">#c6ccd2</color>
     <color name="bronze">#f6a120</color>
+    <color name="gray_50">#ffffff</color>
+    <color name="gray_300">#5be0e0e0</color>
 
 </resources>

@@ -20,7 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 
-import com.example.geomhelper.Activities.LoginActivity;
+import com.example.geomhelper.Activities.StartActivity;
 import com.example.geomhelper.Content.Courses;
 import com.example.geomhelper.Content.Tests;
 import com.example.geomhelper.Fragments.FragmentCourses;
@@ -92,6 +92,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         pref = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+        if (!pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
+            Intent i = new Intent(getApplicationContext(), StartActivity.class);
+            startActivity(i);
+        }
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
@@ -158,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
             Person.leaderBoardPlace = pref.getLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, -1);
             Person.c = pref.getString("c", "");
             Person.id = pref.getString("id", "");
+            Person.map.put("_socialIdentity", pref.getString("_socialIdentity", ""));
             for (int i = 0; i < pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
                 if (Person.courses.size() != pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0)) {
                     String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
@@ -174,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             Person.map.put("image", Person.id);
 
         } else {
-            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+            Intent i = new Intent(getApplicationContext(), StartActivity.class);
             startActivity(i);
         }
 
@@ -254,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (FragmentCourses.h){
+        if (FragmentCourses.h) {
             FragmentCourses.h = false;
             return;
         }
@@ -333,6 +338,7 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt(Person.APP_PREFERENCES_COURSES_SIZE, Person.courses.size());
         editor.putString("c", Person.c);
         editor.putString("id", Person.id);
+        editor.putString("_socialIdentity", String.valueOf(Person.map.get("_socialIdentity")));
         if (d) editor.putBoolean("image", false);
         if (d) editor.putBoolean(Person.APP_PREFERENCES_WELCOME, welcome);
         for (int i = 0; i < Person.courses.size(); i++) {

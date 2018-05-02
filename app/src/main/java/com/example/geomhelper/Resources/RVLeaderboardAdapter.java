@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.geomhelper.Content.Leader;
 import com.example.geomhelper.R;
 
 import java.util.List;
@@ -18,13 +19,13 @@ import java.util.List;
 public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdapter.UserViewHolder> {
 
     private Context context;
-    private List<User> users;
+    private List<Leader> users;
 
-    public void setData(List<User> u) {
+    public void setData(List<Leader> u) {
         users = u;
     }
 
-    public RVLeaderboardAdapter(Context context, List<User> users) {
+    public RVLeaderboardAdapter(Context context, List<Leader> users) {
         this.context = context;
         this.users = users;
     }
@@ -38,7 +39,7 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        final User user = users.get(position);
+        final Leader user = users.get(position);
 
         if (position == 0)
             holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.gold));
@@ -48,9 +49,14 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
             holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.bronze));
 
         if (position == 9) holder.place.setTextSize(17);
-        holder.place.setText((position + 1 + ""));
-        holder.name.setText(user.getName());
-        holder.experience.setText(user.getExperience());
+        holder.place.setText(String.valueOf(position + 1));
+        if (user == null)
+            holder.name.setText("");
+        else holder.name.setText(user.getName());
+        if (user != null)
+            holder.experience.setText(String.valueOf(user.getExperience()));
+        else
+            holder.experience.setText("");
     }
 
     @Override

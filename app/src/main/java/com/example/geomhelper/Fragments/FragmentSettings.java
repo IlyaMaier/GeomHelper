@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.preference.EditTextPreference;
 import android.support.v7.preference.ListPreference;
@@ -17,6 +18,12 @@ import com.example.geomhelper.Activities.LoginActivity;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.facebook.login.LoginManager;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyPurgeCallback;
 import com.kinvey.android.store.UserStore;
@@ -209,7 +216,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         acc = findPreference("acc");
         acc.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
-            public boolean onPreferenceClick(Preference preference) {
+            public boolean onPreferenceClick(final Preference preference) {
                 builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("Выход из аккаунта");
                 builder.setMessage("Вы действительно хотите выйти из аккаунта?");
@@ -226,6 +233,26 @@ public class FragmentSettings extends PreferenceFragmentCompat {
 
                             }
                         });
+
+                        LoginManager.getInstance().logOut();
+                        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(
+                                GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestEmail()
+                                .build();
+
+                        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                                .build();
+
+                        mGoogleApiClient.connect();
+
+                        if(Person.pref.getBoolean("google",false))
+                        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                                new ResultCallback<Status>() {
+                                    @Override
+                                    public void onResult(@NonNull Status status) {
+                                    }
+                                });
 
                         Person.name = "";
                         Person.uId = "";
