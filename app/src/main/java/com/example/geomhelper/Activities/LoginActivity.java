@@ -1,11 +1,10 @@
 package com.example.geomhelper.Activities;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +23,8 @@ import com.example.geomhelper.Fragments.FragmentProfile;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
+import com.example.geomhelper.User;
+import com.example.geomhelper.UserService;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -39,26 +40,21 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.kinvey.android.Client;
-import com.kinvey.android.callback.AsyncDownloaderProgressListener;
-import com.kinvey.android.callback.AsyncUploaderProgressListener;
-import com.kinvey.android.model.User;
-import com.kinvey.android.store.FileStore;
-import com.kinvey.android.store.UserStore;
-import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.core.MediaHttpDownloader;
-import com.kinvey.java.core.MediaHttpUploader;
-import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.store.StoreType;
+import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class LoginActivity extends AppCompatActivity
         implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
@@ -73,8 +69,6 @@ public class LoginActivity extends AppCompatActivity
     ProgressDialog progressDialog;
 
     LinearLayout linearLayout;
-
-    Client mKinveyClient;
 
     protected void onCreate(Bundle savedInstanceState) {
         //action bar
@@ -109,36 +103,13 @@ public class LoginActivity extends AppCompatActivity
         findViewById(R.id.google).setOnClickListener(this);
         findViewById(R.id.twitter).setOnClickListener(this);
 
-        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
-                "602d7fccc790477ca6505a1daa3aa894",
-                this.getApplicationContext()).setBaseUrl("https://baas.kinvey.com").build();
-
         //facebook
         callbackManager = CallbackManager.Factory.create();
 
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                try {
-                    UserStore.loginFacebook(AccessToken.getCurrentAccessToken().getToken(),
-                            mKinveyClient, new KinveyClientCallback<User>() {
-                                @Override
-                                public void onSuccess(User user) {
-                                    Person.map.put("_socialIdentity", AccessToken.getCurrentAccessToken().getToken());
-                                    getMeInfo();
-                                }
 
-                                @Override
-                                public void onFailure(Throwable throwable) {
-                                    Toast.makeText(getApplicationContext(),
-                                            "Произошла ошибка",
-                                            Toast.LENGTH_SHORT).show();
-                                    progressDialog.cancel();
-                                }
-                            });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
 
             @Override
@@ -217,62 +188,70 @@ public class LoginActivity extends AppCompatActivity
         progressDialog.show();
     }
 
+    @SuppressLint("StaticFieldLeak")
     void signIn() {
-        if (!validateForm()) return;
-        try {
-            UserStore.logout(mKinveyClient, new KinveyClientCallback<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-
-                }
-
-                @Override
-                public void onFailure(Throwable throwable) {
-
-                }
-            });
-            LoginManager.getInstance().logOut();
-            UserStore.login(mEmail.getText().toString(), mPassword.getText().toString(),
-                    mKinveyClient, new KinveyClientCallback<User>() {
+        if (validateForm()) {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(User.URL)
+                    .addConverterFactory(ScalarsConverterFactory.create())
+                    .build();
+            UserService userService = retrofit.create(UserService.class);
+            userService.login(mEmail.getText().toString(),
+                    mPassword.getText().toString())
+                    .enqueue(new Callback<String>() {
                         @Override
-                        public void onFailure(Throwable t) {
-                            CharSequence text = "Неправильный логин или пароль.";
-                            Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            switch (Objects.requireNonNull(response.body())) {
+                                case "0":
+                                    Toast.makeText(getApplicationContext(), "Произошла ошибка!",
+                                            Toast.LENGTH_SHORT).show();
+                                    progressDialog.cancel();
+                                    break;
+                                case "2":
+                                    Toast.makeText(getApplicationContext(),
+                                            "Такого пользователя не существует!",
+                                            Toast.LENGTH_SHORT).show();
+                                    progressDialog.cancel();
+                                    break;
+                                case "3":
+                                    Toast.makeText(getApplicationContext(), "Неверный пароль!",
+                                            Toast.LENGTH_SHORT).show();
+                                    progressDialog.cancel();
+                                    break;
+                                default:
+                                    User user = new Gson().fromJson(response.body(), User.class);
+                                    Person.uId = String.valueOf(user.getId());
+                                    Person.name = user.getName();
+                                    Person.experience = user.getExperience();
+                                    Person.c = user.getCourses();
+
+                                    if (!Courses.currentCourses.contains(Courses.basics))
+                                        Courses.currentCourses.add(0, Courses.basics);
+                                    if (!Courses.currentCourses.contains(Courses.second))
+                                        Courses.currentCourses.add(1, Courses.second);
+                                    if (!Courses.currentCourses.contains(Courses.third))
+                                        Courses.currentCourses.add(2, Courses.third);
+                                    if (!Courses.currentCourses.contains(Courses.fourth))
+                                        Courses.currentCourses.add(3, Courses.fourth);
+
+                                    if (Person.c != null && !Person.c.isEmpty())
+                                        for (int i = 0; i < Person.c.length(); i++)
+                                            Person.courses.add(0, Courses.currentCourses.get(
+                                                    Integer.parseInt(Person.c.charAt(i) + "")));
+
+                                    saveAndFinish();
+                                    break;
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Toast.makeText(getApplicationContext(), "Произошла ошибка.",
+                                    Toast.LENGTH_SHORT).show();
                             progressDialog.cancel();
                         }
-
-                        @Override
-                        public void onSuccess(User u) {
-                            intent(false);
-                        }
                     });
-        } catch (IOException e1) {
-            e1.printStackTrace();
         }
-    }
-
-    void intent(boolean facebook) {
-        User user = mKinveyClient.getActiveUser();
-
-        Person.uId = user.getId();
-        if (!facebook) {
-            if (user.get("name") == null)
-                Person.name = "";
-            else Person.name = user.get("name").toString();
-        }
-        if (user.get("experience") == null)
-            Person.experience = 0;
-        else Person.experience = Integer.parseInt(user.get("experience").toString());
-        if (user.get("courses") == null)
-            Person.c = "";
-        else Person.c = user.get("courses").toString();
-        for (int i = 0; i < Person.c.length(); i++)
-            Person.courses.add(0, Courses.currentCourses.get(
-                    Integer.parseInt(Person.c.charAt(i) + "")));
-
-        if (!facebook)
-            loadImage();
-        saveAndFinish();
     }
 
     void saveAndFinish() {
@@ -284,7 +263,6 @@ public class LoginActivity extends AppCompatActivity
         editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
         editor.putString("id", Person.id);
         editor.putString("c", Person.c);
-        editor.putString("_socialIdentity", String.valueOf(Person.map.get("_socialIdentity")));
         editor.apply();
 
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
@@ -332,50 +310,47 @@ public class LoginActivity extends AppCompatActivity
                                 object = new JSONObject(response.getRawResponse());
                                 String name = object.getString("name");
 
-                                User user = mKinveyClient.getActiveUser();
-                                if (user.get("name") == null) {
-                                    user.set("name", name);
-                                    Person.name = name;
-                                    Person.map.put("name", name);
-                                }
-                                if (user.get("experience") == null) {
-                                    user.set("experience", 0);
-                                    Person.map.put("experience", 0);
-                                }
-                                if (user.get("courses") == null) {
-                                    user.set("courses", "");
-                                    Person.map.put("courses", "");
-                                }
-                                if (user.get("image") == null) {
-                                    Bitmap yourSelectedImage = BitmapFactory.decodeResource(
-                                            getResources(), R.drawable.back_login);
-                                    try {
-                                        File f = new File(getFilesDir(), "profileImage.png");
-                                        FileOutputStream fos = null;
-                                        try {
-                                            fos = new FileOutputStream(f);
-                                            yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                                        } finally {
-                                            if (fos != null) fos.close();
-                                        }
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    uploadImage();
-                                } else loadImage();
-
-                                user.update(new KinveyClientCallback() {
-                                    @Override
-                                    public void onSuccess(Object o) {
-
-                                    }
-
-                                    @Override
-                                    public void onFailure(Throwable throwable) {
-
-                                    }
-                                });
-                                intent(true);
+//                                User user = mKinveyClient.getActiveUser();
+//                                if (user.get("name") == null) {
+//                                    user.set("name", name);
+//                                    Person.name = name;
+//                                }
+//                                if (user.get("experience") == null) {
+//                                    user.set("experience", 0);
+//                                }
+//                                if (user.get("courses") == null) {
+//                                    user.set("courses", "");
+//                                }
+//                                if (user.get("image") == null) {
+//                                    Bitmap yourSelectedImage = BitmapFactory.decodeResource(
+//                                            getResources(), R.drawable.back_login);
+//                                    try {
+//                                        File f = new File(getFilesDir(), "profileImage.png");
+//                                        FileOutputStream fos = null;
+//                                        try {
+//                                            fos = new FileOutputStream(f);
+//                                            yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+//                                        } finally {
+//                                            if (fos != null) fos.close();
+//                                        }
+//                                    } catch (Exception e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                    uploadImage();
+//                                } else loadImage();
+//
+//                                user.update(new KinveyClientCallback() {
+//                                    @Override
+//                                    public void onSuccess(Object o) {
+//
+//                                    }
+//
+//                                    @Override
+//                                    public void onFailure(Throwable throwable) {
+//
+//                                    }
+//                                });
+//                                intent();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -390,7 +365,6 @@ public class LoginActivity extends AppCompatActivity
     }
 
     void loadImage() {
-        User user = mKinveyClient.getActiveUser();
         File file = new File(getApplicationContext().getFilesDir(), "profileImage.png");
         FileOutputStream fos = null;
         try {
@@ -399,116 +373,110 @@ public class LoginActivity extends AppCompatActivity
             e1.printStackTrace();
         }
 
-        FileMetaData fileMetaDataForDownload = new FileMetaData();
         String img;
-        if (user.get("image") == null)
-            img = "Произошла ошибка";
-        else img = user.get("image").toString();
-        fileMetaDataForDownload.setId(img);
-        FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
-        try {
-            final FileOutputStream finalFos = fos;
-            fileStore.download(fileMetaDataForDownload, fos, new AsyncDownloaderProgressListener<FileMetaData>() {
-                @Override
-                public void onSuccess(FileMetaData fileMetaData) {
-                    try {
-                        if (finalFos != null) {
-                            finalFos.close();
-                        }
-                        FragmentProfile.d = false;
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable throwable) {
-                    FragmentProfile.d = false;
-                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
-                            Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void progressChanged(MediaHttpDownloader mediaHttpDownloader) {
-                }
-
-                @Override
-                public void onCancelled() {
-                    FragmentProfile.d = false;
-                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
-                            Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public boolean isCancelled() {
-                    return false;
-                }
-            });
-            FragmentProfile.d = true;
-        } catch (IOException e1) {
-            FragmentProfile.d = false;
-            Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
-                    Toast.LENGTH_SHORT).show();
-            e1.printStackTrace();
-        }
+//        if (user.get("image") == null)
+//            img = "Произошла ошибка";
+//        else img = user.get("image").toString();
+//        fileMetaDataForDownload.setId(img);
+//        FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
+//        try {
+//            final FileOutputStream finalFos = fos;
+//            fileStore.download(fileMetaDataForDownload, fos, new AsyncDownloaderProgressListener<FileMetaData>() {
+//                @Override
+//                public void onSuccess(FileMetaData fileMetaData) {
+//                    try {
+//                        if (finalFos != null) {
+//                            finalFos.close();
+//                        }
+//                        FragmentProfile.d = false;
+//                    } catch (IOException e1) {
+//                        e1.printStackTrace();
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Throwable throwable) {
+//                    FragmentProfile.d = false;
+//                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
+//                            Toast.LENGTH_SHORT).show();
+//                }
+//
+//                @Override
+//                public void progressChanged(MediaHttpDownloader mediaHttpDownloader) {
+//                }
+//
+//                @Override
+//                public void onCancelled() {
+//                    FragmentProfile.d = false;
+//                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
+//                            Toast.LENGTH_SHORT).show();
+//                }
+//
+//                @Override
+//                public boolean isCancelled() {
+//                    return false;
+//                }
+//            });
+//            FragmentProfile.d = true;
+//        } catch (IOException e1) {
+//            FragmentProfile.d = false;
+//            Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
+//                    Toast.LENGTH_SHORT).show();
+//            e1.printStackTrace();
+//        }
     }
 
     void uploadImage() {
-        FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
-        File file = new File(getFilesDir(), "profileImage.png");
-        try {
-            fileStore.upload(file, new AsyncUploaderProgressListener<FileMetaData>() {
-                @Override
-                public void onSuccess(FileMetaData fileMetaData) {
-                    Person.id = fileMetaData.getId();
-                    Person.map.put("image", Person.id);
-                    Person.map.put("name", Person.name);
-                    Person.map.put("experience", Person.experience);
-                    Person.map.put("courses", Person.c);
-
-                    SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = mSettings.edit();
-                    editor.putString("id", Person.id);
-                    editor.apply();
-
-                    User user = mKinveyClient.getActiveUser();
-                    user.putAll(Person.map);
-                    user.update(new KinveyClientCallback() {
-                        @Override
-                        public void onSuccess(Object o) {
-
-                        }
-
-                        @Override
-                        public void onFailure(Throwable throwable) {
-
-                        }
-                    });
-                }
-
-                @Override
-                public void onFailure(Throwable throwable) {
-
-                }
-
-                @Override
-                public void progressChanged(MediaHttpUploader mediaHttpUploader) {
-
-                }
-
-                @Override
-                public void onCancelled() {
-
-                }
-
-                @Override
-                public boolean isCancelled() {
-                    return false;
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
+//        File file = new File(getFilesDir(), "profileImage.png");
+//        try {
+//            fileStore.upload(file, new AsyncUploaderProgressListener<FileMetaData>() {
+//                @Override
+//                public void onSuccess(FileMetaData fileMetaData) {
+//                    Person.id = fileMetaData.getId();
+//
+//                    SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+//                    SharedPreferences.Editor editor = mSettings.edit();
+//                    editor.putString("id", Person.id);
+//                    editor.apply();
+//
+//                    User user = mKinveyClient.getActiveUser();
+//                    user.update(new KinveyClientCallback() {
+//                        @Override
+//                        public void onSuccess(Object o) {
+//
+//                        }
+//
+//                        @Override
+//                        public void onFailure(Throwable throwable) {
+//
+//                        }
+//                    });
+//                }
+//
+//                @Override
+//                public void onFailure(Throwable throwable) {
+//
+//                }
+//
+//                @Override
+//                public void progressChanged(MediaHttpUploader mediaHttpUploader) {
+//
+//                }
+//
+//                @Override
+//                public void onCancelled() {
+//
+//                }
+//
+//                @Override
+//                public boolean isCancelled() {
+//                    return false;
+//                }
+//            });
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     void signInWithGoogle() {
@@ -524,27 +492,27 @@ public class LoginActivity extends AppCompatActivity
             FragmentProfile.personPhotoUrl = Objects.requireNonNull(acct.getPhotoUrl()).toString();
             FragmentProfile.google = true;
 
-            try {
-                Toast.makeText(getApplicationContext(), acct.getIdToken(), Toast.LENGTH_SHORT).show();
-                UserStore.loginGoogle(acct.getIdToken(), mKinveyClient, new KinveyClientCallback() {
-                    @Override
-                    public void onSuccess(Object o) {
-                        intent(true);
-                        SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = mSettings.edit();
-                        editor.putBoolean("google", true);
-                        editor.apply();
-                    }
-
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        Toast.makeText(getApplicationContext(), "Fail Google", Toast.LENGTH_SHORT).show();
-                        progressDialog.cancel();
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Toast.makeText(getApplicationContext(), acct.getIdToken(), Toast.LENGTH_SHORT).show();
+//                UserStore.loginGoogle(acct.getIdToken(), mKinveyClient, new KinveyClientCallback() {
+//                    @Override
+//                    public void onSuccess(Object o) {
+//                        intent(true);
+//                        SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+//                        SharedPreferences.Editor editor = mSettings.edit();
+//                        editor.putBoolean("google", true);
+//                        editor.apply();
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Throwable throwable) {
+//                        Toast.makeText(getApplicationContext(), "Fail Google", Toast.LENGTH_SHORT).show();
+//                        progressDialog.cancel();
+//                    }
+//                });
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 

@@ -11,21 +11,21 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.geomhelper.Content.Leader;
 import com.example.geomhelper.R;
+import com.example.geomhelper.User;
 
 import java.util.List;
 
 public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdapter.UserViewHolder> {
 
     private Context context;
-    private List<Leader> users;
+    private List<User> users;
 
-    public void setData(List<Leader> u) {
+    public void setData(List<User> u) {
         users = u;
     }
 
-    public RVLeaderboardAdapter(Context context, List<Leader> users) {
+    public RVLeaderboardAdapter(Context context, List<User> users) {
         this.context = context;
         this.users = users;
     }
@@ -39,7 +39,7 @@ public class RVLeaderboardAdapter extends RecyclerView.Adapter<RVLeaderboardAdap
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        final Leader user = users.get(position);
+        final User user = users.get(position);
 
         if (position == 0)
             holder.linearLayout.setBackgroundColor(context.getResources().getColor(R.color.gold));

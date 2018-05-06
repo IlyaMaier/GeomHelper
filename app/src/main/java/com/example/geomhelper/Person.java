@@ -6,8 +6,6 @@ import com.example.geomhelper.Content.Course;
 import com.example.geomhelper.Content.Test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Person {
 
@@ -38,6 +36,5 @@ public class Person {
     public static short backTests = 0;
     public static short backCourses = 0;
     public static SharedPreferences pref;
-    public static Map<String, Object> map = new HashMap<>();
 
 }

@@ -1,6 +1,7 @@
 package com.example.geomhelper.Activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -25,21 +27,20 @@ import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
-import com.kinvey.android.Client;
-import com.kinvey.android.callback.AsyncUploaderProgressListener;
-import com.kinvey.android.model.User;
-import com.kinvey.android.store.FileStore;
-import com.kinvey.android.store.UserStore;
-import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.core.MediaHttpUploader;
-import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.store.StoreType;
+import com.example.geomhelper.User;
+import com.example.geomhelper.UserService;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
@@ -48,12 +49,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
     private EditText mConfirm;
     private EditText mName;
     private CircleImageView circleImageView;
-
     ProgressDialog progressDialog;
-
-    boolean g = false;
-
-    Client mKinveyClient;
 
     protected void onCreate(Bundle savedInstanceState) {
         //action bar
@@ -66,6 +62,8 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         }
 
         setContentView(R.layout.activity_sign_up);
+
+        progressDialog = new ProgressDialog(SignUp.this);
 
         //views
         mEmail = findViewById(R.id.email_sign_up);
@@ -90,12 +88,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
             }
         });
 
-        //buttons
         findViewById(R.id.sign_up).setOnClickListener(this);
-
-        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
-                "602d7fccc790477ca6505a1daa3aa894",
-                this.getApplicationContext()).setBaseUrl("https://baas.kinvey.com").build();
 
     }
 
@@ -134,76 +127,95 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         return valid;
     }
 
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void onClick(View v) {
-        InputMethodManager imm = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager)
+                getApplicationContext().getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
         if (imm != null)
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         if (v.getId() == R.id.sign_up) {
             if (!validateForm()) return;
-            UserStore.logout(mKinveyClient, new KinveyClientCallback<Void>() {
+
+            progressDialog.setTitle("Загрузка...");
+            progressDialog.show();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(User.URL)
+                    .addConverterFactory(ScalarsConverterFactory.create())
+                    .build();
+            UserService userService = retrofit.create(UserService.class);
+            userService.createUser(mEmail.getText().toString(),
+                    mPassword.getText().toString(),
+                    mName.getText().toString())
+                    .enqueue(new Callback<String>() {
                 @Override
-                public void onSuccess(Void aVoid) {
+                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                    switch (Objects.requireNonNull(response.body())) {
+                        case "0":
+                            Toast.makeText(SignUp.this, "Произошла ошибка!",
+                                    Toast.LENGTH_SHORT).show();
+                            break;
+                        case "2":
+                            Toast.makeText(SignUp.this,
+                                    "Пользователь с таким email уже зарегестрирован!",
+                                    Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                            Person.uId = response.body();
+                            Person.name = mName.getText().toString();
 
-                }
+                            SharedPreferences mSettings = getSharedPreferences(
+                                    Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = mSettings.edit();
+                            editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
+                            editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
+                            editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
+                            editor.apply();
 
-                @Override
-                public void onFailure(Throwable throwable) {
-
-                }
-            });
-            UserStore.signUp(mEmail.getText().toString(),
-                    mPassword.getText().toString(), mKinveyClient,
-                    new KinveyClientCallback<User>() {
-                        @Override
-                        public void onFailure(Throwable t) {
-                            CharSequence text = "Регистрация провалена.";
+                            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                            startActivity(i);
+                            finish();
+                            CharSequence text = "Добро пожаловать, " + mName.getText() + "!";
                             Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
                             progressDialog.cancel();
-                        }
+                            break;
+                    }
+                    progressDialog.cancel();
+                }
 
-                        @Override
-                        public void onSuccess(User u) {
-                            intent();
-                        }
-                    });
+                @Override
+                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Произошла ошибка.",
+                            Toast.LENGTH_SHORT).show();
+                    progressDialog.cancel();
+                }
+            });
         }
-        progressDialog = new ProgressDialog(SignUp.this);
-        progressDialog.setTitle("Загрузка...");
-        progressDialog.show();
     }
 
-    void intent() {
-        User user = mKinveyClient.getActiveUser();
-
-        Person.name = mName.getText().toString();
-        Person.uId = user.getId();
-
-        user.set("name", Person.name);
-        user.set("experience", 0);
-        user.set("courses", "");
-        user.set("image", "");
-
-        mKinveyClient.getActiveUser().update(new KinveyClientCallback() {
-            @Override
-            public void onSuccess(Object o) {
-
-            }
-
-            @Override
-            public void onFailure(Throwable throwable) {
-
-            }
-        });
-
-        if (!g) {
-            Bitmap yourSelectedImage = BitmapFactory.decodeResource(
-                    getResources(), R.drawable.back_login);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == 6) {
+            Bitmap yourSelectedImage;
+            Uri selectedImage = data.getData();
+            InputStream imageStream = null;
             try {
-                File f = new File(getFilesDir(), "profileImage.png");
+                if (selectedImage != null) {
+                    imageStream = getContentResolver().openInputStream(selectedImage);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            yourSelectedImage = BitmapFactory.decodeStream(imageStream);
+            circleImageView.setImageBitmap(yourSelectedImage);
+            try {
+                File file = new File(getFilesDir(), "profileImage.png");
                 FileOutputStream fos = null;
                 try {
-                    fos = new FileOutputStream(f);
+                    fos = new FileOutputStream(file);
                     yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                 } finally {
                     if (fos != null) fos.close();
@@ -211,102 +223,11 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-
-        final java.io.File file = new java.io.File(getFilesDir(), "profileImage.png");
-        FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
-        try {
-            fileStore.upload(file, new AsyncUploaderProgressListener<FileMetaData>() {
-                @Override
-                public void onSuccess(FileMetaData fileMetaData) {
-                    Person.id = fileMetaData.getId();
-
-                    SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = mSettings.edit();
-                    editor.putString("id", Person.id);
-                    editor.apply();
-                }
-
-                @Override
-                public void onFailure(Throwable throwable) {
-                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
-                            Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void progressChanged(MediaHttpUploader mediaHttpUploader) throws IOException {
-                }
-
-                @Override
-                public void onCancelled() {
-                }
-
-                @Override
-                public boolean isCancelled() {
-                    return false;
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
-                    Toast.LENGTH_SHORT).show();
-        }
-
-        SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = mSettings.edit();
-        editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
-        editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
-
-        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-        editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
-        editor.apply();
-        startActivity(i);
-        finish();
-        CharSequence text = "Добро пожаловать, " + mName.getText() + "!";
-        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-        progressDialog.cancel();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case 6:
-                if (resultCode == RESULT_OK) {
-                    Bitmap yourSelectedImage;
-                    Uri selectedImage = data.getData();
-                    InputStream imageStream = null;
-                    try {
-                        if (selectedImage != null) {
-                            imageStream = getContentResolver().openInputStream(selectedImage);
-                        }
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    yourSelectedImage = BitmapFactory.decodeStream(imageStream);
-                    circleImageView.setImageBitmap(yourSelectedImage);
-                    try {
-                        File file = new File(getFilesDir(), "profileImage.png");
-                        FileOutputStream fos = null;
-                        try {
-                            fos = new FileOutputStream(file);
-                            yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                        } finally {
-                            if (fos != null) fos.close();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    SharedPreferences.Editor editor = getSharedPreferences(
-                            Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
-                    editor.putBoolean("image", true);
-                    editor.apply();
-                    g = true;
-                }
+            SharedPreferences.Editor editor = getSharedPreferences(
+                    Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
+            editor.putBoolean("image", true);
+            editor.apply();
         }
     }
 }
-
-
-
 

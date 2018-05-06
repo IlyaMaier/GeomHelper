@@ -13,23 +13,22 @@ import android.support.v7.preference.EditTextPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
+import android.widget.Toast;
 
 import com.example.geomhelper.Activities.LoginActivity;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.facebook.login.LoginManager;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.kinvey.android.Client;
-import com.kinvey.android.callback.KinveyPurgeCallback;
-import com.kinvey.android.store.UserStore;
-import com.kinvey.java.core.KinveyClientCallback;
+import com.example.geomhelper.User;
+import com.example.geomhelper.UserService;
 
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class FragmentSettings extends PreferenceFragmentCompat {
 
@@ -40,18 +39,12 @@ public class FragmentSettings extends PreferenceFragmentCompat {
     SharedPreferences.Editor editor;
     Activity mCurrentActivity;
     AlertDialog.Builder builder;
-    Client mKinveyClient;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
         mCurrentActivity = getActivity();
         setPreferencesFromResource(R.xml.preferences, rootKey);
-
-        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
-                "602d7fccc790477ca6505a1daa3aa894",
-                Objects.requireNonNull(this.getContext())).setBaseUrl(
-                "https://baas.kinvey.com").build();
 
         try {
             mSettings = mCurrentActivity.getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
@@ -79,19 +72,27 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 } else {
                     if (name.length() > 20) name = name.substring(0, 20);
                     Person.name = name;
-                    Person.map.put("name", Person.name);
-                    mKinveyClient.getActiveUser().putAll(Person.map);
-                    mKinveyClient.getActiveUser().update(new KinveyClientCallback() {
-                        @Override
-                        public void onSuccess(Object o) {
 
-                        }
+                    Retrofit retrofit = new Retrofit.Builder()
+                            .baseUrl(User.URL)
+                            .addConverterFactory(ScalarsConverterFactory.create())
+                            .build();
+                    UserService userService = retrofit.create(UserService.class);
+                    userService.updateUser(Person.uId, "name", Person.name)
+                            .enqueue(new Callback<String>() {
+                                @Override
+                                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                    if (Objects.requireNonNull(response.body()).equals("0"))
+                                        Toast.makeText(getContext(), "Не дуалось отправить имя на сервер",
+                                                Toast.LENGTH_SHORT).show();
+                                }
 
-                        @Override
-                        public void onFailure(Throwable throwable) {
-
-                        }
-                    });
+                                @Override
+                                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                    Toast.makeText(getContext(), "Не удалось отправить имя на сервер",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
                     return true;
                 }
             }
@@ -222,38 +223,6 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 builder.setMessage("Вы действительно хотите выйти из аккаунта?");
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int arg1) {
-                        UserStore.logout(mKinveyClient, new KinveyPurgeCallback() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-
-                            }
-
-                            @Override
-                            public void onFailure(Throwable throwable) {
-
-                            }
-                        });
-
-                        LoginManager.getInstance().logOut();
-                        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(
-                                GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestEmail()
-                                .build();
-
-                        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                                .build();
-
-                        mGoogleApiClient.connect();
-
-                        if(Person.pref.getBoolean("google",false))
-                        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                                new ResultCallback<Status>() {
-                                    @Override
-                                    public void onResult(@NonNull Status status) {
-                                    }
-                                });
-
                         Person.name = "";
                         Person.uId = "";
                         Person.courses.clear();

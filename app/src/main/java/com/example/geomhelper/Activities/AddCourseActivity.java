@@ -21,10 +21,17 @@ import com.example.geomhelper.Content.Course;
 import com.example.geomhelper.Content.Courses;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
-import com.kinvey.android.Client;
-import com.kinvey.java.core.KinveyClientCallback;
+import com.example.geomhelper.User;
+import com.example.geomhelper.UserService;
 
 import java.util.ArrayList;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class AddCourseActivity extends AppCompatActivity {
 
@@ -56,27 +63,6 @@ public class AddCourseActivity extends AppCompatActivity {
             rvAdapter = new RVAdapter(getApplicationContext(), courses);
             recyclerView.setAdapter(rvAdapter);
         }
-    }
-
-    void sendDataToFirebase(String name) {
-        Person.c += name;
-        Person.map.put("courses", Person.c);
-        Client mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
-                "602d7fccc790477ca6505a1daa3aa894",
-                this.getApplicationContext()).setBaseUrl("https://baas.kinvey.com").build();
-        com.kinvey.android.model.User user = mKinveyClient.getActiveUser();
-        user.putAll(Person.map);
-        user.update(new KinveyClientCallback() {
-            @Override
-            public void onSuccess(Object o) {
-
-            }
-
-            @Override
-            public void onFailure(Throwable throwable) {
-
-            }
-        });
     }
 
     public class RVAdapter extends RecyclerView.Adapter<RVAdapter.RecyclerViewCoursesHolder> {
@@ -122,7 +108,29 @@ public class AddCourseActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Person.courses.add(0, course);
-                        sendDataToFirebase(Courses.currentCourses.indexOf(course) + "");
+                        Person.c += String.valueOf(Courses.currentCourses.indexOf(course));
+
+                        Retrofit retrofit = new Retrofit.Builder()
+                                .baseUrl(User.URL)
+                                .addConverterFactory(ScalarsConverterFactory.create())
+                                .build();
+                        UserService userService = retrofit.create(UserService.class);
+                        userService.updateUser(Person.uId,"courses",Person.c)
+                                .enqueue(new Callback<String>() {
+                                    @Override
+                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                        if (Objects.requireNonNull(response.body()).equals("0"))
+                                            Toast.makeText(context, "Не дуалось отправить данные на сервер",
+                                                    Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                        Toast.makeText(context, "Не удалось отправить данные на сервер",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
                         Intent intent = new Intent();
                         setResult(RESULT_OK, intent);
                         finish();

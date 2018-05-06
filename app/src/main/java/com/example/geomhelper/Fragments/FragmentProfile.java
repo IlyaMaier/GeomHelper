@@ -1,6 +1,7 @@
 package com.example.geomhelper.Fragments;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,14 +31,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
-import com.kinvey.android.Client;
-import com.kinvey.android.callback.AsyncUploaderProgressListener;
-import com.kinvey.android.callback.KinveyDeleteCallback;
-import com.kinvey.android.store.FileStore;
-import com.kinvey.java.core.KinveyClientCallback;
-import com.kinvey.java.core.MediaHttpUploader;
-import com.kinvey.java.model.FileMetaData;
-import com.kinvey.java.store.StoreType;
+import com.example.geomhelper.User;
+import com.example.geomhelper.UserService;
+
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,6 +43,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -55,7 +59,6 @@ public class FragmentProfile extends Fragment {
     Bitmap bitmap;
     ScrollView scrollView;
     Context context;
-    Client mKinveyClient;
     BottomNavigationView bottomNavigationView;
     public static volatile boolean d = false, a = false, google = false;
     public static String personPhotoUrl = "";
@@ -70,23 +73,12 @@ public class FragmentProfile extends Fragment {
 
         context = getContext();
 
-        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
-                "602d7fccc790477ca6505a1daa3aa894",
-                Objects.requireNonNull(context)).setBaseUrl("https://baas.kinvey.com").build();
-
         bottomNavigationView = Objects.requireNonNull(getActivity())
                 .findViewById(R.id.navigation);
         textName = rootView.findViewById(R.id.textName);
         textLevelName = rootView.findViewById(R.id.textLevelName);
         textExperience = rootView.findViewById(R.id.textExperince);
         circleImageView = rootView.findViewById(R.id.imageProfile);
-
-        if (d) {
-            Toast.makeText(getContext(), "Дождитесь окончания загрузки изображения" +
-                    "", Toast.LENGTH_LONG).show();
-            Async async = new Async();
-            async.execute();
-        }
 
         if (google) {
             Glide.with(getContext()).load(personPhotoUrl)
@@ -166,21 +158,28 @@ public class FragmentProfile extends Fragment {
                                 } else {
                                     if (name.length() > 20) name = name.substring(0, 20);
                                     Person.name = name;
-                                    Person.map.put("name", Person.name);
 
-                                    mKinveyClient.getActiveUser().putAll(Person.map);
-                                    mKinveyClient.getActiveUser().update(new KinveyClientCallback() {
-                                        @Override
-                                        public void onSuccess(Object o) {
-                                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
-                                        }
+                                    Retrofit retrofit = new Retrofit.Builder()
+                                            .baseUrl(User.URL)
+                                            .addConverterFactory(ScalarsConverterFactory.create())
+                                            .build();
+                                    UserService userService = retrofit.create(UserService.class);
+                                    userService.updateUser(Person.uId, "name", Person.name)
+                                            .enqueue(new Callback<String>() {
+                                                @Override
+                                                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                                    if (Objects.requireNonNull(response.body()).equals("0"))
+                                                        Toast.makeText(context, "Не дуалось отправить имя на сервер",
+                                                                Toast.LENGTH_SHORT).show();
+                                                }
 
-                                        @Override
-                                        public void onFailure(Throwable throwable) {
-                                            Toast.makeText(context, "Failure", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                    textName.setText(name);
+                                                @Override
+                                                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                                    Toast.makeText(context, "Не удалось отправить имя на сервер",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                    textName.setText(Person.name);
                                 }
                             }
                         }).setNegativeButton("ОТМЕНИТЬ", new DialogInterface.OnClickListener() {
@@ -237,107 +236,30 @@ public class FragmentProfile extends Fragment {
                     SharedPreferences.Editor editor = getActivity().getSharedPreferences(
                             Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
                     editor.apply();
-                    java.io.File file = new java.io.File(Objects.requireNonNull(
-                            getContext()).getFilesDir(), "profileImage.png");
-                    final boolean isCancelled = false;
-                    mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
-                            "602d7fccc790477ca6505a1daa3aa894",
-                            Objects.requireNonNull(getActivity().getApplicationContext())).
-                            setBaseUrl("https://baas.kinvey.com").build();
-                    FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
-                    FileMetaData fileMetaData = new FileMetaData();
-                    fileMetaData.setId(Person.id);
-                    try {
-                        fileStore.remove(fileMetaData, new KinveyDeleteCallback() {
-                            @Override
-                            public void onSuccess(Integer integer) {
-                            }
-
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                            }
-                        });
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        fileStore.upload(file, new AsyncUploaderProgressListener<FileMetaData>() {
-                            @Override
-                            public void onSuccess(FileMetaData fileMetaData) {
-                                Person.id = fileMetaData.getId();
-                                Person.map.put("image", Person.id);
-                                mKinveyClient.getActiveUser().putAll(Person.map);
-                                mKinveyClient.getActiveUser().update(new KinveyClientCallback() {
-                                    @Override
-                                    public void onSuccess(Object o) {
-
-                                    }
-
-                                    @Override
-                                    public void onFailure(Throwable throwable) {
-
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                Toast.makeText(getContext(), "Не удалось загрузить изображение.",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void progressChanged(MediaHttpUploader mediaHttpUploader) {
-                            }
-
-                            @Override
-                            public void onCancelled() {
-                            }
-
-                            @Override
-                            public boolean isCancelled() {
-                                return isCancelled;
-                            }
-                        });
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
         }
     }
 
-    class Async extends AsyncTask<Integer, Integer, Void> {
+    @SuppressLint("StaticFieldLeak")
+    class Async extends AsyncTask<Void, Void, Void> {
+        String result;
 
         @Override
-        protected Void doInBackground(Integer... integers) {
-            while (d) {
-                if (a) publishProgress(1);
-            }
-            publishProgress(0);
+        protected Void doInBackground(Void... voids) {
+            String url = User.URL + "/put?id=%s&param=name&value='%s'";
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+            result = restTemplate.getForObject(String.format(url, Person.uId, Person.name),
+                    String.class, "Android");
+            publishProgress();
             return null;
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            if (values[0] == 0) {
-                try {
-                    try {
-                        bitmap = BitmapFactory.decodeFile(
-                                context.getFilesDir().getPath() +
-                                        "/profileImage.png");
-                        circleImageView.setImageBitmap(bitmap);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
-                cancel(true);
-            } else if (values[0] == 1) {
-                textName.setText(Person.name);
-                a = false;
-            }
+        protected void onProgressUpdate(Void... values) {
+            if (result.equals("0"))
+                Toast.makeText(context, "Не дуалось отправить имя на сервер",
+                        Toast.LENGTH_SHORT).show();
         }
     }
 

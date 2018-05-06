@@ -31,7 +31,6 @@ import com.example.geomhelper.Fragments.FragmentTestThemes;
 import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Fragments.FragmentThemes;
 import com.example.geomhelper.Resources.ShowNotification;
-import com.kinvey.android.Client;
 
 import java.util.Objects;
 
@@ -46,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     PagerAdapter pagerAdapter;
     static SharedPreferences.Editor editor;
     boolean backCourses = false, backTests = false;
-    Client mKinveyClient;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -126,10 +124,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
-                "602d7fccc790477ca6505a1daa3aa894",
-                this.getApplicationContext()).setBaseUrl("https://baas.kinvey.com").build();
-
         getWindow().setBackgroundDrawable(null);
         if (!Courses.currentCourses.contains(Courses.basics))
             Courses.currentCourses.add(0, Courses.basics);
@@ -162,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             Person.leaderBoardPlace = pref.getLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, -1);
             Person.c = pref.getString("c", "");
             Person.id = pref.getString("id", "");
-            Person.map.put("_socialIdentity", pref.getString("_socialIdentity", ""));
+
             for (int i = 0; i < pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
                 if (Person.courses.size() != pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0)) {
                     String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
@@ -173,11 +167,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-            Person.map.put("name", Person.name);
-            Person.map.put("experience", Person.experience);
-            Person.map.put("courses", Person.c);
-            Person.map.put("image", Person.id);
-
         } else {
             Intent i = new Intent(getApplicationContext(), StartActivity.class);
             startActivity(i);
@@ -338,7 +327,6 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt(Person.APP_PREFERENCES_COURSES_SIZE, Person.courses.size());
         editor.putString("c", Person.c);
         editor.putString("id", Person.id);
-        editor.putString("_socialIdentity", String.valueOf(Person.map.get("_socialIdentity")));
         if (d) editor.putBoolean("image", false);
         if (d) editor.putBoolean(Person.APP_PREFERENCES_WELCOME, welcome);
         for (int i = 0; i < Person.courses.size(); i++) {

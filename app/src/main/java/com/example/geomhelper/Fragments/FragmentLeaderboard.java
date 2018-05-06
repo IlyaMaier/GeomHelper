@@ -1,6 +1,5 @@
 package com.example.geomhelper.Fragments;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -16,22 +15,21 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.example.geomhelper.Content.Leader;
-import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.RVLeaderboardAdapter;
-import com.kinvey.android.Client;
-import com.kinvey.android.store.DataStore;
-import com.kinvey.java.KinveyException;
-import com.kinvey.java.cache.KinveyCachedClientCallback;
-import com.kinvey.java.store.StoreType;
+import com.example.geomhelper.User;
+import com.example.geomhelper.UserService;
+import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.example.geomhelper.Person.pref;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class FragmentLeaderboard extends Fragment {
 
@@ -43,9 +41,7 @@ public class FragmentLeaderboard extends Fragment {
     RVLeaderboardAdapter rvLeaderboardAdapter;
     ProgressBar progressBar;
     BottomNavigationView bottomNavigationView;
-    Client mKinveyClient;
-    DataStore<Leader> dataStore;
-    List<Leader> users;
+    List<User> users;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -55,8 +51,6 @@ public class FragmentLeaderboard extends Fragment {
         relativeLayout = rootView.findViewById(R.id.frame_leaderboard);
 
         users = new ArrayList<>();
-        for (int i = 0; i < 10; i++)
-            users.add(new Leader("", 0));
 
         rvLeaderboardAdapter = new RVLeaderboardAdapter(getContext(), users);
 
@@ -83,60 +77,54 @@ public class FragmentLeaderboard extends Fragment {
                         }
                     }
                 });
-        if (pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
-            mKinveyClient = new Client.Builder("kid_B1OS_p1hM",
-                    "602d7fccc790477ca6505a1daa3aa894",
-                    Objects.requireNonNull(this.getContext())).setBaseUrl("https://baas.kinvey.com").build();
 
-            dataStore = DataStore.collection("leaders",
-                    Leader.class, StoreType.CACHE, mKinveyClient);
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(User.URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build();
+        UserService userService = retrofit.create(UserService.class);
+        userService.getLeaders().enqueue(new Callback<String>() {
+                    String result;
 
-            Async async = new Async();
-            async.onPreExecute();
-            async.execute();
-        }
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            if (Objects.equals(response.body(), "0"))
+                                Toast.makeText(getContext(), "Не дуалось получить данные",
+                                        Toast.LENGTH_SHORT).show();
+                            else {
+                                result = response.body();
+                                result = Objects.requireNonNull(result).replace("[", "");
+                                result = result.replace("]", "");
+                                String[] split = result.split(",");
+                                Gson gson = new Gson();
+                                StringBuilder q = new StringBuilder();
+                                int a = 0;
+                                for (String aSplit : split) {
+                                    if (aSplit.contains("}")) q.append(aSplit);
+                                    else q.append(aSplit).append(",");
+                                    a++;
+                                    if (aSplit.contains("}")) {
+                                        users.add(gson.fromJson(q.toString(), User.class));
+                                        a = 0;
+                                        q = new StringBuilder();
+                                    }
+                                }
+
+                                rvLeaderboardAdapter.setData(users);
+                                rvLeaderboardAdapter.notifyDataSetChanged();
+                                progressBar.setVisibility(View.INVISIBLE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        Toast.makeText(getContext(), "Не удалось получить данные",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
         return rootView;
     }
 
-    class Async extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                try {
-                    dataStore.find(new KinveyCachedClientCallback<List<Leader>>() {
-                        @Override
-                        public void onSuccess(List<Leader> leaders) {
-                            users = leaders;
-                            publishProgress();
-                        }
-
-                        @Override
-                        public void onFailure(Throwable throwable) {
-                            Toast.makeText(getContext(), "Failure", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } catch (KinveyException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-            rvLeaderboardAdapter.setData(users);
-            rvLeaderboardAdapter.notifyDataSetChanged();
-            progressBar.setVisibility(View.INVISIBLE);
-            recyclerView.setVisibility(View.VISIBLE);
-        }
-    }
 }
