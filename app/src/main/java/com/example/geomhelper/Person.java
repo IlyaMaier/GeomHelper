@@ -21,7 +21,6 @@ public class Person {
     public static final String APP_PREFERENCES_WELCOME = "welcome";
 
     public static String name;
-    public static String uId;
     public static String id;
     public static String currentLevel = "Ученик";
     public static int experience = 0;

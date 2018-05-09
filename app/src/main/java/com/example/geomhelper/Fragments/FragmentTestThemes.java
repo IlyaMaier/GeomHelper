@@ -4,15 +4,19 @@ package com.example.geomhelper.Fragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.Resources;
+
+import java.util.Objects;
 
 public class FragmentTestThemes extends Fragment {
 
@@ -41,13 +45,14 @@ public class FragmentTestThemes extends Fragment {
             button[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    MainActivity.back = 4;
-//                    Person.backTests = 4;
-//                    Person.currentTestTheme = v.getId();
-//                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-//                    FragmentCourseText fragmentCourseText = new FragmentCourseText();
-//                    fragmentTransaction.replace(R.id.fragment, fragmentCourseText);
-//                    fragmentTransaction.commit();
+                    MainActivity.back = 4;
+                    Person.backTests = 4;
+                    Person.currentTestTheme = v.getId();
+                    FragmentTransaction fragmentTransaction =
+                            Objects.requireNonNull(getFragmentManager()).beginTransaction();
+                    FragmentFirstTask fragmentFirstTask = new FragmentFirstTask();
+                    fragmentTransaction.replace(R.id.frame_tests, fragmentFirstTask);
+                    fragmentTransaction.commit();
                 }
             });
         }

@@ -64,7 +64,6 @@ public class FragmentCourses extends Fragment {
     int scrollDist = 0;
     boolean isVisible = true, j = true;
     float MINIMUM = 25;
-    BottomNavigationView bottomNavigationView;
     FrameLayout frameLayout;
     CardView card;
     float y, y0;
@@ -76,6 +75,7 @@ public class FragmentCourses extends Fragment {
     EditText et;
     ImageView imageView;
     ArrayList<Short> shortsAll, shortsP;
+    BottomNavigationView bottomNavigationView;
 
     public FragmentCourses() {
     }
@@ -105,7 +105,7 @@ public class FragmentCourses extends Fragment {
 
         et = rootView.findViewById(R.id.search);
 
-        recyclerView = rootView.findViewById(R.id.recyclerCourses);
+        recyclerView = rootView.findViewById(R.id.rv_courses);
 
         fragmentManager = getFragmentManager();
 
@@ -161,7 +161,7 @@ public class FragmentCourses extends Fragment {
                                 }
                             j = false;
                         }
-                    } else if (h && y - event.getY() > 90) {
+                    } else if (h && y - event.getY() > 5) {
                         card.animate().translationY(-height).alpha(0).start();
                         recyclerView.animate().translationY(0).start();
                         h = false;
@@ -184,23 +184,23 @@ public class FragmentCourses extends Fragment {
                             "Такой темы не существует.",
                             Toast.LENGTH_SHORT).show();
                 else if (themesP.contains(theme)) {
-//                    recyclerView.smoothScrollToPosition(
-//                            adapterCourses.items.indexOf(
-//                                    Person.courses.get(
-//                                            shortsP.get(
-//                                                    themesP.indexOf(theme)))));
+                    recyclerView.smoothScrollToPosition(
+                            adapterCourses.items.indexOf(
+                                    Person.courses.get(
+                                            shortsP.get(
+                                                    themesP.indexOf(theme)))));
                     InputMethodManager imm = (InputMethodManager)
                             getContext().getSystemService(
                                     Context.INPUT_METHOD_SERVICE);
                     if (imm != null)
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-//                    Toast.makeText(getContext(),
-//                            "Откройте курс  \"" +
-//                                    Person.courses.get(
-//                                            shortsP.get(
-//                                                    themesP.indexOf(theme)))
-//                                            .getCourseName() + "\".",
-//                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),
+                            "Откройте курс  \"" +
+                                    Person.courses.get(
+                                            shortsP.get(
+                                                    themesP.indexOf(theme)))
+                                            .getCourseName() + "\".",
+                            Toast.LENGTH_SHORT).show();
                     card.animate().translationY(-height).alpha(0).start();
                     if (async != null)
                         async.cancel(true);
@@ -273,15 +273,13 @@ public class FragmentCourses extends Fragment {
         });
 
         bottomNavigationView = Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
-        bottomNavigationView.setOnNavigationItemReselectedListener(
-                new BottomNavigationView.OnNavigationItemReselectedListener() {
-                    @Override
-                    public void onNavigationItemReselected(@NonNull MenuItem item) {
-                        recyclerView.smoothScrollToPosition(0);
-                    }
-                }
-        );
-
+        bottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
+            @Override
+            public void onNavigationItemReselected(@NonNull MenuItem item) {
+                recyclerView.smoothScrollToPosition(0);
+                y0 = 0;
+            }
+        });
         return rootView;
     }
 
@@ -418,12 +416,12 @@ public class FragmentCourses extends Fragment {
                                         .addConverterFactory(ScalarsConverterFactory.create())
                                         .build();
                                 UserService userService = retrofit.create(UserService.class);
-                                userService.updateUser(Person.uId,"courses",Person.c)
+                                userService.updateUser(Person.id, "courses", Person.c)
                                         .enqueue(new Callback<String>() {
                                             @Override
                                             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                                 if (Objects.requireNonNull(response.body()).equals("0"))
-                                                    Toast.makeText(context, "Не дуалось отправить данные на сервер",
+                                                    Toast.makeText(context, "Не удалось отправить данные на сервер",
                                                             Toast.LENGTH_SHORT).show();
                                             }
 

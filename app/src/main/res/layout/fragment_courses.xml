@@ -7,7 +7,7 @@
     tools:context="com.example.geomhelper.Fragments.FragmentCourses">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerCourses"
+        android:id="@+id/rv_courses"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"

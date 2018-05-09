@@ -5,6 +5,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -197,7 +199,7 @@ public class LoginActivity extends AppCompatActivity
                     .build();
             UserService userService = retrofit.create(UserService.class);
             userService.login(mEmail.getText().toString(),
-                    mPassword.getText().toString())
+                    User.md5(mPassword.getText().toString()))
                     .enqueue(new Callback<String>() {
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -220,10 +222,51 @@ public class LoginActivity extends AppCompatActivity
                                     break;
                                 default:
                                     User user = new Gson().fromJson(response.body(), User.class);
-                                    Person.uId = String.valueOf(user.getId());
+                                    Person.id = String.valueOf(user.getId());
                                     Person.name = user.getName();
                                     Person.experience = user.getExperience();
                                     Person.c = user.getCourses();
+
+                                    Retrofit retrofit = new Retrofit.Builder()
+                                            .baseUrl(User.URL)
+                                            .addConverterFactory(ScalarsConverterFactory.create())
+                                            .build();
+
+                                    UserService userService = retrofit.create(UserService.class);
+                                    userService.downloadimage(Person.id).enqueue(new Callback<String>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<String> call,
+                                                               @NonNull Response<String> response) {
+                                            try {
+                                                String[] strings = Objects.requireNonNull(response.body()).split(",");
+                                                byte[] w = new byte[strings.length];
+                                                for (int i = 0; i < w.length; i++)
+                                                    w[i] = Byte.parseByte(strings[i]);
+
+                                                Bitmap bitmap = BitmapFactory.decodeByteArray(w, 0, w.length);
+                                                try {
+                                                    File file = new File(getApplicationContext().getFilesDir(), "profileImage.png");
+                                                    FileOutputStream fos = null;
+                                                    try {
+                                                        fos = new FileOutputStream(file);
+                                                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                                                    } finally {
+                                                        if (fos != null) fos.close();
+                                                    }
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
+                                            } catch (NullPointerException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                            Toast.makeText(LoginActivity.this,
+                                                    "Не удалось загрузить изображение", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
 
                                     if (!Courses.currentCourses.contains(Courses.basics))
                                         Courses.currentCourses.add(0, Courses.basics);
@@ -252,6 +295,7 @@ public class LoginActivity extends AppCompatActivity
                         }
                     });
         }
+
     }
 
     void saveAndFinish() {
@@ -259,9 +303,8 @@ public class LoginActivity extends AppCompatActivity
         SharedPreferences.Editor editor = mSettings.edit();
         editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
         editor.putBoolean("image", true);
-        editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
+        editor.putString(Person.APP_PREFERENCES_UID, Person.id);
         editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
-        editor.putString("id", Person.id);
         editor.putString("c", Person.c);
         editor.apply();
 

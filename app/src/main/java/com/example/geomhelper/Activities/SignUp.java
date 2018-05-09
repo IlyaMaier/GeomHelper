@@ -1,7 +1,6 @@
 package com.example.geomhelper.Activities;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -31,8 +30,8 @@ import com.example.geomhelper.User;
 import com.example.geomhelper.UserService;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
@@ -50,6 +49,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
     private EditText mName;
     private CircleImageView circleImageView;
     ProgressDialog progressDialog;
+    boolean a = false;
 
     protected void onCreate(Bundle savedInstanceState) {
         //action bar
@@ -127,7 +127,6 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
         return valid;
     }
 
-    @SuppressLint("StaticFieldLeak")
     @Override
     public void onClick(View v) {
         InputMethodManager imm = (InputMethodManager)
@@ -141,57 +140,102 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
             progressDialog.setTitle("Загрузка...");
             progressDialog.show();
 
+            if(!a){
+                try {
+                    File file = new File(getFilesDir(), "profileImage.png");
+                    FileOutputStream fos = null;
+                    try {
+                        fos = new FileOutputStream(file);
+                        BitmapFactory.decodeResource(
+                                getResources(), R.drawable.back_login).compress(
+                                Bitmap.CompressFormat.JPEG, 100, fos);
+                        a = true;
+                    } finally {
+                        if (fos != null) fos.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(User.URL)
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .build();
+
             UserService userService = retrofit.create(UserService.class);
+
             userService.createUser(mEmail.getText().toString(),
-                    mPassword.getText().toString(),
+                    User.md5(mPassword.getText().toString()),
                     mName.getText().toString())
                     .enqueue(new Callback<String>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    switch (Objects.requireNonNull(response.body())) {
-                        case "0":
-                            Toast.makeText(SignUp.this, "Произошла ошибка!",
-                                    Toast.LENGTH_SHORT).show();
-                            break;
-                        case "2":
-                            Toast.makeText(SignUp.this,
-                                    "Пользователь с таким email уже зарегестрирован!",
-                                    Toast.LENGTH_SHORT).show();
-                            break;
-                        default:
-                            Person.uId = response.body();
-                            Person.name = mName.getText().toString();
+                        @Override
+                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                            switch (Objects.requireNonNull(response.body())) {
+                                case "0":
+                                    Toast.makeText(SignUp.this, "Произошла ошибка!",
+                                            Toast.LENGTH_SHORT).show();
+                                    break;
+                                case "2":
+                                    Toast.makeText(SignUp.this,
+                                            "Пользователь с таким email уже зарегестрирован!",
+                                            Toast.LENGTH_SHORT).show();
+                                    break;
+                                default:
+                                    Person.id = response.body();
+                                    Person.name = mName.getText().toString();
 
-                            SharedPreferences mSettings = getSharedPreferences(
-                                    Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = mSettings.edit();
-                            editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
-                            editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
-                            editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
-                            editor.apply();
+                                    Retrofit retrofit = new Retrofit.Builder()
+                                            .baseUrl(User.URL)
+                                            .addConverterFactory(ScalarsConverterFactory.create())
+                                            .build();
 
-                            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(i);
-                            finish();
-                            CharSequence text = "Добро пожаловать, " + mName.getText() + "!";
-                            Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                                    try {
+                                        UserService userService = retrofit.create(UserService.class);
+                                        userService.uploadImage(Person.id,null )
+                                                .enqueue(new Callback<String>() {
+                                                    @Override
+                                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                                        Toast.makeText(SignUp.this,
+                                                                "Не удалось отправить изображение", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                    } catch (NullPointerException e) {
+                                        Toast.makeText(SignUp.this,
+                                                "Не удалось отправить изображение", Toast.LENGTH_SHORT).show();
+                                        e.printStackTrace();
+                                    }
+                                    SharedPreferences mSettings = getSharedPreferences(
+                                            Person.APP_PREFERENCES, Context.MODE_PRIVATE);
+                                    SharedPreferences.Editor editor = mSettings.edit();
+                                    editor.putBoolean(Person.APP_PREFERENCES_WELCOME, true);
+                                    editor.putString(Person.APP_PREFERENCES_UID, Person.id);
+                                    editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
+                                    editor.apply();
+
+                                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                                    startActivity(i);
+                                    finish();
+                                    CharSequence text = "Добро пожаловать, " + mName.getText() + "!";
+                                    Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+                                    progressDialog.cancel();
+                                    break;
+                            }
                             progressDialog.cancel();
-                            break;
-                    }
-                    progressDialog.cancel();
-                }
+                        }
 
-                @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Произошла ошибка.",
-                            Toast.LENGTH_SHORT).show();
-                    progressDialog.cancel();
-                }
-            });
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Toast.makeText(getApplicationContext(), "Произошла ошибка.",
+                                    Toast.LENGTH_SHORT).show();
+                            progressDialog.cancel();
+                        }
+                    });
         }
     }
 
@@ -206,7 +250,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                 if (selectedImage != null) {
                     imageStream = getContentResolver().openInputStream(selectedImage);
                 }
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             yourSelectedImage = BitmapFactory.decodeStream(imageStream);
@@ -216,18 +260,17 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                 FileOutputStream fos = null;
                 try {
                     fos = new FileOutputStream(file);
-                    yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                    yourSelectedImage.compress(
+                            Bitmap.CompressFormat.JPEG, 100, fos);
+                    a = true;
                 } finally {
                     if (fos != null) fos.close();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            SharedPreferences.Editor editor = getSharedPreferences(
-                    Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
-            editor.putBoolean("image", true);
-            editor.apply();
         }
     }
+
 }
 

@@ -115,7 +115,7 @@ public class AddCourseActivity extends AppCompatActivity {
                                 .addConverterFactory(ScalarsConverterFactory.create())
                                 .build();
                         UserService userService = retrofit.create(UserService.class);
-                        userService.updateUser(Person.uId,"courses",Person.c)
+                        userService.updateUser(Person.id,"courses",Person.c)
                                 .enqueue(new Callback<String>() {
                                     @Override
                                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {

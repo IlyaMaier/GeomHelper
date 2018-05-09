@@ -78,12 +78,12 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                             .addConverterFactory(ScalarsConverterFactory.create())
                             .build();
                     UserService userService = retrofit.create(UserService.class);
-                    userService.updateUser(Person.uId, "name", Person.name)
+                    userService.updateUser(Person.id, "name", Person.name)
                             .enqueue(new Callback<String>() {
                                 @Override
                                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                     if (Objects.requireNonNull(response.body()).equals("0"))
-                                        Toast.makeText(getContext(), "Не дуалось отправить имя на сервер",
+                                        Toast.makeText(getContext(), "Не удалось отправить имя на сервер",
                                                 Toast.LENGTH_SHORT).show();
                                 }
 
@@ -224,12 +224,11 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int arg1) {
                         Person.name = "";
-                        Person.uId = "";
+                        Person.id = "";
                         Person.courses.clear();
                         Person.experience = 0;
                         Person.leaderBoardPlace = 0;
                         Person.c = "";
-                        Person.id = "";
                         MainActivity.saveAll(true, false);
                         Intent i = new Intent(getContext(), LoginActivity.class);
                         startActivity(i);

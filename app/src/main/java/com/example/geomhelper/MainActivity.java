@@ -22,6 +22,7 @@ import android.view.Window;
 
 import com.example.geomhelper.Activities.StartActivity;
 import com.example.geomhelper.Content.Courses;
+import com.example.geomhelper.Content.FirstTasks;
 import com.example.geomhelper.Content.Tests;
 import com.example.geomhelper.Fragments.FragmentCourses;
 import com.example.geomhelper.Fragments.FragmentLeaderboard;
@@ -34,6 +35,7 @@ import com.example.geomhelper.Resources.ShowNotification;
 
 import java.util.Objects;
 
+import static com.example.geomhelper.Content.FirstTasks.tasks;
 import static com.example.geomhelper.Person.pref;
 
 public class MainActivity extends AppCompatActivity {
@@ -134,6 +136,11 @@ public class MainActivity extends AppCompatActivity {
         if (!Courses.currentCourses.contains(Courses.fourth))
             Courses.currentCourses.add(3, Courses.fourth);
 
+        if(!tasks.contains(FirstTasks.straightAndCut))
+            tasks.add(FirstTasks.straightAndCut);
+        if(!tasks.contains(FirstTasks.straightAndCut1))
+            tasks.add(FirstTasks.straightAndCut1);
+
         if (!Tests.currentTests.contains(Tests.fourth)) {
             Tests.currentTests.add(0, Tests.fourth);
         }
@@ -149,13 +156,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
             Person.name = pref.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");
-            Person.uId = pref.getString(Person.APP_PREFERENCES_UID, "-1");
+            Person.id = pref.getString(Person.APP_PREFERENCES_UID, "-1");
             Person.currentLevel = pref.getString(Person.APP_PREFERENCES_LEVEL, "Произошла ошибка");
             Person.experience = pref.getInt(Person.APP_PREFERENCES_EXPERIENCE, -1);
             Person.currentLevelExperience = pref.getInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, -1);
             Person.leaderBoardPlace = pref.getLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, -1);
             Person.c = pref.getString("c", "");
-            Person.id = pref.getString("id", "");
 
             for (int i = 0; i < pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
                 if (Person.courses.size() != pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0)) {
@@ -271,12 +277,12 @@ public class MainActivity extends AppCompatActivity {
             Person.backCourses = 1;
             back = 1;
         } else if (back == 3 && backTests) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.frameTests, new FragmentTests()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.frame_tests, new FragmentTests()).commit();
             getSupportFragmentManager().beginTransaction().remove(new FragmentTestThemes()).commit();
             back = 0;
         } else if (back == 4 && backTests) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.frameTests, new FragmentTestThemes()).commit();
-//            getSupportFragmentManager().beginTransaction().remove(new FragmentThemes()).commit();
+            getSupportFragmentManager().beginTransaction().
+                    replace(R.id.frame_tests, new FragmentTestThemes()).commit();
             back = 3;
         }
     }
@@ -319,14 +325,13 @@ public class MainActivity extends AppCompatActivity {
     public static void saveAll(boolean d, boolean welcome) {
         editor = pref.edit();
         editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
-        editor.putString(Person.APP_PREFERENCES_UID, Person.uId);
+        editor.putString(Person.APP_PREFERENCES_UID, Person.id);
         editor.putString(Person.APP_PREFERENCES_LEVEL, Person.currentLevel);
         editor.putInt(Person.APP_PREFERENCES_EXPERIENCE, Person.experience);
         editor.putInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, Person.currentLevelExperience);
         editor.putLong(Person.APP_PREFERENCES_LEADERBOARDPLACE, Person.leaderBoardPlace);
         editor.putInt(Person.APP_PREFERENCES_COURSES_SIZE, Person.courses.size());
         editor.putString("c", Person.c);
-        editor.putString("id", Person.id);
         if (d) editor.putBoolean("image", false);
         if (d) editor.putBoolean(Person.APP_PREFERENCES_WELCOME, welcome);
         for (int i = 0; i < Person.courses.size(); i++) {

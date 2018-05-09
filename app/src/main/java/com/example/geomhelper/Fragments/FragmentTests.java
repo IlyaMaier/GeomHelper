@@ -54,16 +54,13 @@ public class FragmentTests extends Fragment {
         recyclerView.setAdapter(rvTestsAdapter);
         recyclerView.scrollToPosition(Tests.currentTests.size() - 1);
 
-        bottomNavigationView = Objects.requireNonNull(getActivity()).
-                findViewById(R.id.navigation);
-        bottomNavigationView.setOnNavigationItemReselectedListener(
-                new BottomNavigationView.OnNavigationItemReselectedListener() {
-                    @Override
-                    public void onNavigationItemReselected(@NonNull MenuItem item) {
-                        recyclerView.smoothScrollToPosition(rvTestsAdapter.getItemCount() - 1);
-                    }
-                });
-
+        bottomNavigationView = Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
+        bottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
+            @Override
+            public void onNavigationItemReselected(@NonNull MenuItem item) {
+                recyclerView.smoothScrollToPosition(rvTestsAdapter.getItemCount() - 1);
+            }
+        });
         return rootView;
     }
 
@@ -138,7 +135,7 @@ public class FragmentTests extends Fragment {
                         Person.backTests = 3;
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                         FragmentTestThemes fragmentTestThemes = new FragmentTestThemes();
-                        fragmentTransaction.replace(R.id.frameTests, fragmentTestThemes);
+                        fragmentTransaction.replace(R.id.frame_tests, fragmentTestThemes);
                         fragmentTransaction.commit();
                         recyclerView.setVisibility(View.INVISIBLE);
                         recyclerView.setClickable(false);

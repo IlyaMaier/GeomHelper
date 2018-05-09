@@ -1,17 +1,14 @@
 package com.example.geomhelper.Fragments;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -33,9 +30,6 @@ import com.example.geomhelper.R;
 import com.example.geomhelper.Resources.CircleImageView;
 import com.example.geomhelper.User;
 import com.example.geomhelper.UserService;
-
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -113,7 +107,7 @@ public class FragmentProfile extends Fragment {
         try {
             try {
                 bitmap = BitmapFactory.decodeFile(
-                        context.getFilesDir().getPath() +
+                        context.getFilesDir() +
                                 "/profileImage.png");
 
                 circleImageView.setImageBitmap(bitmap);
@@ -164,12 +158,12 @@ public class FragmentProfile extends Fragment {
                                             .addConverterFactory(ScalarsConverterFactory.create())
                                             .build();
                                     UserService userService = retrofit.create(UserService.class);
-                                    userService.updateUser(Person.uId, "name", Person.name)
+                                    userService.updateUser(Person.id, "name", Person.name)
                                             .enqueue(new Callback<String>() {
                                                 @Override
                                                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                                                     if (Objects.requireNonNull(response.body()).equals("0"))
-                                                        Toast.makeText(context, "Не дуалось отправить имя на сервер",
+                                                        Toast.makeText(context, "Не удалось отправить имя на сервер",
                                                                 Toast.LENGTH_SHORT).show();
                                                 }
 
@@ -233,33 +227,7 @@ public class FragmentProfile extends Fragment {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    SharedPreferences.Editor editor = getActivity().getSharedPreferences(
-                            Person.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
-                    editor.apply();
                 }
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    class Async extends AsyncTask<Void, Void, Void> {
-        String result;
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            String url = User.URL + "/put?id=%s&param=name&value='%s'";
-            RestTemplate restTemplate = new RestTemplate();
-            restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-            result = restTemplate.getForObject(String.format(url, Person.uId, Person.name),
-                    String.class, "Android");
-            publishProgress();
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            if (result.equals("0"))
-                Toast.makeText(context, "Не дуалось отправить имя на сервер",
-                        Toast.LENGTH_SHORT).show();
         }
     }
 

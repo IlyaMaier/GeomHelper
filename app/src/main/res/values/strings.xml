@@ -55,5 +55,17 @@
     <string name="facebook_app_id">227878137947449</string>
     <string name="fb_login_protocol_scheme">fb227878137947449</string>
     <string name="server_client_id">1021657095056-0g139d0uof3m7q25jc2aaei1naridfdj.apps.googleusercontent.com</string>
+    <string name="task_1">Задание 1</string>
+    <string name="choose">Какое-то там задание на выбор ванианта ответа</string>
+    <string name="_1">Вариант 1</string>
+    <string name="_2">Вариант 2</string>
+    <string name="_3">Вариант 3</string>
+    <string name="cont">Продолжить</string>
+    <string name="task2">Задание 2</string>
+    <string name="c">Какое-то там задание c простыми теоремами и вычислениями</string>
+    <string name="answer">Ответ</string>
+    <string name="task3">Задание 3</string>
+    <string name="paint">Какое-то там задание, которое надо будет нарисовать(вместо картинки должно быть поле рисования)</string>
+    <string name="end">Закончить</string>
 
 </resources>
