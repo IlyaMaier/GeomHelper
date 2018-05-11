@@ -6,10 +6,23 @@ import java.util.ArrayList;
 
 public class FirstTasks {
 
-    public static ArrayList<FirstTask> tasks = new ArrayList<>();
+    public ArrayList<FirstTask> getTasks(int test, int theme) {
+        ArrayList<FirstTask> firstTasks = new ArrayList<>();
+        switch (test) {
+            case 0:
+                switch (theme) {
+                    case 0:
+                        firstTasks.add(straightAndCut);
+                        firstTasks.add(straightAndCut1);
+                        break;
+                }
+                break;
+        }
+        return firstTasks;
+    }
 
     //Прямая и отрезок
-    public static FirstTask straightAndCut = new FirstTask(
+    private FirstTask straightAndCut = new FirstTask(
             "Пересекаются ли отрезки AB и CD?",
             R.drawable.straight_and_cut,
             "Да",
@@ -18,7 +31,7 @@ public class FirstTasks {
             1,
             5);
 
-    public static FirstTask straightAndCut1 = new FirstTask(
+    private FirstTask straightAndCut1 = new FirstTask(
             "Пересекаются ли прямые АВ и CD?",
             R.drawable.straight_and_cut,
             "Да",

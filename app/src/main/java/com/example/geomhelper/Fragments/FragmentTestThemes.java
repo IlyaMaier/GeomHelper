@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.example.geomhelper.Content.Test;
+import com.example.geomhelper.Content.Tests;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
@@ -23,6 +25,7 @@ public class FragmentTestThemes extends Fragment {
     Resources resources = new Resources();
     Button[] button;
     LinearLayout linearLayout;
+    Test test;
 
     public FragmentTestThemes() { }
 
@@ -31,14 +34,16 @@ public class FragmentTestThemes extends Fragment {
                              Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_test_themes, container, false);
 
+        test = new Tests().getCurrentTests().get(Person.currentTest);
+
         linearLayout = rootView.findViewById(R.id.linearLayoutFragmentTestThemes);
-        button = new Button[Person.currentTest.getNumberOfThemes()];
+        button = new Button[test.getNumberOfThemes()];
 
         for (int i = 0; i < button.length; i++) {
             button[i] = new Button(getContext());
             button[i].setHeight(250);
             button[i].setBackgroundColor(resources.colors[i]);
-            button[i].setText(Person.currentTest.getTheme(i));
+            button[i].setText(test.getTheme(i));
             button[i].setTextSize(16);
             button[i].setId(i);
             linearLayout.addView(button[i]);

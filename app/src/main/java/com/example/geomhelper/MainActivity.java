@@ -21,9 +21,8 @@ import android.view.View;
 import android.view.Window;
 
 import com.example.geomhelper.Activities.StartActivity;
+import com.example.geomhelper.Content.Course;
 import com.example.geomhelper.Content.Courses;
-import com.example.geomhelper.Content.FirstTasks;
-import com.example.geomhelper.Content.Tests;
 import com.example.geomhelper.Fragments.FragmentCourses;
 import com.example.geomhelper.Fragments.FragmentLeaderboard;
 import com.example.geomhelper.Fragments.FragmentProfile;
@@ -33,9 +32,9 @@ import com.example.geomhelper.Fragments.FragmentTests;
 import com.example.geomhelper.Fragments.FragmentThemes;
 import com.example.geomhelper.Resources.ShowNotification;
 
+import java.util.List;
 import java.util.Objects;
 
-import static com.example.geomhelper.Content.FirstTasks.tasks;
 import static com.example.geomhelper.Person.pref;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     PagerAdapter pagerAdapter;
     static SharedPreferences.Editor editor;
     boolean backCourses = false, backTests = false;
+    List<Course> courses;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -126,33 +126,9 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        courses = new Courses().getCurrentCourses();
+
         getWindow().setBackgroundDrawable(null);
-        if (!Courses.currentCourses.contains(Courses.basics))
-            Courses.currentCourses.add(0, Courses.basics);
-        if (!Courses.currentCourses.contains(Courses.second))
-            Courses.currentCourses.add(1, Courses.second);
-        if (!Courses.currentCourses.contains(Courses.third))
-            Courses.currentCourses.add(2, Courses.third);
-        if (!Courses.currentCourses.contains(Courses.fourth))
-            Courses.currentCourses.add(3, Courses.fourth);
-
-        if(!tasks.contains(FirstTasks.straightAndCut))
-            tasks.add(FirstTasks.straightAndCut);
-        if(!tasks.contains(FirstTasks.straightAndCut1))
-            tasks.add(FirstTasks.straightAndCut1);
-
-        if (!Tests.currentTests.contains(Tests.fourth)) {
-            Tests.currentTests.add(0, Tests.fourth);
-        }
-        if (!Tests.currentTests.contains(Tests.third)) {
-            Tests.currentTests.add(1, Tests.third);
-        }
-        if (!Tests.currentTests.contains(Tests.second)) {
-            Tests.currentTests.add(2, Tests.second);
-        }
-        if (!Tests.currentTests.contains(Tests.basics)) {
-            Tests.currentTests.add(3, Tests.basics);
-        }
 
         if (pref.getBoolean(Person.APP_PREFERENCES_WELCOME, false)) {
             Person.name = pref.getString(Person.APP_PREFERENCES_NAME, "Произошла ошибка");
@@ -166,9 +142,9 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0); i++) {
                 if (Person.courses.size() != pref.getInt(Person.APP_PREFERENCES_COURSES_SIZE, 0)) {
                     String course = Person.APP_PREFERENCES_COURSES + String.valueOf(i);
-                    for (int j = 0; j < Courses.currentCourses.size(); j++) {
-                        if (pref.getString(course, "").equals(Courses.currentCourses.get(j).getCourseName())) {
-                            Person.courses.add(i, Courses.currentCourses.get(j));
+                    for (int j = 0; j < courses.size(); j++) {
+                        if (pref.getString(course, "").equals(courses.get(j).getCourseName())) {
+                            Person.courses.add(i, courses.get(j));
                         }
                     }
                 }

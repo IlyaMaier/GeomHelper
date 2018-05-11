@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -50,6 +52,8 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
     private CircleImageView circleImageView;
     ProgressDialog progressDialog;
     boolean a = false;
+    Retrofit retrofit;
+    UserService userService;
 
     protected void onCreate(Bundle savedInstanceState) {
         //action bar
@@ -140,7 +144,7 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
             progressDialog.setTitle("Загрузка...");
             progressDialog.show();
 
-            if(!a){
+            if (!a) {
                 try {
                     File file = new File(getFilesDir(), "profileImage.png");
                     FileOutputStream fos = null;
@@ -158,12 +162,12 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                 }
             }
 
-            Retrofit retrofit = new Retrofit.Builder()
+            retrofit = new Retrofit.Builder()
                     .baseUrl(User.URL)
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .build();
 
-            UserService userService = retrofit.create(UserService.class);
+            userService = retrofit.create(UserService.class);
 
             userService.createUser(mEmail.getText().toString(),
                     User.md5(mPassword.getText().toString()),
@@ -185,31 +189,21 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
                                     Person.id = response.body();
                                     Person.name = mName.getText().toString();
 
-                                    Retrofit retrofit = new Retrofit.Builder()
-                                            .baseUrl(User.URL)
-                                            .addConverterFactory(ScalarsConverterFactory.create())
-                                            .build();
+                                    File imgFile = new File(getFilesDir(), "profileImage.png");
+                                    RequestBody requestBodyFile = RequestBody.create(MediaType.parse("image/*"), imgFile);
+                                    RequestBody requestBodyID = RequestBody.create(MediaType.parse("text/plain"), Person.id);
+                                    userService.upload(requestBodyID, requestBodyFile).enqueue(new Callback<String>() {
+                                        @Override
+                                        public void onResponse(Call<String> call, Response<String> response) {
+                                            System.out.println(response.body());
+                                        }
 
-                                    try {
-                                        UserService userService = retrofit.create(UserService.class);
-                                        userService.uploadImage(Person.id,null )
-                                                .enqueue(new Callback<String>() {
-                                                    @Override
-                                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                        @Override
+                                        public void onFailure(Call<String> call, Throwable t) {
+                                            System.out.println(t.getMessage());
+                                        }
+                                    });
 
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                                        Toast.makeText(SignUp.this,
-                                                                "Не удалось отправить изображение", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                });
-                                    } catch (NullPointerException e) {
-                                        Toast.makeText(SignUp.this,
-                                                "Не удалось отправить изображение", Toast.LENGTH_SHORT).show();
-                                        e.printStackTrace();
-                                    }
                                     SharedPreferences mSettings = getSharedPreferences(
                                             Person.APP_PREFERENCES, Context.MODE_PRIVATE);
                                     SharedPreferences.Editor editor = mSettings.edit();

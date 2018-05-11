@@ -1,14 +1,14 @@
 package com.example.geomhelper.Content;
 
 public class SecondTask {
-    String textViewName2, textViewTask2, editText2Task;
-    int imageView2;
+    private String textViewName2, textViewTask2, answer;
+    private int imageView2;
 
-    public SecondTask(String textViewTask2,
-                      int imageView2, String editText2Task) {
+    SecondTask(String textViewTask2,
+                      int imageView2, String answer) {
         this.textViewTask2 = textViewTask2;
         this.imageView2 = imageView2;
-        this.editText2Task = editText2Task;
+        this.answer = answer;
     }
 
     public String getTextViewName2() {
@@ -35,11 +35,12 @@ public class SecondTask {
         this.imageView2 = imageView2;
     }
 
-    public String getEditText2Task() {
-        return editText2Task;
+    public String answer() {
+        return answer;
     }
 
-    public void setEditText2Task(String editText2Task) {
-        this.editText2Task = editText2Task;
+    public void answer(String answer) {
+        this.answer = answer;
     }
+
 }

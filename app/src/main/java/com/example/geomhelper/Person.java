@@ -3,7 +3,6 @@ package com.example.geomhelper;
 import android.content.SharedPreferences;
 
 import com.example.geomhelper.Content.Course;
-import com.example.geomhelper.Content.Test;
 
 import java.util.ArrayList;
 
@@ -30,8 +29,9 @@ public class Person {
     public static String c = "";
     public static Course currentCourse;
     public static int currentTheme = 0;
-    public static Test currentTest;
+    public static int currentTest;
     public static int currentTestTheme = 0;
+    public static int task = 0;
     public static short backTests = 0;
     public static short backCourses = 0;
     public static SharedPreferences pref;

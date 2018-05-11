@@ -36,23 +36,26 @@ public class FragmentTests extends Fragment {
     RVAdpater rvTestsAdapter;
     LinearLayoutManager verticalManager, horizontalManager;
     BottomNavigationView bottomNavigationView;
+    List<Test> currentTests;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tests, container, false);
 
+        currentTests = new Tests().getCurrentTests();
+
         verticalManager = new LinearLayoutManager(getContext());
         horizontalManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
 
-        rvTestsAdapter = new RVAdpater(Tests.currentTests);
+        rvTestsAdapter = new RVAdpater(currentTests);
 
         fragmentManager = getFragmentManager();
 
         recyclerView = rootView.findViewById(R.id.rv_tests);
         recyclerView.setLayoutManager(verticalManager);
         recyclerView.setAdapter(rvTestsAdapter);
-        recyclerView.scrollToPosition(Tests.currentTests.size() - 1);
+        recyclerView.scrollToPosition(currentTests.size() - 1);
 
         bottomNavigationView = Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
@@ -130,7 +133,7 @@ public class FragmentTests extends Fragment {
                 cardView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Person.currentTest = test;
+                        Person.currentTest = currentTests.indexOf(test);
                         MainActivity.back = 3;
                         Person.backTests = 3;
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

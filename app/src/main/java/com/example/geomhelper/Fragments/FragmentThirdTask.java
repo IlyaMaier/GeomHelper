@@ -13,8 +13,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.geomhelper.MainActivity;
-import com.example.geomhelper.Person;
 import com.example.geomhelper.R;
 
 import java.util.Objects;
@@ -42,11 +40,9 @@ public class FragmentThirdTask extends Fragment {
         buttonEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.back = 3;
-                Person.backTests = 3;
                 FragmentManager fragmentManager = getFragmentManager();
                 Objects.requireNonNull(fragmentManager).beginTransaction().
-                        replace(R.id.frame_tests, new FragmentTestThemes()).commit();
+                        replace(R.id.frame_tests, new FragmentResult()).commit();
             }
         });
 

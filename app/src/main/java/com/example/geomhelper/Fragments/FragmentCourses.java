@@ -45,6 +45,7 @@ import com.example.geomhelper.User;
 import com.example.geomhelper.UserService;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -76,6 +77,7 @@ public class FragmentCourses extends Fragment {
     ImageView imageView;
     ArrayList<Short> shortsAll, shortsP;
     BottomNavigationView bottomNavigationView;
+    List<Course> courses;
 
     public FragmentCourses() {
     }
@@ -85,6 +87,8 @@ public class FragmentCourses extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_courses, container, false);
+
+        courses = new Courses().getCurrentCourses();
 
         frameLayout = rootView.findViewById(R.id.fragment);
 
@@ -148,9 +152,9 @@ public class FragmentCourses extends Fragment {
                             shortsAll = new ArrayList<>();
                             shortsP = new ArrayList<>();
 
-                            for (int i = 0; i < Courses.currentCourses.size(); i++)
-                                for (int j = 0; j < Courses.currentCourses.get(i).getNumberOfThemes(); j++) {
-                                    themesAll.add(Courses.currentCourses.get(i).getTheme(j).toLowerCase());
+                            for (int i = 0; i < courses.size(); i++)
+                                for (int j = 0; j < courses.get(i).getNumberOfThemes(); j++) {
+                                    themesAll.add(courses.get(i).getTheme(j).toLowerCase());
                                     shortsAll.add((short) i);
                                 }
 
@@ -228,7 +232,7 @@ public class FragmentCourses extends Fragment {
                     startActivityForResult(i, 10);
                     Toast.makeText(getContext(),
                             "Добавьте курс  \"" +
-                                    Courses.currentCourses.get(
+                                    courses.get(
                                             shortsAll.get(
                                                     themesAll.indexOf(theme)))
                                             .getCourseName() + "\".",
@@ -295,9 +299,9 @@ public class FragmentCourses extends Fragment {
                 shortsAll = new ArrayList<>();
                 shortsP = new ArrayList<>();
 
-                for (int i = 0; i < Courses.currentCourses.size(); i++)
-                    for (int j = 0; j < Courses.currentCourses.get(i).getNumberOfThemes(); j++) {
-                        themesAll.add(Courses.currentCourses.get(i).getTheme(j).toLowerCase());
+                for (int i = 0; i < courses.size(); i++)
+                    for (int j = 0; j < courses.get(i).getNumberOfThemes(); j++) {
+                        themesAll.add(courses.get(i).getTheme(j).toLowerCase());
                         shortsAll.add((short) i);
                     }
 
@@ -330,7 +334,7 @@ public class FragmentCourses extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull RVAdapter.RecyclerViewCoursesHolder holder, int position) {
-            holder.bind(Person.courses.get(position));
+            holder.bind(Person.courses.get(position), position);
         }
 
         @Override
@@ -348,6 +352,7 @@ public class FragmentCourses extends Fragment {
             private TextView title;
             private ImageView image;
             private Course course;
+            private int position;
 
             RecyclerViewCoursesHolder(final View itemView) {
                 super(itemView);
@@ -390,18 +395,19 @@ public class FragmentCourses extends Fragment {
                                 adapterCourses.setItems(Person.courses);
                                 adapterCourses.notifyDataSetChanged();
                                 floatingActionButton.show();
-                                Person.c = Person.c.replace(String.valueOf(
-                                        Courses.currentCourses.indexOf(course)), "");
-
+                                Person.c = Person.c.replace(
+                                        Person.c.charAt(Person.c.length() - position-1)
+                                                + "", "");
+                                System.out.println(courses.indexOf(course));
                                 if (!j) {
                                     themesAll = new ArrayList<>();
                                     themesP = new ArrayList<>();
                                     shortsAll = new ArrayList<>();
                                     shortsP = new ArrayList<>();
 
-                                    for (int i = 0; i < Courses.currentCourses.size(); i++)
-                                        for (int j = 0; j < Courses.currentCourses.get(i).getNumberOfThemes(); j++) {
-                                            themesAll.add(Courses.currentCourses.get(i).getTheme(j).toLowerCase());
+                                    for (int i = 0; i < courses.size(); i++)
+                                        for (int j = 0; j < courses.get(i).getNumberOfThemes(); j++) {
+                                            themesAll.add(courses.get(i).getTheme(j).toLowerCase());
                                             shortsAll.add((short) i);
                                         }
 
@@ -445,8 +451,9 @@ public class FragmentCourses extends Fragment {
                 });
             }
 
-            void bind(Course course) {
+            void bind(Course course, int position) {
                 this.course = course;
+                this.position = position;
                 image.setImageBitmap(BitmapFactory.decodeResource(itemView.getResources(), course.getBackground()));
                 title.setText(course.getCourseName());
             }

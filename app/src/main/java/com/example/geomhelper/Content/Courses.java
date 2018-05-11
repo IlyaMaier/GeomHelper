@@ -7,16 +7,23 @@ import java.util.List;
 
 public class Courses {
 
-    public static List<Course> currentCourses = new ArrayList<>();
+    public List<Course> getCurrentCourses() {
+        List<Course> courses = new ArrayList<>();
+        courses.add(basics);
+        courses.add(second);
+        courses.add(third);
+        courses.add(fourth);
+        return courses;
+    }
 
     // Basics
-    private static String[] basicsThemes = {"Прямая и отрезок",
+    private String[] basicsThemes = {"Прямая и отрезок",
             "Луч и угол",
             "Сравнение отрезков и углов",
             "Измерение отрезков",
             "Измерение углов",
             "Перпендикулярные прямые"};
-    private static String[] basicCourseTextUrl = {
+    private String[] basicCourseTextUrl = {
             "file:///android_asset/courses/first/text1.html",
             "file:///android_asset/courses/first/text2.html",
             "file:///android_asset/courses/first/text3.html",
@@ -24,7 +31,7 @@ public class Courses {
             "file:///android_asset/courses/first/text5.html",
             "file:///android_asset/courses/first/text6.html"
     };
-    public static Course basics = new Course("Начальные геометрические сведения",
+    private Course basics = new Course("Начальные геометрические сведения",
             6,
             basicsThemes,
             basicCourseTextUrl,
@@ -32,17 +39,17 @@ public class Courses {
     // end basics
 
     // Second
-    private static String[] secondThemes = {"Первый признак равенства треугольников",
+    private String[] secondThemes = {"Первый признак равенства треугольников",
             "Медианы, биссектрисы и высоты треугольника",
             "Второй и третий признаки равенства треугольников",
             "Задачи на построение"};
-    private static String[] secondCourseTextUrl = {
+    private String[] secondCourseTextUrl = {
             "file:///android_asset/courses/second/text1.html",
             "file:///android_asset/courses/second/text2.html",
             "file:///android_asset/courses/second/text3.html",
             "file:///android_asset/courses/second/text4.html"
     };
-    public static Course second = new Course("Треугольники",
+    private Course second = new Course("Треугольники",
             4,
             secondThemes,
             secondCourseTextUrl,
@@ -50,15 +57,15 @@ public class Courses {
     // end second
 
     // Third
-    private static String[] thirdThemes = {"Признаки параллельности двух прямых",
+    private String[] thirdThemes = {"Признаки параллельности двух прямых",
             "Аксиома параллельных прямых",
             "Практические задачи"};
-    private static String[] thirdCourseTextUrl = {
+    private String[] thirdCourseTextUrl = {
             "file:///android_asset/courses/third/text1.html",
             "file:///android_asset/courses/third/text2.html",
             "file:///android_asset/courses/third/text3.html"
     };
-    public static Course third = new Course("Параллельные прямые",
+    private Course third = new Course("Параллельные прямые",
             3,
             thirdThemes,
             thirdCourseTextUrl,
@@ -66,17 +73,17 @@ public class Courses {
     // end third
 
     // Fourth
-    private static String[] fourthThemes = {"Сумма углов треугольника",
+    private String[] fourthThemes = {"Сумма углов треугольника",
             "Соотношения между сторонами и углами",
             "Прямоугольные треугольники",
             "Построение треугольника по трем элементам"};
-    private static String[] fourthCourseTextUrl = {
+    private String[] fourthCourseTextUrl = {
             "file:///android_asset/courses/fourth/text1.html",
             "file:///android_asset/courses/fourth/text2.html",
             "file:///android_asset/courses/fourth/text3.html",
             "file:///android_asset/courses/fourth/text4.html"
     };
-    public static Course fourth = new Course("Соотношения между сторонами и углами ▲",
+    private Course fourth = new Course("Соотношения между сторонами и углами ▲",
             4,
             fourthThemes,
             fourthCourseTextUrl,

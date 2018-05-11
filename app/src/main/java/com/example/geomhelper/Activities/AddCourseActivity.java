@@ -25,6 +25,7 @@ import com.example.geomhelper.User;
 import com.example.geomhelper.UserService;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -38,13 +39,17 @@ public class AddCourseActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     RVAdapter rvAdapter;
     LinearLayoutManager linearLayoutManager;
+    List<Course> coursesList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_course_activity);
-        if (Person.courses.size() == Courses.currentCourses.size()) {
+
+        coursesList = new Courses().getCurrentCourses();
+
+        if (Person.courses.size() == coursesList.size()) {
             Intent intent = new Intent();
             setResult(RESULT_OK, intent);
             Toast.makeText(getApplicationContext(), "Для вас нет доступных курсов", Toast.LENGTH_LONG).show();
@@ -52,9 +57,9 @@ public class AddCourseActivity extends AppCompatActivity {
         } else {
             ArrayList<Course> courses = new ArrayList<>();
             Course course;
-            for (int i = 0; i < Courses.currentCourses.size(); i++) {
-                course = Courses.currentCourses.get(i);
-                if (!Person.courses.contains(course)) courses.add(course);
+            for (int i = 0; i < coursesList.size(); i++) {
+                course = coursesList.get(i);
+                if (!Person.c.contains(i + "")) courses.add(course);
             }
 
             recyclerView = findViewById(R.id.recycler_add_course);
@@ -108,14 +113,14 @@ public class AddCourseActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Person.courses.add(0, course);
-                        Person.c += String.valueOf(Courses.currentCourses.indexOf(course));
+                        Person.c += String.valueOf(coursesList.indexOf(course));
 
                         Retrofit retrofit = new Retrofit.Builder()
                                 .baseUrl(User.URL)
                                 .addConverterFactory(ScalarsConverterFactory.create())
                                 .build();
                         UserService userService = retrofit.create(UserService.class);
-                        userService.updateUser(Person.id,"courses",Person.c)
+                        userService.updateUser(Person.id, "courses", Person.c)
                                 .enqueue(new Callback<String>() {
                                     @Override
                                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {

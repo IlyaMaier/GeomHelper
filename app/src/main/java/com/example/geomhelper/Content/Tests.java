@@ -7,17 +7,24 @@ import java.util.List;
 
 public class Tests {
 
-    public static List<Test> currentTests = new ArrayList<>();
+    public List<Test> getCurrentTests() {
+        List<Test> tests = new ArrayList<>();
+        tests.add(0, basics);
+        tests.add(0, second);
+        tests.add(0, third);
+        tests.add(0, fourth);
+        return tests;
+    }
 
     //basics
-    private static String[] basicsThemes = {"Прямая и отрезок",
+    private String[] basicsThemes = {"Прямая и отрезок",
             "Луч и угол",
             "Сравнение отрезков и углов",
             "Измерение отрезков",
             "Измерение углов",
             "Перпендикулярные прямые"};
-    private static int basicsExperience = 95;
-    public static Test basics = new Test("Начальные геометрические сведения",
+    private int basicsExperience = 95;
+    public Test basics = new Test("Начальные геометрические сведения",
             6,
             basicsThemes,
             basicsExperience,
@@ -25,12 +32,12 @@ public class Tests {
     // end basics
 
     // Second
-    private static String[] secondThemes = {"Первый признак равенства треугольников",
+    private String[] secondThemes = {"Первый признак равенства треугольников",
             "Медианы, биссектрисы и высоты треугольника",
             "Второй и третий признаки равенства треугольников",
             "Задачи на построение"};
-    private static int secondExperience = 150;
-    public static Test second = new Test("Треугольники",
+    private int secondExperience = 150;
+    public Test second = new Test("Треугольники",
             4,
             secondThemes,
             secondExperience,
@@ -38,11 +45,11 @@ public class Tests {
     // end second
 
     // Third
-    private static String[] thirdThemes = {"Признаки параллельности двух прямых",
+    private String[] thirdThemes = {"Признаки параллельности двух прямых",
             "Аксиома параллельных прямых",
             "Практические задачи"};
-    private static int thirdExperience = 100;
-    public static Test third = new Test("Параллельные прямые",
+    private int thirdExperience = 100;
+    public Test third = new Test("Параллельные прямые",
             3,
             thirdThemes,
             thirdExperience,
@@ -50,12 +57,12 @@ public class Tests {
     // end third
 
     // Fourth
-    private static String[] fourthThemes = {"Сумма углов треугольника",
+    private String[] fourthThemes = {"Сумма углов треугольника",
             "Соотношения между сторонами и углами",
             "Прямоугольные треугольники",
             "Построение треугольника по трем элементам"};
-    private static int fourthExperience = 160;
-    public static Test fourth = new Test("Соотношения между сторонами и углами ▲",
+    private int fourthExperience = 160;
+    public Test fourth = new Test("Соотношения между сторонами и углами ▲",
             4,
             fourthThemes,
             fourthExperience,

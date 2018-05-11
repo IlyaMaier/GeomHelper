@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.geomhelper.Content.Course;
 import com.example.geomhelper.Content.Courses;
 import com.example.geomhelper.Fragments.FragmentProfile;
 import com.example.geomhelper.MainActivity;
@@ -50,6 +51,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -268,18 +270,10 @@ public class LoginActivity extends AppCompatActivity
                                         }
                                     });
 
-                                    if (!Courses.currentCourses.contains(Courses.basics))
-                                        Courses.currentCourses.add(0, Courses.basics);
-                                    if (!Courses.currentCourses.contains(Courses.second))
-                                        Courses.currentCourses.add(1, Courses.second);
-                                    if (!Courses.currentCourses.contains(Courses.third))
-                                        Courses.currentCourses.add(2, Courses.third);
-                                    if (!Courses.currentCourses.contains(Courses.fourth))
-                                        Courses.currentCourses.add(3, Courses.fourth);
-
+                                    List<Course> courses = new Courses().getCurrentCourses();
                                     if (Person.c != null && !Person.c.isEmpty())
                                         for (int i = 0; i < Person.c.length(); i++)
-                                            Person.courses.add(0, Courses.currentCourses.get(
+                                            Person.courses.add(0, courses.get(
                                                     Integer.parseInt(Person.c.charAt(i) + "")));
 
                                     saveAndFinish();

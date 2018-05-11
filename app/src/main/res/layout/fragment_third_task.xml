@@ -18,7 +18,7 @@
             android:text="@string/task3"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            android:textColor="#000001" />
+            android:textColor="@color/text_color" />
 
         <TextView
             android:id="@+id/textViewTask3"
@@ -46,7 +46,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:background="@android:color/holo_blue_light"
+            android:background="@drawable/button"
+            android:layout_marginBottom="15dp"
             android:text="@string/end" />
 
     </LinearLayout>

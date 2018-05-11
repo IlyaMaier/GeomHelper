@@ -67,5 +67,6 @@
     <string name="task3">Задание 3</string>
     <string name="paint">Какое-то там задание, которое надо будет нарисовать(вместо картинки должно быть поле рисования)</string>
     <string name="end">Закончить</string>
+    <string name="results">Тест завершен!</string>
 
 </resources>
