@@ -6,7 +6,7 @@
     android:background="@color/background_color"
     tools:context="com.example.geomhelper.Fragments.FragmentCourses">
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_courses"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,12 +14,12 @@
         android:layoutAnimation="@anim/layout_animation_fall_down_courses"
         android:padding="8dp" />
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="10dp"
         android:layout_marginEnd="16dp"
         android:src="@drawable/ic_add" />
 

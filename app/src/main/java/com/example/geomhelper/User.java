@@ -5,12 +5,13 @@ import java.security.NoSuchAlgorithmException;
 
 public class User  {
 
-    public static final String URL = "http://213.191.30.191:8080";
+    public static final String URL = "http://213.191.30.233:8080";
 
     int id;
     String name;
     int experience;
     String courses;
+    String tests;
 
     public User() {
 
@@ -46,6 +47,14 @@ public class User  {
 
     public void setCourses(String courses) {
         this.courses = courses;
+    }
+
+    public String getTests() {
+        return tests;
+    }
+
+    public void setTests(String tests) {
+        this.tests = tests;
     }
 
     public static String md5(final String s) {

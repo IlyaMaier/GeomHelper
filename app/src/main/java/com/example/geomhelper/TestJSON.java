@@ -1,18 +1,24 @@
 package com.example.geomhelper;
 
+import android.annotation.SuppressLint;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TestJSON {
 
-    SparseArray<SparseIntArray> tests;
+    Map<Integer, Map<Integer, Integer>> tests;
 
+    @SuppressLint("UseSparseArrays")
     public TestJSON() {
-        tests = new SparseArray<>();
+        tests = new HashMap<>();
     }
 
     public void setTest(int test, int theme, int stage) {
-        SparseIntArray arr = new SparseIntArray();
+        @SuppressLint("UseSparseArrays")
+        Map<Integer,Integer> arr = new HashMap<Integer,Integer>();
         arr.put(theme, stage);
         tests.put(test, arr);
     }

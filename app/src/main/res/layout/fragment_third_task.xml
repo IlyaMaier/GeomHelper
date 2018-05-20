@@ -20,34 +20,70 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             android:textColor="@color/text_color" />
 
-        <TextView
-            android:id="@+id/textViewTask3"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/paint"
-            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textViewT31"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small"
+                android:textColor="@color/text_color" />
+
+            <EditText
+                android:id="@+id/editText31"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="@string/answer"
+                android:inputType="text" />
+
+            <TextView
+                android:id="@+id/textViewT32"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small"
+                android:textColor="@color/text_color" />
+
+            <EditText
+                android:id="@+id/editText32"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="@string/answer"
+                android:inputType="text" />
+
+            <TextView
+                android:id="@+id/textViewT33"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small"
+                android:textColor="@color/text_color" />
+
+            <EditText
+                android:id="@+id/editText33"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="@string/answer"
+                android:inputType="text" />
+
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/imageView3"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             app:srcCompat="@drawable/sm" />
-
-        <EditText
-            android:id="@+id/editText2Task"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:hint="@string/answer" />
 
         <Button
             android:id="@+id/buttonEnd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
             android:background="@drawable/button"
-            android:layout_marginBottom="15dp"
             android:text="@string/end" />
 
     </LinearLayout>

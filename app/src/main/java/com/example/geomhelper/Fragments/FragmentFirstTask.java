@@ -1,11 +1,12 @@
 package com.example.geomhelper.Fragments;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+import androidx.annotation.FractionRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.example.geomhelper.Fragments.FragmentResult.answer1;
 import static com.example.geomhelper.Person.pref;
 import static com.example.geomhelper.Person.task;
 
@@ -55,33 +57,13 @@ public class FragmentFirstTask extends Fragment {
         buttonEnter1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                {
-//                    Retrofit retrofit = new Retrofit.Builder()
-//                            .baseUrl(User.URL)
-//                            .addConverterFactory(ScalarsConverterFactory.create())
-//                            .build();
-//
-//                    try {
-//                        UserService userService = retrofit.create(UserService.class);
-//                        userService.updateUser(Person.id, "experience", String.valueOf(Person.experience))
-//                                .enqueue(new Callback<String>() {
-//                                    @Override
-//                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-//
-//                                    }
-//
-//                                    @Override
-//                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-//                                        Toast.makeText(getContext(),
-//                                                "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                });
-//                    } catch (NullPointerException e) {
-//                        Toast.makeText(getContext(),
-//                                "Не удалось отправить данные на сервер", Toast.LENGTH_SHORT).show();
-//                        e.printStackTrace();
-//                    }
-//                }
+                if (radioButton.isChecked())
+                    answer1 = 0;
+                else if (radioButton1.isChecked())
+                    answer1 = 1;
+                else if (radioButton2.isChecked())
+                    answer1 = 2;
+
                 FragmentSecondTask fragmentSecondTask = new FragmentSecondTask();
                 FragmentManager fragmentManager = getFragmentManager();
                 Objects.requireNonNull(fragmentManager).beginTransaction()
@@ -105,8 +87,8 @@ public class FragmentFirstTask extends Fragment {
 
         ArrayList<FirstTask> firstTasks = new FirstTasks().
                 getTasks(tests.size() - 1 - Person.currentTest, Person.currentTestTheme);
-        if (firstTasks.size() == 0) {
-            t=false;
+        if (firstTasks.size() == 0||task==firstTasks.size()) {
+            t = false;
             Toast.makeText(getContext(), "Тесты по данной теме закончились или недоступны",
                     Toast.LENGTH_SHORT).show();
             close();

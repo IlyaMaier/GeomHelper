@@ -10,11 +10,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.AppCompatDelegate;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -146,13 +146,13 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
 
             if (!a) {
                 try {
-                    File file = new File(getFilesDir(), "profileImage.png");
+                    File file = new File(getFilesDir(), "/profileImage.png");
                     FileOutputStream fos = null;
                     try {
                         fos = new FileOutputStream(file);
                         BitmapFactory.decodeResource(
                                 getResources(), R.drawable.back_login).compress(
-                                Bitmap.CompressFormat.JPEG, 100, fos);
+                                Bitmap.CompressFormat.PNG, 100, fos);
                         a = true;
                     } finally {
                         if (fos != null) fos.close();
@@ -250,12 +250,12 @@ public class SignUp extends AppCompatActivity implements View.OnClickListener {
             yourSelectedImage = BitmapFactory.decodeStream(imageStream);
             circleImageView.setImageBitmap(yourSelectedImage);
             try {
-                File file = new File(getFilesDir(), "profileImage.png");
+                File file = new File(getFilesDir(), "/profileImage.png");
                 FileOutputStream fos = null;
                 try {
                     fos = new FileOutputStream(file);
                     yourSelectedImage.compress(
-                            Bitmap.CompressFormat.JPEG, 100, fos);
+                            Bitmap.CompressFormat.PNG, 100, fos);
                     a = true;
                 } finally {
                     if (fos != null) fos.close();

@@ -2,10 +2,10 @@ package com.example.geomhelper.Fragments;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,15 +21,17 @@ import com.example.geomhelper.R;
 
 import java.util.Objects;
 
+import static com.example.geomhelper.Person.pref;
+
 public class FragmentCourseText extends Fragment {
 
     public FragmentCourseText() {
     }
 
-    FloatingActionButton floatingActionButton, floatingActionButton2;
-    WebView webView;
-    int scrollDist = 0;
-    boolean isVisible = true;
+    private FloatingActionButton floatingActionButton, floatingActionButton2;
+    private WebView webView;
+    private int scrollDist = 0;
+    private boolean isVisible = true;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -38,7 +40,11 @@ public class FragmentCourseText extends Fragment {
         view.setBackgroundColor(getResources().getColor(R.color.white));
 
         webView = view.findViewById(R.id.web_fragment_course_text);
-        webView.loadUrl(Person.currentCourse.getCourseTextUrl(Person.currentTheme));
+        if (pref.getString("pref_day_night", "").equals("Включен")) {
+            webView.loadUrl(Person.currentCourse.getCourseTextUrlNight(Person.currentTheme));
+            webView.setBackgroundColor(getResources().getColor(R.color.background_color));
+            webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null);
+        } else webView.loadUrl(Person.currentCourse.getCourseTextUrl(Person.currentTheme));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             webView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
@@ -98,7 +104,11 @@ public class FragmentCourseText extends Fragment {
                 } else {
                     floatingActionButton.setImageResource(R.drawable.ic_next);
                     Person.currentTheme--;
-                    webView.loadUrl(Person.currentCourse.getCourseTextUrl(Person.currentTheme));
+                    if (pref.getString("pref_day_night", "").equals("Включен")) {
+                        webView.loadUrl(Person.currentCourse.getCourseTextUrlNight(Person.currentTheme));
+                        webView.setBackgroundColor(getResources().getColor(R.color.background_color));
+                        webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null);
+                    } else webView.loadUrl(Person.currentCourse.getCourseTextUrl(Person.currentTheme));
                 }
             }
         });
@@ -122,7 +132,11 @@ public class FragmentCourseText extends Fragment {
                     Person.backCourses = 1;
                 } else {
                     Person.currentTheme++;
-                    webView.loadUrl(Person.currentCourse.getCourseTextUrl(Person.currentTheme));
+                    if (pref.getString("pref_day_night", "").equals("Включен")) {
+                        webView.loadUrl(Person.currentCourse.getCourseTextUrlNight(Person.currentTheme));
+                        webView.setBackgroundColor(getResources().getColor(R.color.background_color));
+                        webView.setLayerType(WebView.LAYER_TYPE_SOFTWARE, null);
+                    } else webView.loadUrl(Person.currentCourse.getCourseTextUrl(Person.currentTheme));
                     if (Person.currentCourse.getThemesSize() - 1 == Person.currentTheme)
                         floatingActionButton.setImageResource(R.drawable.ic_completed);
                 }

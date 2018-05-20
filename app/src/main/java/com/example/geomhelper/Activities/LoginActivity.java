@@ -8,9 +8,9 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.AppCompatDelegate;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.geomhelper.Content.Course;
 import com.example.geomhelper.Content.Courses;
+import com.example.geomhelper.Content.Levels;
 import com.example.geomhelper.Fragments.FragmentProfile;
 import com.example.geomhelper.MainActivity;
 import com.example.geomhelper.Person;
@@ -44,7 +45,18 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
+import com.vk.sdk.VKAccessToken;
+import com.vk.sdk.VKCallback;
+import com.vk.sdk.VKSdk;
+import com.vk.sdk.api.VKApi;
+import com.vk.sdk.api.VKApiConst;
+import com.vk.sdk.api.VKError;
+import com.vk.sdk.api.VKParameters;
+import com.vk.sdk.api.VKRequest;
+import com.vk.sdk.api.VKResponse;
+import com.vk.sdk.util.VKUtil;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -67,11 +79,12 @@ public class LoginActivity extends AppCompatActivity
     private EditText mEmail;
     private EditText mPassword;
     private GoogleApiClient mGoogleApiClient;
+    private String tests;
 
+    Retrofit retrofit;
+    UserService userService;
     CallbackManager callbackManager;
-
     ProgressDialog progressDialog;
-
     LinearLayout linearLayout;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +118,6 @@ public class LoginActivity extends AppCompatActivity
         findViewById(R.id.vk).setOnClickListener(this);
         findViewById(R.id.facebook).setOnClickListener(this);
         findViewById(R.id.google).setOnClickListener(this);
-        findViewById(R.id.twitter).setOnClickListener(this);
 
         //facebook
         callbackManager = CallbackManager.Factory.create();
@@ -113,11 +125,12 @@ public class LoginActivity extends AppCompatActivity
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-
+                getMeInfo();
             }
 
             @Override
             public void onCancel() {
+                progressDialog.cancel();
             }
 
             @Override
@@ -125,11 +138,11 @@ public class LoginActivity extends AppCompatActivity
                 Toast.makeText(getApplicationContext(),
                         "Произошла ошибка при попытке входа через Facebook",
                         Toast.LENGTH_SHORT).show();
+                progressDialog.cancel();
             }
         });
 
         //google+
-        String serverClientId = getString(R.string.server_client_id);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
@@ -139,6 +152,14 @@ public class LoginActivity extends AppCompatActivity
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl(User.URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build();
+        userService = retrofit.create(UserService.class);
+
+        VKSdk.initialize(getApplicationContext());
     }
 
     private boolean validateForm() {
@@ -183,9 +204,6 @@ public class LoginActivity extends AppCompatActivity
             case R.id.google:
                 signInWithGoogle();
                 break;
-            case R.id.twitter:
-                signInWithTwitter();
-                break;
         }
         progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setTitle("Загрузка...");
@@ -195,11 +213,6 @@ public class LoginActivity extends AppCompatActivity
     @SuppressLint("StaticFieldLeak")
     void signIn() {
         if (validateForm()) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(User.URL)
-                    .addConverterFactory(ScalarsConverterFactory.create())
-                    .build();
-            UserService userService = retrofit.create(UserService.class);
             userService.login(mEmail.getText().toString(),
                     User.md5(mPassword.getText().toString()))
                     .enqueue(new Callback<String>() {
@@ -227,7 +240,10 @@ public class LoginActivity extends AppCompatActivity
                                     Person.id = String.valueOf(user.getId());
                                     Person.name = user.getName();
                                     Person.experience = user.getExperience();
+                                    Person.currentLevel = new Levels().getLevel(Person.experience);
+                                    Person.currentLevelExperience = new Levels().getLevelExperience(Person.currentLevel);
                                     Person.c = user.getCourses();
+                                    tests = user.getTests();
 
                                     Retrofit retrofit = new Retrofit.Builder()
                                             .baseUrl(User.URL)
@@ -300,6 +316,10 @@ public class LoginActivity extends AppCompatActivity
         editor.putString(Person.APP_PREFERENCES_UID, Person.id);
         editor.putString(Person.APP_PREFERENCES_NAME, Person.name);
         editor.putString("c", Person.c);
+        editor.putString("tests", tests);
+        editor.putInt("experience", Person.experience);
+        editor.putString(Person.APP_PREFERENCES_LEVEL, Person.currentLevel);
+        editor.putInt(Person.APP_PREFERENCES_LEVEL_EXPERIENCE, Person.currentLevelExperience);
         editor.apply();
 
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
@@ -308,8 +328,8 @@ public class LoginActivity extends AppCompatActivity
 
         CharSequence text;
         if (Person.name != null)
-            text = "Добро пожаловать снова, " + Person.name + "!";
-        else text = "Добро пожаловать снова!";
+            text = "Добро пожаловать , " + Person.name + "!";
+        else text = "Добро пожаловать!";
         Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
         progressDialog.cancel();
     }
@@ -323,19 +343,146 @@ public class LoginActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        callbackManager.onActivityResult(requestCode, resultCode, data);
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
+    protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
+        if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
+            @Override
+            public void onResult(final VKAccessToken res) {
+                final String email = res.email;
+                if (email == null) {
+                    Toast.makeText(LoginActivity.this,
+                            "Произошла ошибка при входе через VK",
+                            Toast.LENGTH_SHORT).show();
+                    progressDialog.cancel();
+                } else {
+                    VKApi.users().get(VKParameters.from(VKApiConst.USER_ID, res.userId))
+                            .executeWithListener(new VKRequest.VKRequestListener() {
+                                @Override
+                                public void onComplete(VKResponse response) {
+                                    try {
+                                        final String name = response.json.getJSONArray("response").getJSONObject(0)
+                                                .getString("first_name") + " " +
+                                                response.json.getJSONArray("response").getJSONObject(0)
+                                                        .getString("last_name");
+                                        userService.loginWithSocial(email, User.md5(getString(R.string.soc)), name)
+                                                .enqueue(new Callback<String>() {
+                                                    @Override
+                                                    public void onResponse(@NonNull Call<String> call,
+                                                                           @NonNull Response<String> response) {
+                                                        if (Objects.requireNonNull(response.body()).equals("0")) {
+                                                            Toast.makeText(LoginActivity.this,
+                                                                    "Произошла ошибка при входе через VK",
+                                                                    Toast.LENGTH_SHORT).show();
+                                                            progressDialog.cancel();
+                                                        } else {
+                                                            if (Objects.requireNonNull(response.body()).length() > 10) {
+                                                                User user = new Gson().fromJson(response.body(), User.class);
+                                                                Person.id = String.valueOf(user.getId());
+                                                                Person.name = user.getName();
+                                                                Person.experience = user.getExperience();
+                                                                Person.currentLevel = new Levels().getLevel(Person.experience);
+                                                                Person.currentLevelExperience = new Levels().getLevelExperience(Person.currentLevel);
+                                                                Person.c = user.getCourses();
+                                                                tests = user.getTests();
+
+                                                                List<Course> courses = new Courses().getCurrentCourses();
+                                                                if (Person.c != null && !Person.c.isEmpty())
+                                                                    for (int i = 0; i < Person.c.length(); i++)
+                                                                        Person.courses.add(0, courses.get(
+                                                                                Integer.parseInt(Person.c.charAt(i) + "")));
+                                                            } else {
+                                                                Person.name = name;
+                                                                Person.id = response.body();
+                                                            }
+                                                            VKRequest request = VKApi.users().get(VKParameters.from(VKApiConst.FIELDS, "photo"));
+                                                            request.executeWithListener(new VKRequest.VKRequestListener() {
+                                                                @Override
+                                                                public void onComplete(VKResponse response) {
+                                                                    try {
+                                                                        FragmentProfile.personPhotoUrl = response.json
+                                                                                .getJSONArray("response").getJSONObject(0)
+                                                                                .getString("photo");
+                                                                    } catch (JSONException e) {
+                                                                        Toast.makeText(LoginActivity.this,
+                                                                                "Не удалось загрузить картинку!",
+                                                                                Toast.LENGTH_SHORT).show();
+                                                                    }
+                                                                }
+
+                                                                @Override
+                                                                public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts) {
+                                                                    Toast.makeText(LoginActivity.this,
+                                                                            "Не удалось загрузить картинку!",
+                                                                            Toast.LENGTH_SHORT).show();
+                                                                }
+
+                                                                @Override
+                                                                public void onError(VKError error) {
+                                                                    Toast.makeText(LoginActivity.this,
+                                                                            "Не удалось загрузить картинку!",
+                                                                            Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            });
+                                                            FragmentProfile.social = true;
+                                                            saveAndFinish();
+                                                            getSharedPreferences(Person.APP_PREFERENCES, MODE_PRIVATE)
+                                                                    .edit().putBoolean("vk", true).apply();
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                                        Toast.makeText(LoginActivity.this,
+                                                                "Произошла ошибка при входе через VK",
+                                                                Toast.LENGTH_SHORT).show();
+                                                        progressDialog.cancel();
+                                                    }
+                                                });
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        Toast.makeText(LoginActivity.this,
+                                                "Произошла ошибка при входе через VK",
+                                                Toast.LENGTH_SHORT).show();
+                                        progressDialog.cancel();
+                                    }
+                                }
+
+                                @Override
+                                public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts) {
+                                    Toast.makeText(getApplicationContext(),
+                                            "Произошла ошибка при входе через VK!", Toast.LENGTH_SHORT).show();
+                                    progressDialog.cancel();
+                                }
+
+                                @Override
+                                public void onError(VKError error) {
+                                    Toast.makeText(getApplicationContext(),
+                                            "Произошла ошибка при входе через VK!", Toast.LENGTH_SHORT).show();
+                                    progressDialog.cancel();
+                                }
+                            });
+                }
+            }
+
+            @Override
+            public void onError(VKError error) {
+                Toast.makeText(getApplicationContext(),
+                        "Произошла ошибка при входе через VK!", Toast.LENGTH_SHORT).show();
+                progressDialog.cancel();
+            }
+        })) {
+            callbackManager.onActivityResult(requestCode, resultCode, data);
+            super.onActivityResult(requestCode, resultCode, data);
+            if (requestCode == RC_SIGN_IN) {
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                handleSignInResult(result);
+            }
         }
     }
 
     public void getMeInfo() {
         AccessToken token = AccessToken.getCurrentAccessToken();
 
-        GraphRequest request = GraphRequest.newGraphPathRequest(
+        final GraphRequest request = GraphRequest.newGraphPathRequest(
                 token,
                 "me",
                 new GraphRequest.Callback() {
@@ -345,175 +492,70 @@ public class LoginActivity extends AppCompatActivity
                         try {
                             if (response.getError() == null) {
                                 object = new JSONObject(response.getRawResponse());
-                                String name = object.getString("name");
+                                final String name = object.getString("name");
+                                String email = object.getString("email");
+                                final String photo = object.getJSONObject("picture").getJSONObject("data").getString("url");
+                                userService.loginWithSocial(email, User.md5(getString(R.string.soc)), name)
+                                        .enqueue(new Callback<String>() {
+                                            @Override
+                                            public void onResponse(@NonNull Call<String> call,
+                                                                   @NonNull Response<String> response) {
+                                                if (Objects.requireNonNull(response.body()).equals("0")) {
+                                                    Toast.makeText(LoginActivity.this,
+                                                            "Произошла ошибка при входе через Facebook",
+                                                            Toast.LENGTH_SHORT).show();
+                                                    progressDialog.cancel();
+                                                } else {
+                                                    if (Objects.requireNonNull(response.body()).length() > 10) {
+                                                        User user = new Gson().fromJson(response.body(), User.class);
+                                                        Person.id = String.valueOf(user.getId());
+                                                        Person.name = user.getName();
+                                                        Person.experience = user.getExperience();
+                                                        Person.currentLevel = new Levels().getLevel(Person.experience);
+                                                        Person.currentLevelExperience = new Levels().getLevelExperience(Person.currentLevel);
+                                                        Person.c = user.getCourses();
+                                                        tests = user.getTests();
 
-//                                User user = mKinveyClient.getActiveUser();
-//                                if (user.get("name") == null) {
-//                                    user.set("name", name);
-//                                    Person.name = name;
-//                                }
-//                                if (user.get("experience") == null) {
-//                                    user.set("experience", 0);
-//                                }
-//                                if (user.get("courses") == null) {
-//                                    user.set("courses", "");
-//                                }
-//                                if (user.get("image") == null) {
-//                                    Bitmap yourSelectedImage = BitmapFactory.decodeResource(
-//                                            getResources(), R.drawable.back_login);
-//                                    try {
-//                                        File f = new File(getFilesDir(), "profileImage.png");
-//                                        FileOutputStream fos = null;
-//                                        try {
-//                                            fos = new FileOutputStream(f);
-//                                            yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-//                                        } finally {
-//                                            if (fos != null) fos.close();
-//                                        }
-//                                    } catch (Exception e) {
-//                                        e.printStackTrace();
-//                                    }
-//                                    uploadImage();
-//                                } else loadImage();
-//
-//                                user.update(new KinveyClientCallback() {
-//                                    @Override
-//                                    public void onSuccess(Object o) {
-//
-//                                    }
-//
-//                                    @Override
-//                                    public void onFailure(Throwable throwable) {
-//
-//                                    }
-//                                });
-//                                intent();
+                                                        List<Course> courses = new Courses().getCurrentCourses();
+                                                        if (Person.c != null && !Person.c.isEmpty())
+                                                            for (int i = 0; i < Person.c.length(); i++)
+                                                                Person.courses.add(0, courses.get(
+                                                                        Integer.parseInt(Person.c.charAt(i) + "")));
+                                                    } else {
+                                                        Person.name = name;
+                                                        Person.id = response.body();
+                                                    }
+                                                    FragmentProfile.personPhotoUrl = photo;
+                                                    FragmentProfile.social = true;
+                                                    saveAndFinish();
+                                                    getSharedPreferences(Person.APP_PREFERENCES, MODE_PRIVATE)
+                                                            .edit().putBoolean("facebook", true).apply();
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                                Toast.makeText(LoginActivity.this,
+                                                        "Произошла ошибка при входе через Facebook",
+                                                        Toast.LENGTH_SHORT).show();
+                                                progressDialog.cancel();
+                                            }
+                                        });
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
+                            Toast.makeText(LoginActivity.this,
+                                    "Произошла ошибка при входе через Facebook",
+                                    Toast.LENGTH_SHORT).show();
+                            progressDialog.cancel();
                         }
                     }
                 });
 
         Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,picture.type(large)");
+        parameters.putString("fields", "id,name,email,picture.type(large)");
         request.setParameters(parameters);
         request.executeAsync();
-    }
-
-    void loadImage() {
-        File file = new File(getApplicationContext().getFilesDir(), "profileImage.png");
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(file);
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-        }
-
-        String img;
-//        if (user.get("image") == null)
-//            img = "Произошла ошибка";
-//        else img = user.get("image").toString();
-//        fileMetaDataForDownload.setId(img);
-//        FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
-//        try {
-//            final FileOutputStream finalFos = fos;
-//            fileStore.download(fileMetaDataForDownload, fos, new AsyncDownloaderProgressListener<FileMetaData>() {
-//                @Override
-//                public void onSuccess(FileMetaData fileMetaData) {
-//                    try {
-//                        if (finalFos != null) {
-//                            finalFos.close();
-//                        }
-//                        FragmentProfile.d = false;
-//                    } catch (IOException e1) {
-//                        e1.printStackTrace();
-//                    }
-//                }
-//
-//                @Override
-//                public void onFailure(Throwable throwable) {
-//                    FragmentProfile.d = false;
-//                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
-//                            Toast.LENGTH_SHORT).show();
-//                }
-//
-//                @Override
-//                public void progressChanged(MediaHttpDownloader mediaHttpDownloader) {
-//                }
-//
-//                @Override
-//                public void onCancelled() {
-//                    FragmentProfile.d = false;
-//                    Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
-//                            Toast.LENGTH_SHORT).show();
-//                }
-//
-//                @Override
-//                public boolean isCancelled() {
-//                    return false;
-//                }
-//            });
-//            FragmentProfile.d = true;
-//        } catch (IOException e1) {
-//            FragmentProfile.d = false;
-//            Toast.makeText(getApplicationContext(), "Не удалось загрузить изображение.",
-//                    Toast.LENGTH_SHORT).show();
-//            e1.printStackTrace();
-//        }
-    }
-
-    void uploadImage() {
-//        FileStore fileStore = mKinveyClient.getFileStore(StoreType.CACHE);
-//        File file = new File(getFilesDir(), "profileImage.png");
-//        try {
-//            fileStore.upload(file, new AsyncUploaderProgressListener<FileMetaData>() {
-//                @Override
-//                public void onSuccess(FileMetaData fileMetaData) {
-//                    Person.id = fileMetaData.getId();
-//
-//                    SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-//                    SharedPreferences.Editor editor = mSettings.edit();
-//                    editor.putString("id", Person.id);
-//                    editor.apply();
-//
-//                    User user = mKinveyClient.getActiveUser();
-//                    user.update(new KinveyClientCallback() {
-//                        @Override
-//                        public void onSuccess(Object o) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onFailure(Throwable throwable) {
-//
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void onFailure(Throwable throwable) {
-//
-//                }
-//
-//                @Override
-//                public void progressChanged(MediaHttpUploader mediaHttpUploader) {
-//
-//                }
-//
-//                @Override
-//                public void onCancelled() {
-//
-//                }
-//
-//                @Override
-//                public boolean isCancelled() {
-//                    return false;
-//                }
-//            });
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     void signInWithGoogle() {
@@ -527,29 +569,51 @@ public class LoginActivity extends AppCompatActivity
 
             Person.name = Objects.requireNonNull(acct).getDisplayName();
             FragmentProfile.personPhotoUrl = Objects.requireNonNull(acct.getPhotoUrl()).toString();
-            FragmentProfile.google = true;
+            FragmentProfile.social = true;
 
-//            try {
-//                Toast.makeText(getApplicationContext(), acct.getIdToken(), Toast.LENGTH_SHORT).show();
-//                UserStore.loginGoogle(acct.getIdToken(), mKinveyClient, new KinveyClientCallback() {
-//                    @Override
-//                    public void onSuccess(Object o) {
-//                        intent(true);
-//                        SharedPreferences mSettings = getSharedPreferences(Person.APP_PREFERENCES, Context.MODE_PRIVATE);
-//                        SharedPreferences.Editor editor = mSettings.edit();
-//                        editor.putBoolean("google", true);
-//                        editor.apply();
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Throwable throwable) {
-//                        Toast.makeText(getApplicationContext(), "Fail Google", Toast.LENGTH_SHORT).show();
-//                        progressDialog.cancel();
-//                    }
-//                });
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            userService.loginWithSocial(acct.getEmail(), User.md5(getString(R.string.soc)), Person.name)
+                    .enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(@NonNull Call<String> call,
+                                               @NonNull Response<String> response) {
+                            if (Objects.requireNonNull(response.body()).equals("0")) {
+                                Toast.makeText(LoginActivity.this,
+                                        "Произошла ошибка при входе через Google",
+                                        Toast.LENGTH_SHORT).show();
+                                progressDialog.cancel();
+                            } else {
+                                if (Objects.requireNonNull(response.body()).length() > 10) {
+                                    User user = new Gson().fromJson(response.body(), User.class);
+                                    Person.id = String.valueOf(user.getId());
+                                    Person.name = user.getName();
+                                    Person.experience = user.getExperience();
+                                    Person.currentLevel = new Levels().getLevel(Person.experience);
+                                    Person.currentLevelExperience = new Levels().getLevelExperience(Person.currentLevel);
+                                    Person.c = user.getCourses();
+                                    tests = user.getTests();
+
+                                    List<Course> courses = new Courses().getCurrentCourses();
+                                    if (Person.c != null && !Person.c.isEmpty())
+                                        for (int i = 0; i < Person.c.length(); i++)
+                                            Person.courses.add(0, courses.get(
+                                                    Integer.parseInt(Person.c.charAt(i) + "")));
+                                } else {
+                                    Person.id = response.body();
+                                }
+                                getSharedPreferences(Person.APP_PREFERENCES, MODE_PRIVATE)
+                                        .edit().putBoolean("google", true).apply();
+                                saveAndFinish();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                            Toast.makeText(LoginActivity.this,
+                                    "Произошла ошибка при входе через Google",
+                                    Toast.LENGTH_SHORT).show();
+                            progressDialog.cancel();
+                        }
+                    });
         }
     }
 
@@ -559,11 +623,7 @@ public class LoginActivity extends AppCompatActivity
     }
 
     void signInWithVK() {
-
-    }
-
-    void signInWithTwitter() {
-
+        VKSdk.login(this, "email");
     }
 
     @Override
@@ -574,7 +634,3 @@ public class LoginActivity extends AppCompatActivity
     }
 
 }
-
-
-
-

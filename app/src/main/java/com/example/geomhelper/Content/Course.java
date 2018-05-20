@@ -6,18 +6,25 @@ public class Course {
     private int numberOfThemes;
     private String[] themes;
     private String[] courseTextUrl;
+    private String[] courseTextUrlNight;
     private int background;
 
-    Course(String courseName, int numberOfThemes, String[] themes, String[] courseTextUrl, int background) {
+    Course(String courseName, int numberOfThemes, String[] themes, String[] courseTextUrl,
+           String[] courseTextUrlNight, int background) {
         this.courseName = courseName;
         this.numberOfThemes = numberOfThemes;
         this.themes = themes;
         this.courseTextUrl = courseTextUrl;
+        this.courseTextUrlNight = courseTextUrlNight;
         this.background = background;
     }
 
     public String getCourseTextUrl(int a) {
         return courseTextUrl[a];
+    }
+
+    public String getCourseTextUrlNight(int a) {
+        return courseTextUrlNight[a];
     }
 
     public String getCourseName() {

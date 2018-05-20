@@ -36,6 +36,14 @@
             android:key = "acc"
             android:title="Выйти из аккаунта"/>
 
+        <Preference
+            android:key="email"
+            android:title="Сменить Email" />
+
+        <Preference
+            android:key = "password"
+            android:title="Сменить пароль"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

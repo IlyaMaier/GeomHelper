@@ -108,14 +108,6 @@
                     android:contentDescription="@string/social"
                     android:src="@drawable/ic_google" />
 
-                <ImageView
-                    android:id="@+id/twitter"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:layout_marginEnd="16dp"
-                    android:contentDescription="@string/social"
-                    android:src="@drawable/ic_twitter" />
-
             </LinearLayout>
 
         </LinearLayout>

@@ -1,6 +1,7 @@
 package com.example.geomhelper.Fragments;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,13 +9,17 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -54,7 +60,7 @@ public class FragmentProfile extends Fragment {
     ScrollView scrollView;
     Context context;
     BottomNavigationView bottomNavigationView;
-    public static volatile boolean d = false, a = false, google = false;
+    public static volatile boolean d = false, a = false, social = false;
     public static String personPhotoUrl = "";
 
     public FragmentProfile() {
@@ -74,32 +80,14 @@ public class FragmentProfile extends Fragment {
         textExperience = rootView.findViewById(R.id.textExperince);
         circleImageView = rootView.findViewById(R.id.imageProfile);
 
-        if (google) {
+        if (social) {
             Glide.with(getContext()).load(personPhotoUrl)
                     .thumbnail(0.5f)
                     .crossFade()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(circleImageView);
-
-            Bitmap bitmap = circleImageView.getDrawingCache();
-            File file = new File(context.getFilesDir(), "profileImage.png");
-            FileOutputStream fos = null;
-            try {
-                fos = new FileOutputStream(file);
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } finally {
-                if (fos != null) {
-                    try {
-                        fos.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+            new Async().execute();
         }
-
         textName.setText(Person.name);
         textLevelName.setText(Person.currentLevel);
         textExperience.setText((Person.experience + "/" + Person.currentLevelExperience));
@@ -216,11 +204,11 @@ public class FragmentProfile extends Fragment {
                     Bitmap yourSelectedImage = BitmapFactory.decodeStream(imageStream);
                     circleImageView.setImageBitmap(yourSelectedImage);
                     try {
-                        File file = new File(context.getFilesDir(), "profileImage.png");
+                        File file = new File(context.getFilesDir(), "/profileImage.png");
                         FileOutputStream fos = null;
                         try {
                             fos = new FileOutputStream(file);
-                            yourSelectedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                            yourSelectedImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
                         } finally {
                             if (fos != null) fos.close();
                         }
@@ -228,6 +216,41 @@ public class FragmentProfile extends Fragment {
                         e.printStackTrace();
                     }
                 }
+        }
+    }
+
+    class Async extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Bitmap bitmap1 = null;
+            try {
+                bitmap1 = Glide
+                        .with(context)
+                        .load(personPhotoUrl)
+                        .asBitmap()
+                        .into(100, 100)
+                        .get();
+                File file = new File(context.getFilesDir(), "/profileImage.png");
+                FileOutputStream fos = null;
+                try {
+                    fos = new FileOutputStream(file);
+                    bitmap1.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (fos != null) {
+                        try {
+                            fos.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                social = false;
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
     }
 

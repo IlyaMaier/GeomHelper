@@ -31,10 +31,19 @@ public class Courses {
             "file:///android_asset/courses/first/text5.html",
             "file:///android_asset/courses/first/text6.html"
     };
+    private String[] basicCourseTextUrlNight = {
+            "file:///android_asset/courses-night/first/text1.html",
+            "file:///android_asset/courses-night/first/text2.html",
+            "file:///android_asset/courses-night/first/text3.html",
+            "file:///android_asset/courses-night/first/text4.html",
+            "file:///android_asset/courses-night/first/text5.html",
+            "file:///android_asset/courses-night/first/text6.html"
+    };
     private Course basics = new Course("Начальные геометрические сведения",
             6,
             basicsThemes,
             basicCourseTextUrl,
+            basicCourseTextUrlNight,
             R.drawable.backround_button_courses);
     // end basics
 
@@ -49,10 +58,17 @@ public class Courses {
             "file:///android_asset/courses/second/text3.html",
             "file:///android_asset/courses/second/text4.html"
     };
+    private String[] secondCourseTextUrlNight = {
+            "file:///android_asset/courses-night/second/text1.html",
+            "file:///android_asset/courses-night/second/text2.html",
+            "file:///android_asset/courses-night/second/text3.html",
+            "file:///android_asset/courses-night/second/text4.html"
+    };
     private Course second = new Course("Треугольники",
             4,
             secondThemes,
             secondCourseTextUrl,
+            secondCourseTextUrlNight,
             R.drawable.backround_button_courses);
     // end second
 
@@ -65,10 +81,16 @@ public class Courses {
             "file:///android_asset/courses/third/text2.html",
             "file:///android_asset/courses/third/text3.html"
     };
+    private String[] thirdCourseTextUrlNight = {
+            "file:///android_asset/courses-night/third/text1.html",
+            "file:///android_asset/courses-night/third/text2.html",
+            "file:///android_asset/courses-night/third/text3.html"
+    };
     private Course third = new Course("Параллельные прямые",
             3,
             thirdThemes,
             thirdCourseTextUrl,
+            thirdCourseTextUrlNight,
             R.drawable.backround_button_courses);
     // end third
 
@@ -83,10 +105,17 @@ public class Courses {
             "file:///android_asset/courses/fourth/text3.html",
             "file:///android_asset/courses/fourth/text4.html"
     };
+    private String[] fourthCourseTextUrlNight = {
+            "file:///android_asset/courses-night/fourth/text1.html",
+            "file:///android_asset/courses-night/fourth/text2.html",
+            "file:///android_asset/courses-night/fourth/text3.html",
+            "file:///android_asset/courses-night/fourth/text4.html"
+    };
     private Course fourth = new Course("Соотношения между сторонами и углами ▲",
             4,
             fourthThemes,
             fourthCourseTextUrl,
+            fourthCourseTextUrlNight,
             R.drawable.backround_button_courses);
     // end fourth
 

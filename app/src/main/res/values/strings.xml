@@ -68,5 +68,12 @@
     <string name="paint">Какое-то там задание, которое надо будет нарисовать(вместо картинки должно быть поле рисования)</string>
     <string name="end">Закончить</string>
     <string name="results">Тест завершен!</string>
+    <string name="correct">correct</string>
+    <string name="soc">social</string>
+    <string name="type_pass">Действующий пароль</string>
+    <string name="new_email">Новый Email</string>
+    <string name="new_password">Новый пароль</string>
+    <string name="check_password">Повторите новый пароль</string>
+    <integer name="com_vk_sdk_AppId">6314062</integer>
 
 </resources>

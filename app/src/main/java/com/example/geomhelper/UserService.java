@@ -25,6 +25,12 @@ public interface UserService {
                        @Field("password") String password);
 
     @FormUrlEncoded
+    @POST("/loginWithSocial")
+    Call<String> loginWithSocial(@Field("email") String email,
+                       @Field("password") String password,
+                                 @Field("name")String name);
+
+    @FormUrlEncoded
     @PUT("/updateUser")
     Call<String> updateUser(@Field("id") String id,
                             @Field("param") String param,
@@ -41,5 +47,17 @@ public interface UserService {
     Call<String> upload(
             @Part("id") RequestBody id,
             @Part("file") RequestBody file);
+
+    @FormUrlEncoded
+    @PUT("/changeEmail")
+    Call<String> changeEmail(@Field("id") String id,
+                            @Field("password") String password,
+                            @Field("email") String email);
+
+    @FormUrlEncoded
+    @PUT("/changePassword")
+    Call<String> changePassword(@Field("id") String id,
+                             @Field("password") String password,
+                             @Field("newPassword") String newPassword);
 
 }

@@ -8,15 +8,15 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -56,28 +56,23 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class FragmentCourses extends Fragment {
 
-    RecyclerView recyclerView;
-    LinearLayoutManager verticalManager;
-    RVAdapter adapterCourses;
-    FloatingActionButton floatingActionButton;
-    View rootView;
-    FragmentManager fragmentManager;
-    int scrollDist = 0;
-    boolean isVisible = true, j = true;
-    float MINIMUM = 25;
-    FrameLayout frameLayout;
-    CardView card;
-    float y, y0;
-    long millis;
-    public static boolean h = false;
-    int height;
-    Async async;
-    ArrayList<String> themesAll, themesP;
-    EditText et;
-    ImageView imageView;
-    ArrayList<Short> shortsAll, shortsP;
-    BottomNavigationView bottomNavigationView;
-    List<Course> courses;
+    private RecyclerView recyclerView;
+    private RVAdapter adapterCourses;
+    private FloatingActionButton floatingActionButton;
+    private FragmentManager fragmentManager;
+    private int scrollDist = 0;
+    private boolean isVisible = true, j = true;
+    private float MINIMUM = 25;
+    private CardView card;
+    private float y, y0;
+    private long millis;
+    public static volatile boolean h = false;
+    private int height;
+    private Async async;
+    private ArrayList<String> themesAll, themesP;
+    private EditText et;
+    private ArrayList<Short> shortsAll, shortsP;
+    private List<Course> courses;
 
     public FragmentCourses() {
     }
@@ -86,11 +81,11 @@ public class FragmentCourses extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_courses, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_courses, container, false);
 
         courses = new Courses().getCurrentCourses();
 
-        frameLayout = rootView.findViewById(R.id.fragment);
+        FrameLayout frameLayout = rootView.findViewById(R.id.fragment);
 
         card =
                 (CardView) LayoutInflater.from(getContext()).inflate(R.layout.card_search, null);
@@ -113,7 +108,7 @@ public class FragmentCourses extends Fragment {
 
         fragmentManager = getFragmentManager();
 
-        verticalManager = new LinearLayoutManager(getContext());
+        LinearLayoutManager verticalManager = new LinearLayoutManager(getContext());
 
         recyclerView.setLayoutManager(verticalManager);
 
@@ -178,7 +173,7 @@ public class FragmentCourses extends Fragment {
 
         });
 
-        imageView = rootView.findViewById(R.id.image_search);
+        ImageView imageView = rootView.findViewById(R.id.image_search);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -270,13 +265,13 @@ public class FragmentCourses extends Fragment {
 
             void hide() {
                 floatingActionButton.animate().translationY(
-                        floatingActionButton.getHeight() + 16).
+                        floatingActionButton.getHeight() + 30).
                         setInterpolator(new AccelerateInterpolator(2)).start();
             }
 
         });
 
-        bottomNavigationView = Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
+        BottomNavigationView bottomNavigationView = Objects.requireNonNull(getActivity()).findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
             @Override
             public void onNavigationItemReselected(@NonNull MenuItem item) {

@@ -16,8 +16,7 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_gravity="center_horizontal"
-            android:contentDescription="@string/ProfileImage"
-            android:src="@drawable/back_login" />
+            android:contentDescription="@string/ProfileImage" />
 
         <TextView
             android:id="@+id/textName"

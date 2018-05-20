@@ -13,6 +13,7 @@ public class SecondTasks {
                 switch (theme) {
                     case 0:
                         secondTasks.add(straightAndCut);
+                        secondTasks.add(straightAndCut);
                         break;
                 }
                 break;
